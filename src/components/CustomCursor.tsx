@@ -40,12 +40,12 @@ export default function CustomCursor() {
         gsap.to(cursor, {
           width: 28,
           height: 28,
-          backgroundColor: "#0A0A0A",
+          backgroundColor: "#FFFFFF",
           borderColor: "transparent",
           duration: 0.3,
           ease: "power2.out",
         });
-        gsap.to(text, { color: "#FFFFFF", duration: 0.3 });
+        gsap.to(text, { color: "#0A0A0A", duration: 0.3 });
       } else if (target.closest('[data-cursor="link"]')) {
         gsap.to(cursor, {
           width: 20,
@@ -73,12 +73,12 @@ export default function CustomCursor() {
           width: 28,
           height: 28,
           backgroundColor: "transparent",
-          borderColor: "#0A0A0A",
+          borderColor: "#FFFFFF",
           borderRadius: "50%",
           duration: 0.3,
           ease: "power2.out",
         });
-        gsap.to(text, { color: "#0A0A0A", duration: 0.3 });
+        gsap.to(text, { color: "#FFFFFF", duration: 0.3 });
       }
     };
 
@@ -96,16 +96,16 @@ export default function CustomCursor() {
   return (
     <div
       ref={cursorRef}
-      className="fixed top-0 left-0 w-[28px] h-[28px] pointer-events-none z-[9999] flex items-center justify-center"
+      className="fixed top-0 left-0 w-[28px] h-[28px] pointer-events-none z-[9999] flex items-center justify-center mix-blend-difference"
       style={{
-        border: "1px solid #0A0A0A",
+        border: "1px solid #FFFFFF",
         borderRadius: "50%",
         transform: "translate(-50%, -50%)",
       }}
     >
       <span
         ref={textRef}
-        className="text-[8px] font-ui font-light text-[#0A0A0A]"
+        className="text-[8px] font-ui font-light text-white"
       />
     </div>
   );

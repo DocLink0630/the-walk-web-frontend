@@ -12,7 +12,7 @@ export const PLATFORM_PANELS: PlatformPanel[] = [
     eyebrow: "FOR CLIENTS",
     title: "Book verified models.",
     description: "Browse portfolios. Send direct inquiries.",
-    ctaLabel: "Browse Models",
+    ctaLabel: "Discover Talent",
     ctaHref: "/models",
   },
 ];

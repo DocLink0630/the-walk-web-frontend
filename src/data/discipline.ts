@@ -6,7 +6,7 @@ import beautyArtists from '@/assets/images/beautician.webp'
 export const disciplines: Discipline [] = [
     {
         number: '01',
-        title: 'BROWSE MODELS',
+        title: 'DISCOVER TALENT',
         tagline: 'Editorial · Runway · Commercial',
         description:
           'Discover verified models across every category. Browse portfolios, check availability, and send an inquiry directly through the platform.',
