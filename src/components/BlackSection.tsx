@@ -1,4 +1,6 @@
 "use client";
+// Custom section for the black section
+// This section is used to display the black section of the website
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
