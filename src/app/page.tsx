@@ -17,7 +17,7 @@ export default function Home() {
           poster: heroPoster,
         }}
         ctas={[
-          { label: "Browse Models", href: "/models", variant: "primary" },
+          { label: "Discover Talent", href: "/models", variant: "primary" },
           { label: "Make Inquiry", href: "/inquiry", variant: "secondary" },
         ]}
       />

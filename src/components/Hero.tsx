@@ -27,7 +27,7 @@ export interface HeroProps {
 }
 
 const DEFAULT_CTAS: HeroCta[] = [
-  { label: "Browse Models", href: "/models", variant: "primary" },
+  { label: "Discover Talent", href: "/models", variant: "primary" },
   { label: "Make Inquiry", href: "/inquiry", variant: "secondary" },
 ];
 
