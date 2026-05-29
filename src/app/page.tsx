@@ -1,8 +1,9 @@
 import Hero from "@/components/Hero";
-import heroPoster from "@/assets/images/hero.webp";
 import WhatWeDoSection from "@/components/WhatWeDoSection";
 import TalentSection from "@/components/TalentSection";
 import BlackSection from "@/components/BlackSection";
+import ModelRegistrationCTA from "@/components/ModelRegistrationCTA";
+import AcademyCTA from "@/components/AcademyCTA";
 import PlatformStrip from "@/components/PlatformStripe";
 import ContactSection from "@/components/ContactSection";
 
@@ -10,21 +11,23 @@ export default function Home() {
   return (
     <main className="flex-1">
       <Hero
-        heading="The Walk Academy"
+        heading="The Walk Agency"
         background={{
           type: "video",
           src: "/videos/background.mp4",
-          poster: heroPoster,
+          poster: "/images/hero.webp",
         }}
         ctas={[
           { label: "Discover Talent", href: "/models", variant: "primary" },
-          { label: "Make Inquiry", href: "/inquiry", variant: "secondary" },
+          { label: "Join Today", href: "/inquiry", variant: "secondary" },
         ]}
       />
-      <WhatWeDoSection/>
       <TalentSection/>
-      <BlackSection/>
+      <WhatWeDoSection/>
+      <ModelRegistrationCTA/>
+      <AcademyCTA/>
       <PlatformStrip/>
+      <BlackSection/>
       <ContactSection/>
     </main>
   );
