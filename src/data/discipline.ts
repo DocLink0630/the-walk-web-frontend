@@ -19,15 +19,15 @@ export const disciplines: Discipline [] = [
       },
       {
         number: '02',
-        title: 'BEAUTY ARTISTS',
-        tagline: 'Makeup · Hair · Styling',
+        title: 'THE WALK ACADEMY',
+        tagline: 'Train · Graduate · Get Listed',
         description:
-          'Makeup artists and hair stylists with verified credentials. Find the right artist for your editorial shoot, event, or production.',
-        link: '/beauticians',
-        label: 'FIND AN ARTIST →',
+          'Professional modelling courses taught by industry veterans. Complete the program and launch your profile on the platform.',
+        link: '/academy',
+        label: 'JOIN TODAY →',
         image:
-          beautyArtists.src,
-        imagePosition: 'center',
+          models.src,
+        imagePosition: 'center top',
         size: 'small',
       },
       {
@@ -45,15 +45,15 @@ export const disciplines: Discipline [] = [
       },
       {
         number: '04',
-        title: 'THE ACADEMY',
-        tagline: 'Train · Graduate · Get Listed',
+        title: 'BEAUTY ARTISTS',
+        tagline: 'Makeup · Hair · Styling',
         description:
-          'Professional modelling courses taught by industry veterans. Complete the program and launch your profile on the platform.',
-        link: '/academy',
-        label: 'EXPLORE COURSES →',
+          'Makeup artists and hair stylists with verified credentials. Find the right artist for your editorial shoot, event, or production.',
+        link: '/beauticians',
+        label: 'FIND AN ARTIST →',
         image:
-          models.src,
-        imagePosition: 'center top',
+          beautyArtists.src,
+        imagePosition: 'center',
         size: 'large',
       },
 ]
