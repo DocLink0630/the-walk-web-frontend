@@ -1,0 +1,118 @@
+import Image from "next/image";
+import Link from "next/link";
+import { CTA_PRIMARY_FILLED } from "@/config/cta-styles";
+import { ACADEMY_PAGE_CONTAINER } from "@/data/academy-page";
+import type { AcademyPageContent } from "@/types/academy-page";
+
+interface AcademyProgrammeSectionProps {
+  programme: AcademyPageContent["programme"];
+  applyHref?: string;
+}
+
+export default function AcademyProgrammeSection({
+  programme,
+  applyHref = "/register",
+}: AcademyProgrammeSectionProps) {
+  const { course } = programme;
+
+  return (
+    <section className="py-16 md:py-24 lg:py-[120px] bg-[#F9F7F4] border-t border-[#E5E3E0]">
+      <div className={ACADEMY_PAGE_CONTAINER}>
+        <div
+          data-academy-reveal-group
+          data-academy-start="top 88%"
+          className="mb-12 md:mb-16 lg:mb-20 text-center max-w-[800px] mx-auto"
+        >
+          <p className="font-ui text-[9px] tracking-[0.35em] uppercase text-[#C8A97A] mb-4 md:mb-5">
+            {programme.eyebrow}
+          </p>
+          <h2 className="font-display text-[42px] md:text-[60px] lg:text-[72px] font-light text-[#0A0A0A] leading-[0.95] mb-5 md:mb-6">
+            {programme.heading}
+          </h2>
+          <div className="w-12 md:w-16 h-px bg-[#C8A97A] mx-auto" />
+        </div>
+
+        <div
+          data-academy-reveal
+          data-academy-start="top 85%"
+          className="bg-white border border-[#E0E0E0] shadow-[0_4px_24px_rgba(0,0,0,0.05)]"
+        >
+          <div className="relative aspect-[16/9] md:aspect-[21/8] overflow-hidden">
+            <Image
+              src={course.image}
+              alt={course.title}
+              fill
+              className="object-cover object-top"
+              sizes="(max-width: 1440px) 100vw, 1440px"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-0 border-b border-[#E5E3E0]">
+            <div className="md:col-span-8 p-6 md:p-10 lg:p-14 md:border-r border-[#E5E3E0]">
+              <div className="flex items-center gap-3 md:gap-3.5 mb-5 md:mb-6">
+                <span className="font-ui text-[9px] tracking-[0.28em] uppercase text-[#C8A97A]">
+                  {course.duration}
+                </span>
+                <span className="text-[#D0D0D0]">·</span>
+                <span className="font-ui text-[9px] tracking-[0.22em] uppercase text-[#9A9A9A]">
+                  {course.level}
+                </span>
+              </div>
+              <h3 className="font-display text-[32px] md:text-[44px] lg:text-[52px] font-light text-[#0A0A0A] leading-[1.05] mb-4 md:mb-6">
+                {course.title}
+              </h3>
+              <p className="font-display text-[16px] md:text-[18px] font-light text-[#4A4A4A] leading-[1.7] max-w-[600px]">
+                {course.description}
+              </p>
+            </div>
+            <div className="md:col-span-4 p-6 md:p-10 lg:p-14 flex flex-col justify-between bg-[#FAFAF9] border-t md:border-t-0">
+              <div className="mb-6 md:mb-0">
+                <p className="font-ui text-[9px] tracking-[0.28em] uppercase text-[#9A9A9A] mb-3">
+                  NEXT INTAKE
+                </p>
+                <p className="font-display text-[20px] md:text-[24px] font-light text-[#C8A97A] leading-[1.3]">
+                  {course.intake}
+                </p>
+              </div>
+              <Link
+                href={applyHref}
+                data-cursor="button"
+                className={CTA_PRIMARY_FILLED + " text-center"}
+              >
+                APPLY NOW
+              </Link>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 md:divide-x divide-[#E5E3E0]">
+            {course.months.map((month, index) => (
+              <div
+                key={month.number}
+                data-academy-month
+                data-academy-delay={index * 0.08}
+                className={`p-6 md:p-10 lg:p-12 ${index % 2 === 0 ? "bg-white" : "bg-[#FAFAF9]"} border-t md:border-t-0 first:border-t-0`}
+              >
+                <div className="inline-flex items-center justify-center font-ui text-[8px] tracking-[0.3em] uppercase px-3 md:px-4 py-1.5 md:py-2 border border-[#0A0A0A] text-[#0A0A0A] mb-5 md:mb-6">
+                  {month.number}
+                </div>
+                <h4 className="font-display text-[28px] md:text-[32px] lg:text-[36px] font-light text-[#0A0A0A] leading-[1.05] mb-6 md:mb-8">
+                  {month.title}
+                </h4>
+                <ul className="space-y-3 md:space-y-3.5">
+                  {month.items.map((item) => (
+                    <li key={item} className="flex items-start gap-3 md:gap-3.5">
+                      <span className="w-1 h-1 bg-[#C8A97A] shrink-0 mt-[8px]" />
+                      <span className="font-display text-[15px] md:text-[16px] font-light text-[#4A4A4A] leading-[1.65]">
+                        {item}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

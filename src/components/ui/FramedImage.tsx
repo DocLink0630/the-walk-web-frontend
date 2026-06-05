@@ -10,6 +10,9 @@ export interface FramedImageProps {
   showGoldCorner?: boolean;
   sizes?: string;
   priority?: boolean;
+  /** cover = photo fill; contain = logos and artwork */
+  fit?: "cover" | "contain";
+  imageClassName?: string;
 }
 
 const FramedImage = forwardRef<HTMLDivElement, FramedImageProps>(
@@ -23,9 +26,16 @@ const FramedImage = forwardRef<HTMLDivElement, FramedImageProps>(
       showGoldCorner = false,
       sizes = "(max-width: 1024px) 100vw, 50vw",
       priority = false,
+      fit = "cover",
+      imageClassName = "",
     },
     ref,
   ) => {
+    const fitClass =
+      fit === "contain"
+        ? "object-contain p-12 md:p-16"
+        : "object-cover transition-transform duration-700 group-hover:scale-105";
+
     return (
       <div
         ref={ref}
@@ -37,7 +47,7 @@ const FramedImage = forwardRef<HTMLDivElement, FramedImageProps>(
           alt={alt}
           fill
           priority={priority}
-          className="object-cover transition-transform duration-700 group-hover:scale-105"
+          className={`${fitClass} ${imageClassName}`.trim()}
           sizes={sizes}
         />
         <div
