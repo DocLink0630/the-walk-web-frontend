@@ -1,7 +1,14 @@
 import { create } from "zustand";
+import {
+  adminAuthHeaders,
+  clearAdminToken,
+  getAdminToken,
+  setAdminToken,
+} from "@/lib/admin/token";
 import type { AdminSession } from "@/types/admin";
 
 interface AdminAuthState {
+  token: string | null;
   session: AdminSession | null;
   isLoading: boolean;
   error: string | null;
@@ -46,6 +53,7 @@ async function parseError(res: Response, fallback: string): Promise<string> {
 }
 
 export const useAdminAuthStore = create<AdminAuthState>((set, get) => ({
+  token: typeof window !== "undefined" ? getAdminToken() : null,
   session: null,
   isLoading: false,
   error: null,
@@ -53,19 +61,27 @@ export const useAdminAuthStore = create<AdminAuthState>((set, get) => ({
   setError: (error) => set({ error }),
 
   fetchSession: async () => {
-    set({ isLoading: true, error: null });
+    const token = getAdminToken();
+    if (!token) {
+      set({ session: null, token: null, isLoading: false });
+      return false;
+    }
+
+    set({ isLoading: true, error: null, token });
     try {
-      const res = await fetch("/api/admin/auth/me", { credentials: "include" });
+      const res = await fetch("/api/admin/auth/me", {
+        headers: adminAuthHeaders(),
+      });
       if (!res.ok) {
-        set({ session: null, isLoading: false });
+        set({ session: null, token: null, isLoading: false });
         return false;
       }
       const data = await res.json();
       const session = parseSession(data);
-      set({ session, isLoading: false });
+      set({ session, token, isLoading: false });
       return !!session;
     } catch {
-      set({ session: null, isLoading: false });
+      set({ session: null, token: null, isLoading: false });
       return false;
     }
   },
@@ -73,7 +89,7 @@ export const useAdminAuthStore = create<AdminAuthState>((set, get) => ({
   probeAdminAccess: async () => {
     try {
       const res = await fetch("/api/admin/users?limit=1&page=1", {
-        credentials: "include",
+        headers: adminAuthHeaders(),
       });
       return res.ok;
     } catch {
@@ -87,30 +103,72 @@ export const useAdminAuthStore = create<AdminAuthState>((set, get) => ({
       const loginRes = await fetch("/api/admin/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
 
+      const loginData = (await loginRes.json()) as {
+        access_token?: string;
+        session?: unknown;
+        hint?: string;
+        message?: string;
+        tokenHint?: { iss?: string; aud?: string | string[] };
+      };
+
       if (!loginRes.ok) {
-        const message = await parseError(
-          loginRes,
-          loginRes.status === 401
-            ? "Invalid email or password"
-            : loginRes.status === 502
-              ? "Unable to reach the server"
-              : "Login failed",
-        );
+        let message =
+          typeof loginData.message === "string"
+            ? loginData.message
+            : loginRes.status === 401
+              ? "Invalid email or password"
+              : loginRes.status === 502
+                ? "Unable to reach the server"
+                : "Login failed";
+        if (loginData.tokenHint?.iss || loginData.tokenHint?.aud) {
+          message += ` Token iss: ${loginData.tokenHint.iss ?? "—"}, aud: ${JSON.stringify(loginData.tokenHint.aud ?? "—")}.`;
+        }
+        if (loginData.hint) message += ` ${loginData.hint}`;
         set({ isLoading: false, error: message });
         return false;
       }
 
-      const hasSession = await get().fetchSession();
-      if (!hasSession) {
-        await fetch("/api/admin/auth/logout", {
-          method: "POST",
-          credentials: "include",
-        });
+      if (!loginData.access_token) {
         set({
+          isLoading: false,
+          error: "Login succeeded but no access token was returned.",
+        });
+        return false;
+      }
+
+      setAdminToken(loginData.access_token);
+      set({ token: loginData.access_token });
+
+      let session = loginData.session ? parseSession(loginData.session) : null;
+      if (!session) {
+        const hasSession = await get().fetchSession();
+        if (!hasSession) {
+          clearAdminToken();
+          const meMessage = await parseError(
+            await fetch("/api/admin/auth/me", {
+              headers: adminAuthHeaders(),
+            }),
+            "Could not load your session.",
+          );
+          set({
+            token: null,
+            isLoading: false,
+            error: meMessage,
+          });
+          return false;
+        }
+        session = get().session;
+      } else {
+        set({ session, isLoading: false });
+      }
+
+      if (!session) {
+        clearAdminToken();
+        set({
+          token: null,
           isLoading: false,
           error: "Could not load your session. Please try again.",
         });
@@ -122,8 +180,7 @@ export const useAdminAuthStore = create<AdminAuthState>((set, get) => ({
         await get().logout();
         set({
           isLoading: false,
-          error:
-            "You do not have permission to access the admin dashboard.",
+          error: "You do not have permission to access the admin dashboard.",
         });
         return false;
       }
@@ -140,16 +197,12 @@ export const useAdminAuthStore = create<AdminAuthState>((set, get) => ({
   },
 
   logout: async () => {
-    try {
-      await fetch("/api/admin/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-    } catch {
-      /* ignore */
-    }
-    set({ session: null, error: null, isLoading: false });
+    clearAdminToken();
+    set({ session: null, token: null, error: null, isLoading: false });
   },
 
-  reset: () => set({ session: null, error: null, isLoading: false }),
+  reset: () => {
+    clearAdminToken();
+    set({ session: null, token: null, error: null, isLoading: false });
+  },
 }));

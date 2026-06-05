@@ -1,3 +1,4 @@
+import { adminAuthHeaders } from "@/lib/admin/token";
 import type { PaginatedUsersResponse, UserRole, UserStatus } from "@/types/admin";
 
 export interface FetchUsersParams {
@@ -21,7 +22,7 @@ export async function fetchAdminUsers(
   }
 
   const res = await fetch(`/api/admin/users?${sp.toString()}`, {
-    credentials: "include",
+    headers: adminAuthHeaders(),
   });
 
   if (!res.ok) {
@@ -45,8 +46,7 @@ export async function updateUserStatus(
 ): Promise<{ ok: true } | { ok: false; message: string }> {
   const res = await fetch(`/api/admin/users/${userId}`, {
     method: "PATCH",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: adminAuthHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ status }),
   });
 

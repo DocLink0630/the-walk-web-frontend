@@ -1,14 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import {
-  backendFetch,
-  errorMessage,
-  getBackendUrl,
-} from "@/lib/admin/backend";
-import {
-  ADMIN_TOKEN_COOKIE,
-  adminTokenCookieOptions,
-} from "@/lib/admin/cookies";
+import { resolveWorkingAdminToken } from "@/lib/admin/verify-admin-token";
+import { backendFetch, getBackendUrl } from "@/lib/admin/backend";
 import type { LoginResponse } from "@/types/admin";
 
 export async function POST(request: NextRequest) {
@@ -48,28 +40,27 @@ export async function POST(request: NextRequest) {
   }
 
   const result = data as LoginResponse;
+  const verified = await resolveWorkingAdminToken(result);
 
-  if (!result.access_token) {
+  if (!verified.ok) {
+    const { failure } = verified;
     return NextResponse.json(
       {
-        message:
-          "Admin sign-in requires Auth0 authentication. Local-only login cannot access the admin dashboard.",
+        message: failure.message,
+        detail: failure.detail,
+        tokenHint: failure.tokenHint,
+        hint:
+          "Backend must validate the Auth0 token on GET /v1/auth/me. Ask dev to align AUTH0_AUDIENCE and AUTH0_ISSUER_BASE_URL (trailing slash) with the token iss/aud.",
       },
-      { status: 401 },
+      { status: failure.status === 401 ? 401 : 502 },
     );
   }
 
-  const cookieStore = await cookies();
-  cookieStore.set(
-    ADMIN_TOKEN_COOKIE,
-    result.access_token,
-    adminTokenCookieOptions(
-      result.expires_in ? result.expires_in : undefined,
-    ),
-  );
-
   return NextResponse.json({
     ok: true,
+    access_token: verified.token,
+    expires_in: result.expires_in ?? null,
+    session: verified.session,
     user: result.user ?? null,
   });
 }

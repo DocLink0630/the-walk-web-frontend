@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { getBearerToken } from "@/lib/admin/auth-request";
 import { backendFetch, errorMessage, getBackendUrl } from "@/lib/admin/backend";
-import { ADMIN_TOKEN_COOKIE } from "@/lib/admin/cookies";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -15,8 +14,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     );
   }
 
-  const cookieStore = await cookies();
-  const token = cookieStore.get(ADMIN_TOKEN_COOKIE)?.value;
+  const token = getBearerToken(request);
 
   if (!token) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });

@@ -1,7 +1,5 @@
 import { backendApiUrl, getBackendUrl } from "@/lib/backend/url";
 
-export const ADMIN_TOKEN_COOKIE = "admin_access_token";
-
 export { getBackendUrl };
 
 export interface BackendFetchOptions {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuthStore } from "@/stores/adminAuthStore";
 import { CTA_PRIMARY_FILLED } from "@/config/cta-styles";
@@ -10,9 +10,27 @@ const inputCls =
 
 export default function AdminLoginForm() {
   const router = useRouter();
-  const { login, isLoading, error, setError } = useAdminAuthStore();
+  const { login, fetchSession, probeAdminAccess, isLoading, error, setError } =
+    useAdminAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function checkExistingSession() {
+      const ok = await fetchSession();
+      if (cancelled || !ok) return;
+      const canAdmin = await probeAdminAccess();
+      if (cancelled || !canAdmin) return;
+      router.replace("/admin/dashboard");
+    }
+
+    checkExistingSession();
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchSession, probeAdminAccess, router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
