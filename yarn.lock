@@ -3540,7 +3540,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.8.1":
+"prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -3580,6 +3580,15 @@ __metadata:
   version: 16.13.1
   resolution: "react-is@npm:16.13.1"
   checksum: 10c0/33977da7a5f1a287936a0c85639fec6ca74f4f15ef1e59a6bc20338fc73dc69555381e211f7a3529b8150a1f71e4225525b41b60b52965bda53ce7d47377ada1
+  languageName: node
+  linkType: hard
+
+"react-responsive-masonry@npm:^2.7.2":
+  version: 2.7.2
+  resolution: "react-responsive-masonry@npm:2.7.2"
+  dependencies:
+    prop-types: "npm:^15.7.2"
+  checksum: 10c0/4a80410f1ea4523a48bd6795908a8d3452fcbb51673f587e4db83553c07ce0abf3f44be631f935179d9f8048303064b98b20a5025f6b34d41096c18fece493a3
   languageName: node
   linkType: hard
 
@@ -4367,6 +4376,7 @@ __metadata:
     next: "npm:16.2.6"
     react: "npm:19.2.4"
     react-dom: "npm:19.2.4"
+    react-responsive-masonry: "npm:^2.7.2"
     tailwindcss: "npm:^4"
     typescript: "npm:^5"
     zustand: "npm:^5.0.14"
