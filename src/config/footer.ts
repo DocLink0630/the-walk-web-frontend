@@ -31,7 +31,7 @@ export const DEFAULT_FOOTER_SECTIONS: FooterSection[] = [
   {
     title: "FOR TALENT",
     links: [
-      { label: "List as Model", href: "/register?role=model" },
+      { label: "List as Model", href: "/register/model" },
       { label: "List as Artist", href: "/register?role=beautician" },
       { label: "List as Photographer", href: "/register?role=photographer" },
       { label: "Academy Enrolment", href: "/register" },

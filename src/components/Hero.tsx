@@ -26,11 +26,6 @@ export interface HeroProps {
   className?: string;
 }
 
-const DEFAULT_CTAS: HeroCta[] = [
-  { label: "Discover Talent", href: "/models", variant: "primary" },
-  { label: "Make Inquiry", href: "/inquiry", variant: "secondary" },
-];
-
 const CTA_STYLES = {
   primary:
     "font-ui text-[9px] md:text-[10px] font-light tracking-[0.25em] md:tracking-[0.3em] uppercase px-6 md:px-8 py-3 md:py-4 bg-[#C8A97A] text-white border border-[#C8A97A] hover:bg-transparent hover:text-white transition-colors duration-300 text-center",
@@ -132,10 +127,10 @@ function HeroBackgroundMedia({
 export default function Hero({
   background,
   heading,
-  eyebrow = "MODEL AGENCY · COLOMBO",
-  tagline = "Sri Lanka's premier modelling agency. Verified talent. Direct bookings.",
-  sideLabel = "Model · Beautician · Photographer",
-  ctas = DEFAULT_CTAS,
+  eyebrow,
+  tagline,
+  sideLabel,
+  ctas = [],
   showScrollIndicator = true,
   className = "",
 }: HeroProps) {
@@ -167,34 +162,46 @@ export default function Hero({
       clipPath: "inset(8% 4% 8% 4%)",
       duration: 1.6,
       ease: "power4.inOut",
-    })
-      .from(overlayRef.current, { opacity: 0, duration: 0.9 }, "-=0.9")
-      .from(
+    }).from(overlayRef.current, { opacity: 0, duration: 0.9 }, "-=0.9");
+
+    if (subRef.current) {
+      tl.from(
         subRef.current,
         { y: 18, opacity: 0, duration: 0.7, ease: "power3.out" },
         "-=0.5",
-      )
-      .from(
-        wordEls,
-        { y: "110%", duration: 0.9, stagger: 0.12, ease: "power4.out" },
-        "-=0.4",
-      )
-      .from(
+      );
+    }
+
+    tl.from(
+      wordEls,
+      { y: "110%", duration: 0.9, stagger: 0.12, ease: "power4.out" },
+      subRef.current ? "-=0.4" : "-=0.5",
+    );
+
+    if (taglineRef.current) {
+      tl.from(
         taglineRef.current,
         { y: 20, opacity: 0, duration: 0.7, ease: "power3.out" },
         "-=0.3",
-      )
-      .from(
+      );
+    }
+
+    if (ctaRef.current) {
+      tl.from(
         ctaRef.current,
         { y: 16, opacity: 0, duration: 0.6, ease: "power3.out" },
         "-=0.4",
-      )
-      .from(sideTextRef.current, { opacity: 0, duration: 0.8 }, "-=0.6");
+      );
+    }
+
+    if (sideTextRef.current) {
+      tl.from(sideTextRef.current, { opacity: 0, duration: 0.8 }, "-=0.6");
+    }
 
     return () => {
       tl.kill();
     };
-  }, [heading]);
+  }, [heading, eyebrow, tagline, sideLabel, ctas]);
 
   return (
     <section
@@ -222,12 +229,14 @@ export default function Hero({
       <div className="absolute inset-0 z-20 flex items-center">
         <div className="w-full max-w-[1440px] mx-auto px-4 md:px-[60px] lg:px-[80px]">
           <div className="max-w-[680px]">
-            <p
-              ref={subRef}
-              className="font-ui text-[9px] md:text-[10px] font-light tracking-[0.35em] md:tracking-[0.45em] uppercase text-[#C8A97A] mb-5 md:mb-7"
-            >
-              {eyebrow}
-            </p>
+            {eyebrow && (
+              <p
+                ref={subRef}
+                className="font-ui text-[9px] md:text-[10px] font-light tracking-[0.35em] md:tracking-[0.45em] uppercase text-[#C8A97A] mb-5 md:mb-7"
+              >
+                {eyebrow}
+              </p>
+            )}
 
             <h1
               ref={headingRef}

@@ -45,6 +45,6 @@ export const MODEL_REGISTRATION_COPY = {
   description:
     "Create your professional profile, upload your portfolio, and connect with top fashion brands, photographers, and agencies across Sri Lanka.",
   ctaLabel: "Create Your Profile",
-  ctaHref: "/register?role=model",
+  ctaHref: "/register/model",
   decorativeText: "MODEL",
 } as const;

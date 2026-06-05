@@ -12,6 +12,9 @@ export default function Home() {
     <main className="flex-1">
       <Hero
         heading="The Walk Agency"
+        eyebrow="MODEL AGENCY · COLOMBO"
+        tagline="Sri Lanka's premier modelling agency. Verified talent. Direct bookings."
+        sideLabel="Model · Beautician · Photographer"
         background={{
           type: "video",
           src: "/videos/background.mp4",
