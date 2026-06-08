@@ -1,4 +1,8 @@
 import { buildModelProfilePayload } from "@/lib/registration/build-model-profile";
+import {
+  buildWorkExperiencePayload,
+  validateWorkExperienceDrafts,
+} from "@/lib/registration/build-work-experience-payload";
 import { adminAuthHeaders, getAdminToken } from "@/lib/admin/token";
 import type {
   AdminUser,
@@ -128,6 +132,11 @@ export async function saveAdminModel(
     return { ok: false, message: "Please select the model's listing tier." };
   }
 
+  const workError = validateWorkExperienceDrafts(state.workExperiences);
+  if (workError) {
+    return { ok: false, message: workError };
+  }
+
   let profileJson: string;
   try {
     profileJson = JSON.stringify(buildModelProfilePayload(state));
@@ -141,6 +150,14 @@ export async function saveAdminModel(
   formData.append("password", state.password);
   formData.append("role", "MODEL");
   formData.append("modelProfile", profileJson);
+
+  const workResult = await buildWorkExperiencePayload(state.workExperiences);
+  if (!workResult.ok) {
+    return { ok: false, message: workResult.message };
+  }
+  if (workResult.payload.length > 0) {
+    formData.append("work_experience", JSON.stringify(workResult.payload));
+  }
 
   if (state.profilePhoto) formData.append("profile_photo", state.profilePhoto);
   if (state.nicFront) formData.append("nicFront", state.nicFront);

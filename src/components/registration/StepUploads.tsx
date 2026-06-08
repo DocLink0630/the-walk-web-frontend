@@ -3,9 +3,11 @@
 import { useRef, useState } from "react";
 import { CTA_PRIMARY_FILLED } from "@/config/cta-styles";
 import type { RegistrationCopy } from "@/lib/registration/copy";
+import { validateWorkExperienceDrafts } from "@/lib/registration/build-work-experience-payload";
 import { submitRegistration } from "@/lib/registration/submit-registration";
 import type { RegistrationStore } from "@/types/registration-form";
 import type { RegistrationVariant } from "@/types/registration-form";
+import WorkExperienceSection from "./WorkExperienceSection";
 
 export type RegistrationSubmitResult =
   | { ok: true }
@@ -189,6 +191,26 @@ export default function StepUploads({
 }: StepUploadsProps) {
   const [submitted, setSubmitted] = useState(false);
 
+  const workExperienceError =
+    submitted && variant === "model"
+      ? validateWorkExperienceDrafts(store.workExperiences)
+      : null;
+
+  const workFieldErrors: Record<string, string | null> = {};
+  if (submitted && variant === "model") {
+    for (const entry of store.workExperiences) {
+      const title = entry.title.trim();
+      const hasImages = entry.images.length > 0;
+      if (!title && !hasImages) continue;
+      if (!title) {
+        workFieldErrors[`title-${entry.id}`] = "Enter a title for this experience";
+      }
+      if (!hasImages) {
+        workFieldErrors[`images-${entry.id}`] = "Add at least one photo";
+      }
+    }
+  }
+
   const profilePhotoError = submitted && !store.profilePhoto ? "Profile photo is required" : null;
   const nicFrontError = submitted && !store.nicFront ? "NIC front image is required" : null;
   const nicBackError = submitted && !store.nicBack ? "NIC back image is required" : null;
@@ -202,7 +224,13 @@ export default function StepUploads({
     setSubmitted(true);
     store.set({ error: null });
 
-    if (!store.profilePhoto || !store.nicFront || !store.nicBack || store.portfolioPhotos.length === 0) {
+    if (
+      !store.profilePhoto ||
+      !store.nicFront ||
+      !store.nicBack ||
+      store.portfolioPhotos.length === 0 ||
+      workExperienceError
+    ) {
       return;
     }
 
@@ -271,6 +299,17 @@ export default function StepUploads({
         }
       />
       {portfolioError && <p className={formHint + " text-red-600"}>{portfolioError}</p>}
+
+      {variant === "model" && (
+        <WorkExperienceSection
+          entries={store.workExperiences}
+          onChange={(workExperiences) => store.set({ workExperiences })}
+          errors={workFieldErrors}
+        />
+      )}
+      {workExperienceError && (
+        <p className={formHint + " text-red-600"}>{workExperienceError}</p>
+      )}
 
       {store.error && (
         <div className="border border-red-300 bg-red-50 px-4 py-3">

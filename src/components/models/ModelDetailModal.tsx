@@ -106,7 +106,7 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
         <header className="shrink-0 flex items-start justify-between gap-4 border-b border-[#E0E0E0] px-5 py-4 md:px-8 md:py-5">
           <div>
             <p className="font-ui text-[8px] tracking-[0.35em] uppercase text-[#C8A97A] mb-1">
-              {model.isFeaturedOnly ? "Featured model" : "Model profile"}
+              Model profile
             </p>
             <h2 className="font-display text-2xl md:text-3xl font-light text-[#0A0A0A] tracking-wide">
               {displayName}

@@ -186,7 +186,7 @@ export default function ModelsPageContent() {
             <div className="mb-6 border border-[#C8A97A]/30 bg-[#C8A97A]/10 px-4 py-3">
               <p className="font-ui text-[10px] text-[#4A4A4A] leading-relaxed">
                 {notice}
-                {!isAuthenticated && (
+                {!isAuthenticated && notice.includes("client account") && (
                   <>
                     {" "}
                     <Link href="/?login=1" className="text-[#9A7329] underline">

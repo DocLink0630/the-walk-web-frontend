@@ -44,7 +44,7 @@ export const REGISTRATION_COPY: Record<RegistrationVariant, RegistrationCopy> = 
       "Include your measurements, appearance details, and portfolio information. Our team assigns your listing tier and rate after review.",
     uploadsTitle: "Work samples & documents",
     uploadsSubtitle:
-      "Profile photo, NIC, and 1–5 photos of your modelling work (JPEG or PNG) — step 3 of 3",
+      "Profile photo, NIC, portfolio photos, and optional work experience entries (title + photos) — step 3 of 3",
     submitLabel: "Submit profile",
     successTitle: "Profile submitted",
     successMessage:
@@ -67,7 +67,7 @@ export const ADMIN_MODEL_COPY: RegistrationCopy = {
     "Set tier, rate, and measurements. These will be applied on approval after save.",
   uploadsTitle: "Work samples & documents",
   uploadsSubtitle:
-    "Profile photo, NIC, and 1–5 portfolio photos (JPEG or PNG) — step 3 of 3",
+    "Profile photo, NIC, portfolio photos, and optional work experience entries (title + photos) — step 3 of 3",
   submitLabel: "Save & activate model",
   successTitle: "Model added",
   successMessage:

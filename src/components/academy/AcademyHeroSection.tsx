@@ -2,18 +2,26 @@
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import gsap from "gsap";
 import type { AcademyPageContent } from "@/types/academy-page";
 
 interface AcademyHeroSectionProps {
   hero: AcademyPageContent["hero"];
+  applyHref?: string;
+  applyLabel?: string;
 }
 
-export default function AcademyHeroSection({ hero }: AcademyHeroSectionProps) {
+export default function AcademyHeroSection({
+  hero,
+  applyHref = "/register",
+  applyLabel = "APPLY NOW",
+}: AcademyHeroSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const subheadingRef = useRef<HTMLParagraphElement>(null);
   const descriptionRef = useRef<HTMLParagraphElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
   const scrollHintRef = useRef<HTMLDivElement>(null);
@@ -23,6 +31,7 @@ export default function AcademyHeroSection({ hero }: AcademyHeroSectionProps) {
     const heading = headingRef.current;
     const subheading = subheadingRef.current;
     const description = descriptionRef.current;
+    const cta = ctaRef.current;
     const overlay = overlayRef.current;
     const image = imageRef.current;
     const scrollHint = scrollHintRef.current;
@@ -39,7 +48,7 @@ export default function AcademyHeroSection({ hero }: AcademyHeroSectionProps) {
         .from(overlay, { opacity: 0, duration: 0.8 }, "-=0.6")
         .from(heading, { y: 60, opacity: 0, duration: 1, ease: "power4.out" }, "-=0.4")
         .from(
-          [subheading, description],
+          [subheading, description, cta].filter(Boolean),
           {
             y: 30,
             opacity: 0,
@@ -99,10 +108,19 @@ export default function AcademyHeroSection({ hero }: AcademyHeroSectionProps) {
             </h1>
             <p
               ref={descriptionRef}
-              className="font-display text-[16px] md:text-[20px] lg:text-[22px] font-light text-white/90 leading-[1.6]"
+              className="font-display text-[16px] md:text-[20px] lg:text-[22px] font-light text-white/90 leading-[1.6] max-w-[640px]"
             >
               {hero.description}
             </p>
+            <div ref={ctaRef} className="mt-8 md:mt-10">
+              <Link
+                href={applyHref}
+                data-cursor="button"
+                className="inline-block font-ui text-[9px] md:text-[10px] tracking-[0.3em] uppercase px-10 md:px-12 py-4 md:py-5 bg-[#C8A97A] text-white hover:bg-white hover:text-[#0A0A0A] transition-colors duration-300"
+              >
+                {applyLabel}
+              </Link>
+            </div>
           </div>
         </div>
       </div>

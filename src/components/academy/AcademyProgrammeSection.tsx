@@ -47,33 +47,29 @@ export default function AcademyProgrammeSection({
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-0 border-b border-[#E5E3E0]">
-            <div className="md:col-span-8 p-6 md:p-10 lg:p-14 md:border-r border-[#E5E3E0]">
-              <div className="flex items-center gap-3 md:gap-3.5 mb-5 md:mb-6">
-                <span className="font-ui text-[9px] tracking-[0.28em] uppercase text-[#C8A97A]">
-                  {course.duration}
-                </span>
-                <span className="text-[#D0D0D0]">·</span>
-                <span className="font-ui text-[9px] tracking-[0.22em] uppercase text-[#9A9A9A]">
-                  {course.level}
-                </span>
-              </div>
-              <h3 className="font-display text-[32px] md:text-[44px] lg:text-[52px] font-light text-[#0A0A0A] leading-[1.05] mb-4 md:mb-6">
-                {course.title}
-              </h3>
-              <p className="font-display text-[16px] md:text-[18px] font-light text-[#4A4A4A] leading-[1.7] max-w-[600px]">
-                {course.description}
-              </p>
+          <div className="p-6 md:p-10 lg:p-14 border-b border-[#E5E3E0]">
+            <div className="flex items-center gap-3 md:gap-3.5 mb-5 md:mb-6">
+              <span className="font-ui text-[9px] tracking-[0.28em] uppercase text-[#C8A97A]">
+                {course.duration}
+              </span>
+              <span className="text-[#D0D0D0]">·</span>
+              <span className="font-ui text-[9px] tracking-[0.22em] uppercase text-[#9A9A9A]">
+                {course.level}
+              </span>
             </div>
-            <div className="md:col-span-4 p-6 md:p-10 lg:p-14 flex items-center justify-center bg-[#FAFAF9] border-t md:border-t-0">
-              <Link
-                href={applyHref}
-                data-cursor="button"
-                className={CTA_PRIMARY_FILLED + " text-center"}
-              >
-                APPLY NOW
-              </Link>
-            </div>
+            <h3 className="font-display text-[32px] md:text-[44px] lg:text-[52px] font-light text-[#0A0A0A] leading-[1.05] mb-4 md:mb-6">
+              {course.title}
+            </h3>
+            <p className="font-display text-[16px] md:text-[18px] font-light text-[#4A4A4A] leading-[1.7] max-w-[720px]">
+              {course.description}
+            </p>
+            <Link
+              href={applyHref}
+              data-cursor="button"
+              className={CTA_PRIMARY_FILLED + " mt-8 md:mt-10"}
+            >
+              APPLY NOW
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 md:divide-x divide-[#E5E3E0]">

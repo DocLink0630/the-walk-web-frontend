@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { LayoutGrid, LogOut, UserCircle, Users } from "lucide-react";
+import { LayoutDashboard, LayoutGrid, LogOut, UserCircle } from "lucide-react";
 import { ADMIN_NAV_ITEMS, type AdminSection } from "@/types/admin-nav";
 
-const NAV_ICONS: Record<AdminSection, typeof Users> = {
-  students: Users,
+const NAV_ICONS: Record<AdminSection, typeof LayoutDashboard> = {
+  dashboard: LayoutDashboard,
   models: UserCircle,
 };
 

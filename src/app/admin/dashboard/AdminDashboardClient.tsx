@@ -11,7 +11,7 @@ export default function AdminDashboardClient() {
   const router = useRouter();
   const { fetchSession, probeAdminAccess, session, isLoading } = useAdminAuthStore();
   const [ready, setReady] = useState(false);
-  const [section, setSection] = useState<AdminSection>("students");
+  const [section, setSection] = useState<AdminSection>("dashboard");
 
   useEffect(() => {
     let cancelled = false;
@@ -55,7 +55,7 @@ export default function AdminDashboardClient() {
 
   return (
     <AdminShell activeSection={section} onSectionChange={setSection}>
-      <AdminDashboard section={section} />
+      <AdminDashboard section={section} onSectionChange={setSection} />
     </AdminShell>
   );
 }

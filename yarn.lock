@@ -4379,6 +4379,7 @@ __metadata:
     react-responsive-masonry: "npm:^2.7.2"
     tailwindcss: "npm:^4"
     typescript: "npm:^5"
+    yet-another-react-lightbox: "npm:^3.32.0"
     zustand: "npm:^5.0.14"
   languageName: unknown
   linkType: soft
@@ -4466,6 +4467,23 @@ __metadata:
   version: 3.1.1
   resolution: "yallist@npm:3.1.1"
   checksum: 10c0/c66a5c46bc89af1625476f7f0f2ec3653c1a1791d2f9407cfb4c2ba812a1e1c9941416d71ba9719876530e3340a99925f697142989371b72d93b9ee628afd8c1
+  languageName: node
+  linkType: hard
+
+"yet-another-react-lightbox@npm:^3.32.0":
+  version: 3.32.0
+  resolution: "yet-another-react-lightbox@npm:3.32.0"
+  peerDependencies:
+    "@types/react": ^16 || ^17 || ^18 || ^19
+    "@types/react-dom": ^16 || ^17 || ^18 || ^19
+    react: ^16.8.0 || ^17 || ^18 || ^19
+    react-dom: ^16.8.0 || ^17 || ^18 || ^19
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    "@types/react-dom":
+      optional: true
+  checksum: 10c0/b130f530c7ac236b8b23d29c5906b7c17de81eae5d2778f7e1d8ed6f48518c4f41157f5d5a561372c6d18266cd4113454ffd42a4173517a1d53b35c583f190e2
   languageName: node
   linkType: hard
 

@@ -1,11 +1,19 @@
 import type { RegistrationFormState, RegistrationVariant } from "@/types/registration-form";
 import { buildPublicModelProfilePayload } from "./build-model-profile";
 import { buildStudentProfilePayload } from "./build-student-profile";
+import { buildWorkExperiencePayload, validateWorkExperienceDrafts } from "./build-work-experience-payload";
 
 export async function submitRegistration(
   state: RegistrationFormState,
   variant: RegistrationVariant,
 ): Promise<{ ok: true } | { ok: false; message: string }> {
+  if (variant === "model") {
+    const workError = validateWorkExperienceDrafts(state.workExperiences);
+    if (workError) {
+      return { ok: false, message: workError };
+    }
+  }
+
   const formData = new FormData();
   formData.append("email", state.email);
   formData.append("password", state.password);
@@ -22,6 +30,14 @@ export async function submitRegistration(
       "modelProfile",
       JSON.stringify(buildPublicModelProfilePayload(state)),
     );
+
+    const workResult = await buildWorkExperiencePayload(state.workExperiences);
+    if (!workResult.ok) {
+      return { ok: false, message: workResult.message };
+    }
+    if (workResult.payload.length > 0) {
+      formData.append("work_experience", JSON.stringify(workResult.payload));
+    }
   }
 
   if (state.profilePhoto) formData.append("profile_photo", state.profilePhoto);

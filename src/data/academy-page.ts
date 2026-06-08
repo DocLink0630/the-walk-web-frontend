@@ -38,7 +38,7 @@ export const ACADEMY_PAGE: AcademyPageContent = {
         alt: "Academy training",
       },
       {
-        src: "/images/Gallery/DSC09965copy.webp",
+        src: "/images/Gallery/DSC09407.webp",
         alt: "Training facility",
       },
       {

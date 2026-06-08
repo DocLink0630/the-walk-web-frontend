@@ -2,20 +2,13 @@
 
 import { useState } from "react";
 import AdminAddModelPanel from "./AdminAddModelPanel";
-import ModelDashboardKpiRow from "./ModelDashboardKpiRow";
 import ModelQueueTable from "./ModelQueueTable";
 
 export default function ModelManagementPanel() {
-  const [kpiKey, setKpiKey] = useState(0);
   const [showAddModel, setShowAddModel] = useState(false);
-
-  function handleUsersChanged() {
-    setKpiKey((k) => k + 1);
-  }
 
   return (
     <div>
-      <ModelDashboardKpiRow key={kpiKey} />
       <div className="mb-4 flex justify-end">
         <button
           type="button"
@@ -25,11 +18,11 @@ export default function ModelManagementPanel() {
           Add model
         </button>
       </div>
-      <ModelQueueTable onUsersChanged={handleUsersChanged} />
+      <ModelQueueTable />
       {showAddModel && (
         <AdminAddModelPanel
           onClose={() => setShowAddModel(false)}
-          onSaved={handleUsersChanged}
+          onSaved={() => {}}
         />
       )}
     </div>
