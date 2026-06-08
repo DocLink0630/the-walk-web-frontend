@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
+import gsap from "gsap";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import type { GalleryItem } from "@/types/gallery-page";
 
@@ -20,6 +21,8 @@ export default function GalleryLightbox({
   onNext,
   onPrev,
 }: GalleryLightboxProps) {
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const imageWrapRef = useRef<HTMLDivElement>(null);
   const current = items[currentIndex];
 
   useEffect(() => {
@@ -27,6 +30,20 @@ export default function GalleryLightbox({
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+
+    const overlay = overlayRef.current;
+    const imageWrap = imageWrapRef.current;
+
+    if (overlay) {
+      gsap.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.35, ease: "power2.out" });
+    }
+    if (imageWrap) {
+      gsap.fromTo(
+        imageWrap,
+        { opacity: 0, scale: 0.96 },
+        { opacity: 1, scale: 1, duration: 0.45, ease: "power3.out", delay: 0.05 },
+      );
+    }
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") onClose();
@@ -39,17 +56,18 @@ export default function GalleryLightbox({
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [current, onClose, onNext, onPrev]);
+  }, [current, currentIndex, onClose, onNext, onPrev]);
 
   if (!current) return null;
 
   return (
     <div
-      className="fixed inset-0 z-[200] bg-black flex items-center justify-center"
+      ref={overlayRef}
+      className="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label={`${current.title} — image viewer`}
+      aria-label="Gallery image viewer"
     >
       <button
         type="button"
@@ -62,15 +80,17 @@ export default function GalleryLightbox({
       </button>
 
       <div
-        className="relative max-w-[90vw] max-h-[90vh] w-full h-[90vh] flex items-center justify-center"
+        ref={imageWrapRef}
+        className="relative max-w-[92vw] max-h-[88vh] w-full h-[88vh] flex items-center justify-center px-4"
         onClick={(e) => e.stopPropagation()}
       >
         <Image
+          key={current.url}
           src={current.url}
           alt={current.title}
           width={1600}
           height={1200}
-          className="max-w-full max-h-[90vh] w-auto h-auto object-contain"
+          className="max-w-full max-h-[88vh] w-auto h-auto object-contain"
           priority
         />
       </div>
@@ -105,17 +125,9 @@ export default function GalleryLightbox({
       )}
 
       <div className="absolute bottom-6 md:bottom-10 left-0 right-0 text-center pointer-events-none">
-        <div className="inline-block bg-black/50 backdrop-blur-sm px-6 py-3">
-          <p className="font-ui text-[9px] tracking-[0.3em] uppercase text-[#C8A97A] mb-1">
-            {current.category}
-          </p>
-          <p className="font-display text-[16px] font-light text-white">
-            {current.title}
-          </p>
-          <p className="font-ui text-[10px] tracking-[0.2em] uppercase text-white/60 mt-2">
-            {currentIndex + 1} / {items.length}
-          </p>
-        </div>
+        <p className="font-ui text-[10px] tracking-[0.25em] uppercase text-white/50">
+          {currentIndex + 1} / {items.length}
+        </p>
       </div>
     </div>
   );
