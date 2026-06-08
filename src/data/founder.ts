@@ -3,7 +3,7 @@ import type { FounderProfile, FounderQuoteParagraph } from "@/types/founder";
 export const FOUNDER_PROFILE: FounderProfile = {
   name: "Dasun Wijesinghe",
   title: "Founder & Creative Director",
-  image: "/images/founder.jpeg",
+  image: "/images/dasun.jpg",
   imageAlt: "Dasun Wijesinghe",
 };
 

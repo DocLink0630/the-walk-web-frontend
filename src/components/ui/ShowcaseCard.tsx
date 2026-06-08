@@ -34,7 +34,6 @@ export default function ShowcaseCard({
   return (
     <article
       className={`relative group overflow-hidden bg-[#0A0A0A] ${className}`}
-      style={{ clipPath: "inset(0 0 0 0)" }}
     >
       <div
         className={`relative w-full overflow-hidden ${IMAGE_SIZE[size]}`}

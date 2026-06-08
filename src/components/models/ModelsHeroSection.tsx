@@ -1,0 +1,73 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+
+interface ModelsHeroSectionProps {
+  backgroundImage?: string;
+}
+
+export default function ModelsHeroSection({
+  backgroundImage = "/images/Gallery/DSC09407.webp",
+}: ModelsHeroSectionProps) {
+  const heroImageRef = useRef<HTMLDivElement>(null);
+  const heroOverlayRef = useRef<HTMLDivElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    const tl = gsap.timeline({ delay: 0.4 });
+    if (heroImageRef.current) {
+      tl.from(heroImageRef.current, {
+        clipPath: "inset(100% 0 0 0)",
+        duration: 1.2,
+        ease: "power4.out",
+      });
+    }
+    if (heroOverlayRef.current) {
+      tl.from(heroOverlayRef.current, { opacity: 0, duration: 0.6 }, "-=0.4");
+    }
+    if (headingRef.current) {
+      tl.from(
+        headingRef.current,
+        {
+          y: 50,
+          opacity: 0,
+          duration: 0.9,
+          ease: "power4.out",
+        },
+        "-=0.3",
+      );
+    }
+  }, []);
+
+  return (
+    <section className="relative h-[50vh] md:h-[60vh] w-full overflow-hidden">
+      <div
+        ref={heroImageRef}
+        className="absolute inset-0 z-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${backgroundImage})` }}
+      />
+      <div
+        ref={heroOverlayRef}
+        className="absolute inset-0 z-10"
+        style={{
+          background:
+            "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%)",
+        }}
+      />
+      <div className="absolute inset-0 z-20 flex items-end pb-10 md:pb-16">
+        <div className="max-w-[1440px] w-full mx-auto px-4 md:px-8 lg:px-[80px]">
+          <p className="font-ui text-[9px] md:text-[11px] tracking-[0.35em] uppercase text-[#C8A97A] mb-3 md:mb-4">
+            TALENT ROSTER
+          </p>
+          <h1
+            ref={headingRef}
+            className="font-display text-[56px] md:text-[80px] lg:text-[100px] font-light tracking-[0.15em] md:tracking-[0.3em] text-white leading-[0.9]"
+          >
+            MODELS
+          </h1>
+        </div>
+      </div>
+    </section>
+  );
+}

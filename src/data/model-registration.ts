@@ -5,17 +5,17 @@ import type {
 
 export const MODEL_REGISTRATION_IMAGES: ModelRegistrationImage[] = [
   {
-    src: "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&q=80",
+    src: "/images/Gallery/DSC09407.webp",
     alt: "Model portfolio showcase",
     variant: "main",
   },
   {
-    src: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=600&q=80",
+    src: "/images/Gallery/DSC09493.webp",
     alt: "Fashion portrait",
     variant: "accent-top",
   },
   {
-    src: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&q=80",
+    src: "/images/Gallery/DSC00567.webp",
     alt: "Editorial model shot",
     variant: "accent-bottom",
   },

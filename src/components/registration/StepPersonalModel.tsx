@@ -8,7 +8,6 @@ import {
   ContactSection,
   IdentitySection,
   MeasurementsSection,
-  ModelExperienceSection,
   ModelReferralSection,
   PersonalStepActions,
 } from "./personal/ProfileSections";
@@ -26,7 +25,7 @@ export default function StepPersonalModel({
   copy,
   idPrefix = "mod",
 }: StepPersonalModelProps) {
-  const { err, tierError, handleDobChange, handleNext } = useModelPersonalStep(store);
+  const { err, handleDobChange, handleNext } = useModelPersonalStep(store);
   const sectionProps = { store, idPrefix, err, handleDobChange };
 
   return (
@@ -38,7 +37,6 @@ export default function StepPersonalModel({
 
       <IdentitySection {...sectionProps} />
       <ContactSection {...sectionProps} />
-      <ModelExperienceSection store={store} idPrefix={idPrefix} tierError={tierError} />
       <MeasurementsSection store={store} idPrefix={idPrefix} />
       <AppearanceSection store={store} idPrefix={idPrefix} />
       <ModelReferralSection store={store} idPrefix={idPrefix} />

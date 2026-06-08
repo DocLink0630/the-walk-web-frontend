@@ -38,12 +38,19 @@ export const DEFAULT_FOOTER_SECTIONS: FooterSection[] = [
     ],
   },
   {
+    title: "FOR CLIENTS",
+    links: [
+      { label: "Register as Client", href: "/register/client" },
+      { label: "Booking Inquiry", href: "/inquiry" },
+      { label: "Browse Models", href: "/models" },
+    ],
+  },
+  {
     title: "COMPANY",
     links: [
       { label: "About", href: "/about" },
       { label: "Gallery", href: "/gallery" },
       { label: "Events", href: "/events" },
-      { label: "Inquiry", href: "/inquiry" },
     ],
   },
 ];

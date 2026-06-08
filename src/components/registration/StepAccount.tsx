@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { CTA_PRIMARY_FILLED } from "@/config/cta-styles";
-import type { RegistrationCopy } from "@/lib/registration/copy";
-import type { RegistrationStore } from "@/types/registration-form";
+import type { AccountStepStore } from "@/types/account-step";
 import {
   formHeading,
   formHint,
@@ -51,9 +50,14 @@ function PasswordStrength({ password }: { password: string }) {
   );
 }
 
+interface StepAccountCopy {
+  accountTitle: string;
+  accountSubtitle: string;
+}
+
 interface StepAccountProps {
-  store: RegistrationStore;
-  copy: RegistrationCopy;
+  store: AccountStepStore;
+  copy: StepAccountCopy;
   idPrefix?: string;
 }
 

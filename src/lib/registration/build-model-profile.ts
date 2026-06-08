@@ -1,14 +1,8 @@
 import type { ModelProfilePayload, ModelSource } from "@/types/api/model-profile";
 import type { RegistrationFormState } from "@/types/registration-form";
 
-export function buildModelProfilePayload(
-  state: RegistrationFormState,
-): ModelProfilePayload {
-  if (!state.tier) {
-    throw new Error("Model tier is required");
-  }
-
-  const payload: ModelProfilePayload = {
+function baseModelProfileFields(state: RegistrationFormState) {
+  return {
     modelCode: state.modelCode,
     fullName: state.fullName.trim(),
     gender: state.gender,
@@ -18,10 +12,14 @@ export function buildModelProfilePayload(
     addressEnc: state.address.trim(),
     contactNumberEnc: state.contactNumber.trim(),
     whatsappNumberEnc: state.whatsappNumber.trim(),
-    tier: state.tier,
     isLoginEnabled: false,
   };
+}
 
+function applyOptionalModelProfileFields(
+  payload: ModelProfilePayload,
+  state: RegistrationFormState,
+) {
   if (state.height.trim()) payload.heightEnc = state.height.trim();
   if (state.weight.trim()) payload.weightEnc = state.weight.trim();
   if (state.chest.trim()) payload.chestEnc = state.chest.trim();
@@ -34,6 +32,34 @@ export function buildModelProfilePayload(
   if (state.shortBio.trim()) payload.shortBio = state.shortBio.trim();
   if (state.skinColorOptionId) payload.skinColorOptionId = state.skinColorOptionId;
   if (state.source) payload.source = state.source as ModelSource;
+}
 
+/** Self-service model registration — tier/rate assigned by admin on approval */
+export function buildPublicModelProfilePayload(
+  state: RegistrationFormState,
+): ModelProfilePayload {
+  const payload: ModelProfilePayload = {
+    ...baseModelProfileFields(state),
+    tier: "PENDING",
+  };
+  applyOptionalModelProfileFields(payload, state);
+  return payload;
+}
+
+/** Admin-created model — tier/rate stored as registration expectations for review */
+export function buildModelProfilePayload(
+  state: RegistrationFormState,
+): ModelProfilePayload {
+  if (!state.tier) {
+    throw new Error("Model tier is required");
+  }
+
+  const payload: ModelProfilePayload = {
+    ...baseModelProfileFields(state),
+    tier: state.tier,
+  };
+
+  if (state.rate.trim()) payload.rate = state.rate.trim();
+  applyOptionalModelProfileFields(payload, state);
   return payload;
 }

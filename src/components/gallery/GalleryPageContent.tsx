@@ -1,6 +1,7 @@
 "use client";
 
-import { useLayoutEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import gsap from "gsap";
 import { GALLERY_PAGE } from "@/data/gallery-page";
 import GalleryGridSection from "./GalleryGridSection";
 import GalleryHeroSection from "./GalleryHeroSection";
@@ -8,6 +9,7 @@ import GalleryLightbox from "./GalleryLightbox";
 
 export default function GalleryPageContent() {
   const content = GALLERY_PAGE;
+  const gridWrapRef = useRef<HTMLDivElement>(null);
   const [activeCategory, setActiveCategory] = useState("All");
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -23,6 +25,17 @@ export default function GalleryPageContent() {
         : content.items.filter((item) => item.category === activeCategory),
     [activeCategory, content.items],
   );
+
+  useEffect(() => {
+    const grid = gridWrapRef.current;
+    if (!grid) return;
+
+    gsap.fromTo(
+      grid,
+      { opacity: 0, y: 24 },
+      { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" },
+    );
+  }, [activeCategory, filteredItems.length]);
 
   function openLightbox(index: number) {
     setCurrentImageIndex(index);
@@ -57,8 +70,11 @@ export default function GalleryPageContent() {
         categories={content.categories}
         activeCategory={activeCategory}
         onCategoryChange={handleCategoryChange}
+        imageCount={filteredItems.length}
       />
-      <GalleryGridSection items={filteredItems} onItemClick={openLightbox} />
+      <div ref={gridWrapRef}>
+        <GalleryGridSection items={filteredItems} onItemClick={openLightbox} />
+      </div>
       {lightboxOpen && (
         <GalleryLightbox
           items={filteredItems}

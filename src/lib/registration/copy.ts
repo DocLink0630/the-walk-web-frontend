@@ -41,9 +41,10 @@ export const REGISTRATION_COPY: Record<RegistrationVariant, RegistrationCopy> = 
     accountSubtitle: "Join The Walk Agency roster — step 1 of 3",
     personalTitle: "Model profile details",
     personalSubtitle:
-      "Include your experience tier (Fresher / Experienced / Super model), measurements, and portfolio details.",
-    uploadsTitle: "Portfolio & documents",
-    uploadsSubtitle: "Profile photo, NIC, and portfolio images (JPEG or PNG) — step 3 of 3",
+      "Include your measurements, appearance details, and portfolio information. Our team assigns your listing tier and rate after review.",
+    uploadsTitle: "Work samples & documents",
+    uploadsSubtitle:
+      "Profile photo, NIC, and 1–5 photos of your modelling work (JPEG or PNG) — step 3 of 3",
     submitLabel: "Submit profile",
     successTitle: "Profile submitted",
     successMessage:
@@ -55,4 +56,26 @@ export const REGISTRATION_COPY: Record<RegistrationVariant, RegistrationCopy> = 
     ],
     resetLabel: "Register another model",
   },
+};
+
+export const ADMIN_MODEL_COPY: RegistrationCopy = {
+  eyebrow: "Admin — add model",
+  accountTitle: "Model account",
+  accountSubtitle: "Create login credentials for the new model — step 1 of 3",
+  personalTitle: "Model profile details",
+  personalSubtitle:
+    "Set tier, rate, and measurements. These will be applied on approval after save.",
+  uploadsTitle: "Work samples & documents",
+  uploadsSubtitle:
+    "Profile photo, NIC, and 1–5 portfolio photos (JPEG or PNG) — step 3 of 3",
+  submitLabel: "Save & activate model",
+  successTitle: "Model added",
+  successMessage:
+    "The model profile was saved, approved with your tier and rate, and set to Active. The backend may still send a verification email to the model.",
+  successSteps: [
+    "Profile and documents are stored on the platform",
+    "Tier, rate, and talents were applied via approval",
+    "Account status is Active — the model can sign in after verifying email if required",
+  ],
+  resetLabel: "Add another model",
 };

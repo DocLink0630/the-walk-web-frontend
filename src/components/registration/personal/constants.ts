@@ -8,31 +8,6 @@ export const SKIN_COLOR_OPTIONS = [
   { id: "skin-color-rich-deep", label: "Rich Deep" },
 ] as const;
 
-import type { ModelTier } from "@/types/api/model-profile";
-
-/** ModelProfileDto.tier — walk-web-backend ModelTier enum */
-export const MODEL_TIER_OPTIONS: {
-  value: ModelTier;
-  label: string;
-  description: string;
-}[] = [
-  {
-    value: "FRESHER",
-    label: "Fresher",
-    description: "New to professional modelling or building your first portfolio",
-  },
-  {
-    value: "EXPERIENCED",
-    label: "Experienced",
-    description: "Previous runway, editorial, or commercial work",
-  },
-  {
-    value: "SUPERMODEL",
-    label: "Super model",
-    description: "Established career with major campaigns or international work",
-  },
-];
-
 /** ModelSource / StudentSource — same enum values in Prisma */
 export const REFERRAL_SOURCE_OPTIONS = [
   { value: "WALK_IN", label: "Walk in" },

@@ -12,7 +12,7 @@ interface KpiCard {
 
 function KpiTile({ label, value, loading }: KpiCard) {
   return (
-    <div className="border border-[#E0E0E0] bg-white px-5 py-4">
+    <div className="border border-[#E0E0E0] bg-white px-4 py-4 md:px-5 shadow-sm">
       <p className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#9A9A9A] mb-2">
         {label}
       </p>

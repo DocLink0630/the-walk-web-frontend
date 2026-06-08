@@ -41,25 +41,31 @@ export default function AcademyTestimonialsSection({
                 {t.quote}
               </p>
               <div className="flex items-center gap-3 md:gap-4 pt-6 md:pt-7 border-t border-white/8">
-                <div className="relative w-10 md:w-11 h-10 md:h-11 rounded-full overflow-hidden shrink-0">
-                  <Image
-                    src={t.image}
-                    alt={t.name}
-                    fill
-                    className="object-cover"
-                    sizes="44px"
-                  />
-                </div>
+                {t.image && (
+                  <div className="relative w-10 md:w-11 h-10 md:h-11 rounded-full overflow-hidden shrink-0">
+                    <Image
+                      src={t.image}
+                      alt={t.name}
+                      fill
+                      className="object-cover"
+                      sizes="44px"
+                    />
+                  </div>
+                )}
                 <div>
                   <p className="font-ui text-[10px] tracking-[0.2em] uppercase text-white/85 mb-1">
                     {t.name}
                   </p>
-                  <p className="font-ui text-[8px] tracking-[0.18em] uppercase text-[#C8A97A] mb-0.5">
-                    {t.course}
-                  </p>
-                  <p className="font-ui text-[8px] tracking-[0.15em] uppercase text-white/25">
-                    {t.year}
-                  </p>
+                  {t.course && (
+                    <p className="font-ui text-[8px] tracking-[0.18em] uppercase text-[#C8A97A] mb-0.5">
+                      {t.course}
+                    </p>
+                  )}
+                  {t.year && (
+                    <p className="font-ui text-[8px] tracking-[0.15em] uppercase text-white/25">
+                      {t.year}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

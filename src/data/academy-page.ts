@@ -3,7 +3,7 @@ import type { AcademyPageContent } from "@/types/academy-page";
 export const ACADEMY_PAGE: AcademyPageContent = {
   hero: {
     eyebrow: "EDUCATION & TRAINING",
-    heading: "ACADEMY",
+    heading: "THE WALK ACADEMY",
     description:
       "Comprehensive professional training designed to launch and elevate modelling careers — led by industry veterans in a world-class environment.",
     image:
@@ -34,15 +34,15 @@ export const ACADEMY_PAGE: AcademyPageContent = {
     ],
     images: [
       {
-        src: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800&q=80",
+        src: "/images/Gallery/DSC09537copy.webp",
         alt: "Academy training",
       },
       {
-        src: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80",
+        src: "/images/Gallery/DSC09965copy.webp",
         alt: "Training facility",
       },
       {
-        src: "https://images.unsplash.com/photo-1574634534894-89d7576c8259?w=400&q=80",
+        src: "/images/Gallery/DSC09427copy.webp",
         alt: "Runway practice",
       },
     ],
@@ -54,7 +54,6 @@ export const ACADEMY_PAGE: AcademyPageContent = {
       title: "Professional Modelling Programme",
       duration: "3 Months",
       level: "All Levels",
-      intake: "Next intake: July 7, 2025",
       description:
         "A comprehensive end-to-end programme covering everything a working professional model needs. From runway technique and editorial posing to portfolio development, personal branding, and direct agency connections — this is the complete foundation for a serious modelling career.",
       months: [
@@ -95,8 +94,7 @@ export const ACADEMY_PAGE: AcademyPageContent = {
           ],
         },
       ],
-      image:
-        "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1200&q=80",
+      image: "/images/Gallery/DSC09790%20copy.webp",
     },
   },
   fees: {
@@ -129,30 +127,18 @@ export const ACADEMY_PAGE: AcademyPageContent = {
     items: [
       {
         quote:
-          "The Walk Academy didn't just teach me how to walk a runway — it gave me the confidence to own a room. Within three months of graduating I was signed to an agency in Singapore.",
-        name: "Amara Perera",
-        course: "Professional Runway Mastery",
-        year: "Class of 2024",
-        image:
-          "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200&q=80",
+          "Joining THE WALK Model Academy was one of the best decisions I made. The training improved my confidence, posture, and stage presence. The lessons are well-structured, and the guidance from the trainers helped me develop both personally and professionally. I highly recommend this academy to anyone interested in modeling.",
+        name: "Rashmi",
       },
       {
         quote:
-          "I came in knowing nothing. The Foundation programme broke everything down, rebuilt it properly, and when I walked into my first agency casting I felt completely prepared.",
-        name: "Kavindya Senanayake",
-        course: "Foundation Modelling Course",
-        year: "Class of 2024",
-        image:
-          "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=200&q=80",
+          "THE WALK Model Academy provided me with amazing opportunities to learn and grow in the fashion industry. From catwalk training to grooming and confidence-building, every session was valuable. The supportive environment made learning enjoyable and helped me become more confident on stage.",
+        name: "Nethmi",
       },
       {
         quote:
-          "The editorial programme was exactly what my portfolio needed. Shooting with professional photographers in a real studio environment changed the quality of my book entirely.",
-        name: "Dilini Fernando",
-        course: "Editorial & Campaign Modelling",
-        year: "Class of 2023",
-        image:
-          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&q=80",
+          "My experience at THE WALK Model Academy has been incredible. The training sessions are professional, practical, and engaging. I learned proper runway techniques, posing skills, and how to present myself with confidence. I am grateful for the knowledge and opportunities I received through this academy.",
+        name: "Lakshitha",
       },
     ],
   },

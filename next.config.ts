@@ -7,6 +7,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+      {
+        protocol: "https",
+        hostname: "**.storage.supabase.co",
+      },
+      {
+        protocol: "https",
+        hostname: "**.amazonaws.com",
+      },
     ],
   },
 };

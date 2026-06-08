@@ -6,6 +6,15 @@ import type { RegistrationCopy } from "@/lib/registration/copy";
 import { submitRegistration } from "@/lib/registration/submit-registration";
 import type { RegistrationStore } from "@/types/registration-form";
 import type { RegistrationVariant } from "@/types/registration-form";
+
+export type RegistrationSubmitResult =
+  | { ok: true }
+  | { ok: false; message: string };
+
+export type RegistrationSubmitHandler = (
+  store: RegistrationStore,
+  variant: RegistrationVariant,
+) => Promise<RegistrationSubmitResult>;
 import {
   formActions,
   formBackBtn,
@@ -95,9 +104,13 @@ function FileDropZone({ label, required, file, onFile, error }: FileDropZoneProp
 function PortfolioGrid({
   portfolioPhotos,
   onChange,
+  label = "Portfolio photos",
+  hint,
 }: {
   portfolioPhotos: File[];
   onChange: (photos: File[]) => void;
+  label?: string;
+  hint?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const MAX = 5;
@@ -110,11 +123,12 @@ function PortfolioGrid({
   return (
     <div className="space-y-2">
       <p className={formLabel}>
-        Portfolio photos <span className={formRequiredMark}>*</span>
+        {label} <span className={formRequiredMark}>*</span>
         <span className="text-[#6B6B6B] normal-case tracking-normal font-normal ml-2">
           ({portfolioPhotos.length}/{MAX})
         </span>
       </p>
+      {hint && <p className={formHint}>{hint}</p>}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {portfolioPhotos.map((file, i) => {
           const url = URL.createObjectURL(file);
@@ -164,9 +178,15 @@ interface StepUploadsProps {
   store: RegistrationStore;
   copy: RegistrationCopy;
   variant: RegistrationVariant;
+  onSubmit?: RegistrationSubmitHandler;
 }
 
-export default function StepUploads({ store, copy, variant }: StepUploadsProps) {
+export default function StepUploads({
+  store,
+  copy,
+  variant,
+  onSubmit,
+}: StepUploadsProps) {
   const [submitted, setSubmitted] = useState(false);
 
   const profilePhotoError = submitted && !store.profilePhoto ? "Profile photo is required" : null;
@@ -187,12 +207,18 @@ export default function StepUploads({ store, copy, variant }: StepUploadsProps) 
     }
 
     store.set({ isSubmitting: true });
-    const result = await submitRegistration(store, variant);
+    try {
+      const submitFn = onSubmit ?? submitRegistration;
+      const result = await submitFn(store, variant);
 
-    if (result.ok) {
-      store.set({ success: true, isSubmitting: false });
-    } else {
-      store.set({ error: result.message, isSubmitting: false });
+      if (result.ok) {
+        store.set({ success: true, isSubmitting: false });
+      } else {
+        store.set({ error: result.message, isSubmitting: false });
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Submission failed";
+      store.set({ error: msg, isSubmitting: false });
     }
   }
 
@@ -233,6 +259,16 @@ export default function StepUploads({ store, copy, variant }: StepUploadsProps) 
       <PortfolioGrid
         portfolioPhotos={store.portfolioPhotos}
         onChange={(photos) => store.set({ portfolioPhotos: photos })}
+        label={
+          variant === "model"
+            ? "Work / portfolio photos"
+            : "Portfolio photos"
+        }
+        hint={
+          variant === "model"
+            ? "Upload examples of your runway, editorial, or commercial work"
+            : undefined
+        }
       />
       {portfolioError && <p className={formHint + " text-red-600"}>{portfolioError}</p>}
 

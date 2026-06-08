@@ -1,5 +1,5 @@
 import type { RegistrationFormState, RegistrationVariant } from "@/types/registration-form";
-import { buildModelProfilePayload } from "./build-model-profile";
+import { buildPublicModelProfilePayload } from "./build-model-profile";
 import { buildStudentProfilePayload } from "./build-student-profile";
 
 export async function submitRegistration(
@@ -10,10 +10,6 @@ export async function submitRegistration(
   formData.append("email", state.email);
   formData.append("password", state.password);
 
-  if (variant === "model" && !state.tier) {
-    return { ok: false, message: "Please select your modelling experience level." };
-  }
-
   if (variant === "student") {
     formData.append("role", "STUDENT");
     formData.append(
@@ -22,7 +18,10 @@ export async function submitRegistration(
     );
   } else {
     formData.append("role", "MODEL");
-    formData.append("modelProfile", JSON.stringify(buildModelProfilePayload(state)));
+    formData.append(
+      "modelProfile",
+      JSON.stringify(buildPublicModelProfilePayload(state)),
+    );
   }
 
   if (state.profilePhoto) formData.append("profile_photo", state.profilePhoto);

@@ -16,9 +16,6 @@ export function useModelPersonalStep(store: RegistrationStore) {
     return null;
   }
 
-  const tierError =
-    submitted && !store.tier ? "Select your modelling experience level" : null;
-
   function handleDobChange(value: string) {
     const age = ageFromDateOfBirth(value);
     store.set({
@@ -34,9 +31,9 @@ export function useModelPersonalStep(store: RegistrationStore) {
       const v = store[f];
       return typeof v === "string" && !v.trim();
     });
-    if (missingPersonal || !store.tier) return;
+    if (missingPersonal) return;
     store.nextStep();
   }
 
-  return { submitted, err, tierError, handleDobChange, handleNext };
+  return { submitted, err, handleDobChange, handleNext };
 }

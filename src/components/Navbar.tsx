@@ -41,6 +41,14 @@ export default function Navbar() {
   const [headerHeight, setHeaderHeight] = useState(0);
 
   useEffect(() => {
+    if (isAuthenticated || typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("login") === "1") {
+      setShowLogin(true);
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
     const nav = navRef.current;
     if (!nav) return;
 

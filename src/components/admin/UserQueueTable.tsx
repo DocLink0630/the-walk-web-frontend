@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { fetchAdminUsers, updateUserStatus } from "@/lib/admin/users-api";
 import type { AdminUser, UserRole, UserStatus } from "@/types/admin";
+import AdminUserMobileList from "./AdminUserMobileList";
 
 const ALL_STATUSES: UserStatus[] = [
   "PENDING_EMAIL_VERIFICATION",
@@ -112,12 +113,12 @@ export default function UserQueueTable({ onUsersChanged }: UserQueueTableProps) 
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
-        <div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:items-end">
+        <div className="sm:col-span-2">
           <label className="block font-ui text-[9px] tracking-[0.25em] uppercase text-[#4A4A4A] mb-1">
             Search email
           </label>
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <input
               type="search"
               value={searchInput}
@@ -129,7 +130,7 @@ export default function UserQueueTable({ onUsersChanged }: UserQueueTableProps) 
                 }
               }}
               placeholder="user@example.com"
-              className={inputCls + " min-w-[200px]"}
+              className={inputCls + " w-full flex-1"}
             />
             <button
               type="button"
@@ -137,7 +138,7 @@ export default function UserQueueTable({ onUsersChanged }: UserQueueTableProps) 
                 setPage(1);
                 setSearch(searchInput.trim());
               }}
-              className="font-ui text-[9px] tracking-[0.2em] uppercase px-4 py-2 border border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-colors"
+              className="font-ui text-[9px] tracking-[0.2em] uppercase px-4 py-2 border border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-colors shrink-0"
             >
               Search
             </button>
@@ -154,7 +155,7 @@ export default function UserQueueTable({ onUsersChanged }: UserQueueTableProps) 
               setPage(1);
               setStatusFilter(e.target.value as UserStatus | "");
             }}
-            className={inputCls}
+            className={inputCls + " w-full"}
           >
             <option value="">All statuses</option>
             {ALL_STATUSES.map((s) => (
@@ -175,7 +176,7 @@ export default function UserQueueTable({ onUsersChanged }: UserQueueTableProps) 
               setPage(1);
               setRoleFilter(e.target.value as UserRole | "");
             }}
-            className={inputCls}
+            className={inputCls + " w-full"}
           >
             <option value="">All roles</option>
             <option value="STUDENT">Student</option>
@@ -210,7 +211,34 @@ export default function UserQueueTable({ onUsersChanged }: UserQueueTableProps) 
         </div>
       )}
 
-      <div className="border border-[#E0E0E0] bg-white overflow-x-auto">
+      {!loading && users.length > 0 && (
+        <AdminUserMobileList
+          users={users}
+          statusLabels={STATUS_LABELS}
+          allStatuses={ALL_STATUSES}
+          pendingStatus={pendingStatus}
+          updatingId={updatingId}
+          onStatusChange={(userId, status) =>
+            setPendingStatus((prev) => ({ ...prev, [userId]: status }))
+          }
+          onUpdate={handleUpdate}
+          formatDate={formatDate}
+        />
+      )}
+
+      {!loading && users.length === 0 && (
+        <div className="md:hidden border border-[#E0E0E0] bg-white px-4 py-10 text-center">
+          <p className="font-ui text-[10px] text-[#9A9A9A]">No users found</p>
+        </div>
+      )}
+
+      {loading && (
+        <div className="md:hidden border border-[#E0E0E0] bg-white px-4 py-10 text-center">
+          <p className="font-ui text-[10px] text-[#9A9A9A]">Loading users…</p>
+        </div>
+      )}
+
+      <div className="hidden md:block border border-[#E0E0E0] bg-white overflow-x-auto">
         <table className="w-full min-w-[720px]">
           <thead>
             <tr className="border-b border-[#E0E0E0] bg-[#FAFAFA]">

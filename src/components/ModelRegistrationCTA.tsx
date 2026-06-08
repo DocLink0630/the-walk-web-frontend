@@ -9,6 +9,10 @@ import {
   MODEL_REGISTRATION_STEPS,
 } from "@/data/model-registration";
 import { CTA_PRIMARY_FILLED } from "@/config/cta-styles";
+import {
+  attachScrollTriggerResync,
+  revealOnScroll,
+} from "@/lib/gsap/scroll-trigger-setup";
 import { renderMultilineHeading } from "@/lib/render-multiline-heading";
 import type {
   ModelRegistrationCTAProps,
@@ -42,43 +46,35 @@ export default function ModelRegistrationCTA({
     if (!section) return;
 
     const ctx = gsap.context(() => {
-      const timeline = gsap.timeline({
-        scrollTrigger: {
-          trigger: section,
-          start: "top 75%",
-          toggleActions: "play none none reverse",
-        },
-      });
-
       imageRefs.current.forEach((image, index) => {
         if (!image) return;
-
-        timeline.from(
-          image,
-          {
-            clipPath: "inset(100% 0 0 0)",
-            duration: 1.2,
-            ease: "power4.out",
-          },
-          index * 0.15,
-        );
+        revealOnScroll(image, {
+          trigger: section,
+          start: "top 75%",
+          y: 48,
+          scale: 0.96,
+          duration: 1.1,
+          delay: index * 0.12,
+        });
       });
 
       if (contentRef.current) {
-        timeline.from(
-          contentRef.current,
-          {
-            y: 40,
-            opacity: 0,
-            duration: 1,
-            ease: "power4.out",
-          },
-          "-=0.8",
-        );
+        revealOnScroll(contentRef.current, {
+          trigger: section,
+          start: "top 75%",
+          y: 40,
+          duration: 1,
+          delay: 0.2,
+        });
       }
     }, section);
 
-    return () => ctx.revert();
+    const detachResync = attachScrollTriggerResync([section]);
+
+    return () => {
+      detachResync();
+      ctx.revert();
+    };
   }, [images, steps, eyebrow, heading, description]);
 
   const handleImageRef = (index: number, element: HTMLDivElement | null) => {

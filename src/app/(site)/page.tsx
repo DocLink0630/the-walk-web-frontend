@@ -12,7 +12,7 @@ export default function Home() {
     <main className="flex-1">
       <Hero
         heading="The Walk Agency"
-        eyebrow="MODEL AGENCY · COLOMBO"
+        eyebrow="MODEL AGENCY · Sri Lanka"
         tagline="Sri Lanka's premier modelling agency. Verified talent. Direct bookings."
         sideLabel="Model · Beautician · Photographer"
         background={{
@@ -22,7 +22,7 @@ export default function Home() {
         }}
         ctas={[
           { label: "Discover Talent", href: "/models", variant: "primary" },
-          { label: "Join Today", href: "/inquiry", variant: "secondary" },
+          { label: "Book Talent", href: "/register/client", variant: "secondary" },
         ]}
       />
       <TalentSection/>

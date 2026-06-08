@@ -11,7 +11,7 @@ export default function About() {
         tagline="Connecting Sri Lanka's creative talent with the clients who need them."
         background={{
           type: "video",
-          src: "/videos/background.mp4",
+          src: "/videos/about.mp4",
           poster: "/images/hero.webp",
         }}
         showScrollIndicator={false}

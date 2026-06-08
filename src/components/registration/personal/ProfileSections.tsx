@@ -13,8 +13,7 @@ import {
   formSectionTitle,
   formTextarea,
 } from "../form-styles";
-import type { ModelTier } from "@/types/api/model-profile";
-import { MODEL_TIER_OPTIONS, REFERRAL_SOURCE_OPTIONS, SKIN_COLOR_OPTIONS } from "./constants";
+import { REFERRAL_SOURCE_OPTIONS, SKIN_COLOR_OPTIONS } from "./constants";
 import { Field } from "./Field";
 
 type ErrFn = (field: keyof import("@/types/registration-form").RegistrationFormState) => string | null;
@@ -241,47 +240,6 @@ export function AppearanceSection({ store, idPrefix }: Pick<SectionProps, "store
           ))}
         </div>
       </div>
-    </section>
-  );
-}
-
-export function ModelExperienceSection({
-  store,
-  idPrefix,
-  tierError,
-}: Pick<SectionProps, "store" | "idPrefix"> & { tierError?: string | null }) {
-  return (
-    <section className="space-y-4">
-      <h3 className={formSectionTitle}>Modelling experience</h3>
-      <p className={formHint}>
-        Choose the option that best describes your professional modelling background. Our team uses
-        this to review and list your profile.
-      </p>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {MODEL_TIER_OPTIONS.map(({ value, label, description }) => (
-          <button
-            key={value}
-            type="button"
-            onClick={() => store.set({ tier: value as ModelTier })}
-            className={[
-              "text-left border px-4 py-4 transition-colors",
-              store.tier === value
-                ? "border-[#C8A97A] bg-[#C8A97A]/10"
-                : tierError
-                  ? "border-red-400 bg-white"
-                  : "border-[#E0E0E0] bg-white hover:border-[#C8A97A]",
-            ].join(" ")}
-          >
-            <p className="font-ui text-[9px] tracking-[0.2em] uppercase text-[#0A0A0A] mb-2">
-              {label}
-            </p>
-            <p className="font-display text-[14px] font-light text-[#4A4A4A] leading-[1.5]">
-              {description}
-            </p>
-          </button>
-        ))}
-      </div>
-      {tierError && <p className={formHint + " text-red-600"}>{tierError}</p>}
     </section>
   );
 }

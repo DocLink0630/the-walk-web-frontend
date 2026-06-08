@@ -23,6 +23,7 @@ export interface TalentProfile {
   name: string;
   type: TalentType;
   category?: ModelCategory;
+  gender?: string;
   height?: string;
   weight?: string;
   measurements?: string;
