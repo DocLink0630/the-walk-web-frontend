@@ -8,7 +8,7 @@ interface ModelsHeroSectionProps {
 }
 
 export default function ModelsHeroSection({
-  backgroundImage = "/images/Gallery/DSC00532.webp",
+  backgroundImage = "/images/Gallery/DSC09407.webp",
 }: ModelsHeroSectionProps) {
   const heroImageRef = useRef<HTMLDivElement>(null);
   const heroOverlayRef = useRef<HTMLDivElement>(null);

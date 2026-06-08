@@ -18,7 +18,6 @@ export interface AcademyCourse {
   title: string;
   duration: string;
   level: string;
-  intake: string;
   description: string;
   months: AcademyCourseMonth[];
   image: string;

@@ -36,7 +36,8 @@ export default function AcademyCTA({
         scrollTrigger: {
           trigger: section,
           start: "top 70%",
-          toggleActions: "play none none reverse",
+          invalidateOnRefresh: true,
+          toggleActions: "play none none none",
         },
       });
 

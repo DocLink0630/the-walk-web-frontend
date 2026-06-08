@@ -5,17 +5,17 @@ import type {
 
 export const MODEL_REGISTRATION_IMAGES: ModelRegistrationImage[] = [
   {
-    src: "/images/Gallery/DSC00547.jpg",
+    src: "/images/Gallery/DSC09407.webp",
     alt: "Model portfolio showcase",
     variant: "main",
   },
   {
-    src: "/images/Gallery/DSC00533.jpg",
+    src: "/images/Gallery/DSC09493.webp",
     alt: "Fashion portrait",
     variant: "accent-top",
   },
   {
-    src: "/images/Gallery/DSC00567.jpg",
+    src: "/images/Gallery/DSC00567.webp",
     alt: "Editorial model shot",
     variant: "accent-bottom",
   },

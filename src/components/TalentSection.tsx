@@ -7,6 +7,10 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useAuth } from "@/context/AuthContext";
 import ModelDetailModal from "@/components/models/ModelDetailModal";
 import {
+  attachScrollTriggerResync,
+  refreshScrollTriggers,
+} from "@/lib/gsap/scroll-trigger-setup";
+import {
   fetchFeaturedModels,
   getFirstName,
   PORTRAIT_OFFSETS,
@@ -94,19 +98,22 @@ export default function TalentSection({
           scrollTrigger: {
             trigger: card,
             start: "top 85%",
-            toggleActions: "play none none reverse",
+            invalidateOnRefresh: true,
+            toggleActions: "play none none none",
           },
         });
 
         revealTl
           .from(cardInner, {
-            clipPath: "inset(100% 0 0 0)",
+            y: 36,
+            opacity: 0,
             duration: 1.1,
             ease: "power4.out",
+            immediateRender: false,
           })
           .from(
             cardImage,
-            { scale: 1.2, duration: 1.4, ease: "power4.out" },
+            { scale: 1.08, duration: 1.4, ease: "power4.out", immediateRender: false },
             0,
           );
 
@@ -153,7 +160,10 @@ export default function TalentSection({
       });
     }, section);
 
+    const detachResync = attachScrollTriggerResync([section, document.body]);
+
     return () => {
+      detachResync();
       cleanups.forEach((fn) => fn());
       ctx.revert();
     };
@@ -162,6 +172,11 @@ export default function TalentSection({
   useEffect(() => {
     return setupAnimations();
   }, [setupAnimations]);
+
+  useEffect(() => {
+    if (loading) return;
+    refreshScrollTriggers();
+  }, [loading, models.length]);
 
   const displayItems = loading
     ? Array.from({ length: 8 }, (_, i) => ({ skeleton: true as const, index: i }))

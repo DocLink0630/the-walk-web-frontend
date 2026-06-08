@@ -4,6 +4,10 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { disciplines } from "@/data/discipline";
+import {
+  attachScrollTriggerResync,
+  revealOnScroll,
+} from "@/lib/gsap/scroll-trigger-setup";
 import type { Discipline } from "@/types/discipline";
 import SectionIntro from "@/components/ui/SectionIntro";
 import ShowcaseCard from "@/components/ui/ShowcaseCard";
@@ -57,37 +61,33 @@ export default function WhatWeDoSection({
 
     const ctx = gsap.context(() => {
       if (introRef.current) {
-        gsap.from(introRef.current.children, {
+        revealOnScroll(introRef.current.children, {
+          trigger: introRef.current,
+          start: "top 85%",
           y: 40,
-          opacity: 0,
           duration: 0.9,
           stagger: 0.12,
-          ease: "power4.out",
-          scrollTrigger: {
-            trigger: introRef.current,
-            start: "top 85%",
-            toggleActions: "play none none reverse",
-          },
         });
       }
 
       cardRefs.current.forEach((el, i) => {
         if (!el) return;
-        gsap.from(el, {
-          clipPath: "inset(100% 0 0 0)",
-          duration: 1.2,
+        revealOnScroll(el, {
+          trigger: el,
+          start: "top 88%",
+          y: 48,
+          duration: 1,
           delay: i % 2 === 0 ? 0 : 0.15,
-          ease: "power4.out",
-          scrollTrigger: {
-            trigger: el,
-            start: "top 88%",
-            toggleActions: "play none none reverse",
-          },
         });
       });
     }, section);
 
-    return () => ctx.revert();
+    const detachResync = attachScrollTriggerResync([section, document.body]);
+
+    return () => {
+      detachResync();
+      ctx.revert();
+    };
   }, [items]);
 
   return (

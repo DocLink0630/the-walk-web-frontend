@@ -65,15 +65,7 @@ export default function AcademyProgrammeSection({
                 {course.description}
               </p>
             </div>
-            <div className="md:col-span-4 p-6 md:p-10 lg:p-14 flex flex-col justify-between bg-[#FAFAF9] border-t md:border-t-0">
-              <div className="mb-6 md:mb-0">
-                <p className="font-ui text-[9px] tracking-[0.28em] uppercase text-[#9A9A9A] mb-3">
-                  NEXT INTAKE
-                </p>
-                <p className="font-display text-[20px] md:text-[24px] font-light text-[#C8A97A] leading-[1.3]">
-                  {course.intake}
-                </p>
-              </div>
+            <div className="md:col-span-4 p-6 md:p-10 lg:p-14 flex items-center justify-center bg-[#FAFAF9] border-t md:border-t-0">
               <Link
                 href={applyHref}
                 data-cursor="button"

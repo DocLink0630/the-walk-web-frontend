@@ -34,15 +34,15 @@ export const ACADEMY_PAGE: AcademyPageContent = {
     ],
     images: [
       {
-        src: "/images/Gallery/DSC09304%20copy.jpg",
+        src: "/images/Gallery/DSC09537copy.webp",
         alt: "Academy training",
       },
       {
-        src: "/images/Gallery/DSC09307%20copy.jpg",
+        src: "/images/Gallery/DSC09965copy.webp",
         alt: "Training facility",
       },
       {
-        src: "/images/Gallery/DSC09308%20copy.jpg",
+        src: "/images/Gallery/DSC09427copy.webp",
         alt: "Runway practice",
       },
     ],
@@ -54,7 +54,6 @@ export const ACADEMY_PAGE: AcademyPageContent = {
       title: "Professional Modelling Programme",
       duration: "3 Months",
       level: "All Levels",
-      intake: "Next intake: July 7, 2025",
       description:
         "A comprehensive end-to-end programme covering everything a working professional model needs. From runway technique and editorial posing to portfolio development, personal branding, and direct agency connections — this is the complete foundation for a serious modelling career.",
       months: [
@@ -95,7 +94,7 @@ export const ACADEMY_PAGE: AcademyPageContent = {
           ],
         },
       ],
-      image: "/images/Gallery/DSC09790%20copy.jpg",
+      image: "/images/Gallery/DSC09790%20copy.webp",
     },
   },
   fees: {
