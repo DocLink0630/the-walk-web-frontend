@@ -2,6 +2,17 @@ import type { AssignableModelTier } from "@/types/api/model-profile";
 
 export type RegistrationVariant = "student" | "model";
 
+export interface WorkExperienceImageDraft {
+  file: File;
+  alt?: string;
+}
+
+export interface WorkExperienceDraft {
+  id: string;
+  title: string;
+  images: WorkExperienceImageDraft[];
+}
+
 export interface RegistrationFormState {
   modelCode: string;
   email: string;
@@ -36,6 +47,8 @@ export interface RegistrationFormState {
   nicFront: File | null;
   nicBack: File | null;
   portfolioPhotos: File[];
+  /** Model registration — sent as work_experience with uploaded image tokens */
+  workExperiences: WorkExperienceDraft[];
   step: 1 | 2 | 3;
   isSubmitting: boolean;
   error: string | null;

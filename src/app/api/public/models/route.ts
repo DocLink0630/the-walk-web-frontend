@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { backendFetch, getBackendUrl } from "@/lib/backend/fetch";
-import { getClientBearerToken } from "@/lib/client/auth-request";
 
 function errorMessage(data: unknown, fallback: string): string {
   if (data && typeof data === "object" && "message" in data) {
@@ -10,8 +9,7 @@ function errorMessage(data: unknown, fallback: string): string {
 }
 
 /**
- * Proxies Swagger GET /v1/users with roles=["MODEL"].
- * Forwards optional Bearer token when the client is signed in.
+ * Proxies Swagger GET /v1/public/models — public roster, no auth required.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -23,20 +21,15 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const token = getClientBearerToken(request);
   const { searchParams } = request.nextUrl;
 
-  const roles = searchParams.get("roles") ?? JSON.stringify(["MODEL"]);
-  const status = searchParams.get("status") ?? "ACTIVE";
-
-  const { status: backendStatus, data } = await backendFetch("/v1/users", {
-    token: token ?? undefined,
+  const { status: backendStatus, data } = await backendFetch("/v1/public/models", {
     searchParams: {
       page: searchParams.get("page") ?? "1",
       limit: searchParams.get("limit") ?? "100",
       search: searchParams.get("search") ?? undefined,
-      status,
-      roles,
+      status: searchParams.get("status") ?? "ACTIVE",
+      roles: searchParams.get("roles") ?? JSON.stringify(["MODEL"]),
     },
   });
 

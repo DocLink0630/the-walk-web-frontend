@@ -26,7 +26,11 @@ export default function AcademyPageContent() {
 
   return (
     <main ref={mainRef} className="flex-1 min-h-screen bg-white">
-      <AcademyHeroSection hero={content.hero} />
+      <AcademyHeroSection
+        hero={content.hero}
+        applyHref={content.cta.href}
+        applyLabel={content.cta.label}
+      />
       <AcademyStatsSection stats={content.stats} />
       <AcademyWhySection why={content.why} />
       <AcademyProgrammeSection programme={content.programme} applyHref={content.cta.href} />

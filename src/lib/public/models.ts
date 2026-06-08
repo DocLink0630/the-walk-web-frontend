@@ -1,13 +1,18 @@
 import type { AdminUser, AdminUserDetail, ModelTier, PaginatedUsersResponse } from "@/types/admin";
-import type { PublicFeaturedModel, PublicModel } from "@/types/public-model";
+import type {
+  PublicApiModel,
+  PublicFeaturedModel,
+  PublicModel,
+  PublicModelsPageResponse,
+} from "@/types/public-model";
 import type { ModelCategory, TalentProfile } from "@/types/talents";
 import { clientAuthHeaders } from "@/lib/client/auth-request";
 import { fetchFeaturedModels, getFirstName } from "@/lib/public/featured-models";
 
 const DETAIL_CONCURRENCY = 5;
-const ROSTER_PAGE_LIMIT = 100;
+const PUBLIC_PAGE_LIMIT = 100;
 
-/** Swagger GET /v1/users — filter by UserRole.MODEL */
+/** Swagger GET /v1/users — filter by UserRole.MODEL (authenticated enrichment) */
 export const MODEL_ROSTER_ROLES = JSON.stringify(["MODEL"]);
 
 export function getGuestDisplayName(name: string): string {
@@ -53,6 +58,24 @@ function formatMeasurements(profile?: AdminUserDetail["modelProfile"]): string |
   return parts.length > 0 ? parts.join(" · ") : undefined;
 }
 
+function makePublicModelId(name: string, index: number): string {
+  const slug = normalizeModelName(name).replace(/\s+/g, "-") || "model";
+  return `public-${slug}-${index}`;
+}
+
+export function mapPublicApiModelToPublicModel(
+  item: PublicApiModel,
+  index: number,
+): PublicModel {
+  const portfolioImages = item.imageUrl ? [item.imageUrl] : [];
+  return {
+    id: makePublicModelId(item.name, index),
+    name: item.name,
+    imageUrl: item.imageUrl,
+    portfolioImages,
+  };
+}
+
 export function buildFeaturedImageMap(
   featured: PublicFeaturedModel[],
 ): Map<string, string | null> {
@@ -96,27 +119,18 @@ export function featuredModelToPublicModel(
 }
 
 export function featuredToPublicModels(featured: PublicFeaturedModel[]): PublicModel[] {
-  return featured.map((item, index) => ({
-    id: `featured-${index}-${normalizeModelName(item.name).replace(/\s/g, "-")}`,
-    name: item.name,
-    imageUrl: item.imageUrl,
-    portfolioImages: item.imageUrl ? [item.imageUrl] : [],
-    isFeaturedOnly: true,
-  }));
+  return featured.map((item, index) => featuredModelToPublicModel(item, index));
 }
 
-function mapDetailToPublicModel(
-  detail: AdminUserDetail,
-  imageMap: Map<string, string | null>,
-): PublicModel {
+function mapDetailToPublicModel(detail: AdminUserDetail): PublicModel {
   const profile = detail.modelProfile;
   const name = profile?.fullName?.trim() || detail.email;
-  const imageUrl = imageMap.get(normalizeModelName(name)) ?? null;
+  const portfolioImages: string[] = [];
 
   return {
     id: detail.id,
     name,
-    imageUrl,
+    imageUrl: portfolioImages[0] ?? null,
     tier: profile?.tier,
     category: mapTierToCategory(profile?.tier),
     gender: profile?.gender,
@@ -129,17 +143,34 @@ function mapDetailToPublicModel(
     eyeColor: profile?.eyeColorEnc ?? undefined,
     hairColor: profile?.hairColorEnc ?? undefined,
     bio: profile?.shortBio ?? profile?.talentsEnc ?? undefined,
-    portfolioImages: imageUrl ? [imageUrl] : [],
+    portfolioImages,
+  };
+}
+
+function mergePublicWithDetail(
+  publicModel: PublicModel,
+  detail: PublicModel,
+): PublicModel {
+  return {
+    ...publicModel,
+    ...detail,
+    id: detail.id,
+    name: detail.name || publicModel.name,
+    imageUrl: publicModel.imageUrl ?? detail.imageUrl,
+    portfolioImages:
+      publicModel.portfolioImages.length > 0
+        ? publicModel.portfolioImages
+        : detail.portfolioImages,
   };
 }
 
 async function fetchModelDetail(
   userId: string,
-  token: string | null,
+  token: string,
 ): Promise<AdminUserDetail | null> {
   try {
     const res = await fetch(`/api/models/${userId}`, {
-      headers: clientAuthHeaders(token ?? undefined),
+      headers: clientAuthHeaders(token),
     });
     if (!res.ok) return null;
     return (await res.json()) as AdminUserDetail;
@@ -169,27 +200,86 @@ async function mapWithConcurrency<T, R>(
   return results;
 }
 
+async function fetchPublicModelsPage(
+  page: number,
+): Promise<
+  | { ok: true; data: PublicModelsPageResponse }
+  | { ok: false; message: string; status: number }
+> {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(PUBLIC_PAGE_LIMIT),
+    status: "ACTIVE",
+    roles: MODEL_ROSTER_ROLES,
+  });
+
+  try {
+    const res = await fetch(`/api/public/models?${params.toString()}`);
+
+    if (!res.ok) {
+      let message = "Failed to load models";
+      try {
+        const body = await res.json();
+        if (body?.message) message = String(body.message);
+      } catch {
+        /* ignore */
+      }
+      return { ok: false, message, status: res.status };
+    }
+
+    const payload = (await res.json()) as PublicModelsPageResponse;
+    return { ok: true, data: payload };
+  } catch {
+    return { ok: false, message: "Unable to connect to the server.", status: 502 };
+  }
+}
+
+/** GET /v1/public/models — available to guests and signed-in users */
+export async function fetchPublicModelRoster(): Promise<
+  | { ok: true; data: PublicModel[] }
+  | { ok: false; message: string; status: number }
+> {
+  const allModels: PublicApiModel[] = [];
+  let page = 1;
+  let totalPages = 1;
+
+  while (page <= totalPages) {
+    const result = await fetchPublicModelsPage(page);
+    if (!result.ok) {
+      return result;
+    }
+
+    const { data, meta } = result.data;
+    allModels.push(...(data ?? []));
+    totalPages = meta?.totalPages ?? 1;
+    page += 1;
+  }
+
+  const models = allModels.map((item, index) => mapPublicApiModelToPublicModel(item, index));
+  return { ok: true, data: models };
+}
+
 async function fetchModelUsersPage(
   page: number,
-  token: string | null,
+  token: string,
 ): Promise<
   | { ok: true; data: PaginatedUsersResponse }
   | { ok: false; message: string; status: number }
 > {
   const params = new URLSearchParams({
     page: String(page),
-    limit: String(ROSTER_PAGE_LIMIT),
+    limit: String(PUBLIC_PAGE_LIMIT),
     status: "ACTIVE",
     roles: MODEL_ROSTER_ROLES,
   });
 
   try {
-    const res = await fetch(`/api/public/models?${params.toString()}`, {
-      headers: clientAuthHeaders(token ?? undefined),
+    const res = await fetch(`/api/models?${params.toString()}`, {
+      headers: clientAuthHeaders(token),
     });
 
     if (!res.ok) {
-      let message = "Failed to load models from GET /v1/users";
+      let message = "Failed to load model profiles";
       try {
         const body = await res.json();
         if (body?.message) message = String(body.message);
@@ -207,7 +297,7 @@ async function fetchModelUsersPage(
 }
 
 async function fetchAllModelUsers(
-  token: string | null,
+  token: string,
 ): Promise<
   | { ok: true; users: AdminUser[] }
   | { ok: false; message: string; status: number }
@@ -231,27 +321,14 @@ async function fetchAllModelUsers(
   return { ok: true, users: allUsers };
 }
 
-/**
- * Loads ACTIVE models via Swagger GET /v1/users?roles=["MODEL"]&status=ACTIVE,
- * then enriches each row with GET /v1/users/:id for modelProfile fields.
- */
-export async function fetchModelRoster(
-  token: string | null,
-): Promise<
-  | { ok: true; data: PublicModel[] }
-  | { ok: false; message: string; status: number }
-> {
+/** Enriches public roster with full profiles when the client is authenticated. */
+async function enrichModelsWithProfiles(
+  models: PublicModel[],
+  token: string,
+): Promise<PublicModel[]> {
   const usersResult = await fetchAllModelUsers(token);
-  if (!usersResult.ok) {
-    return usersResult;
-  }
-
-  const featuredResult = await fetchFeaturedModels();
-  const featured = featuredResult.ok ? featuredResult.data : [];
-  const imageMap = buildFeaturedImageMap(featured);
-
-  if (usersResult.users.length === 0) {
-    return { ok: true, data: [] };
+  if (!usersResult.ok || usersResult.users.length === 0) {
+    return models;
   }
 
   const details = await mapWithConcurrency(
@@ -260,11 +337,26 @@ export async function fetchModelRoster(
     DETAIL_CONCURRENCY,
   );
 
-  const models = details
-    .filter((detail): detail is AdminUserDetail => detail !== null)
-    .map((detail) => mapDetailToPublicModel(detail, imageMap));
+  const detailByName = new Map<string, PublicModel>();
+  for (const detail of details) {
+    if (!detail) continue;
+    const mapped = mapDetailToPublicModel(detail);
+    detailByName.set(normalizeModelName(mapped.name), mapped);
+  }
 
-  return { ok: true, data: mergeFeaturedImages(models, featured) };
+  let enrichedCount = 0;
+  const enriched = models.map((model) => {
+    const detail = detailByName.get(normalizeModelName(model.name));
+    if (!detail) return model;
+    enrichedCount += 1;
+    return mergePublicWithDetail(model, detail);
+  });
+
+  return enrichedCount > 0 ? enriched : models;
+}
+
+function hasProfileFields(model: PublicModel): boolean {
+  return Boolean(model.tier || model.gender || model.height || model.rate);
 }
 
 export async function loadModelsPageData(options: {
@@ -275,52 +367,35 @@ export async function loadModelsPageData(options: {
   notice?: string;
   error?: string;
 }> {
-  const featuredResult = await fetchFeaturedModels();
-  const featured = featuredResult.ok ? featuredResult.data : [];
-
-  const rosterResult = await fetchModelRoster(options.token);
-
-  if (rosterResult.ok && rosterResult.data.length > 0) {
-    return { models: rosterResult.data, restricted: false };
-  }
-
-  if (rosterResult.ok && rosterResult.data.length === 0) {
-    return {
-      models: featuredToPublicModels(featured),
-      restricted: true,
-      notice:
-        "No ACTIVE models returned from GET /v1/users yet. Showing featured models.",
-    };
-  }
+  const rosterResult = await fetchPublicModelRoster();
 
   if (!rosterResult.ok) {
-    const fallback = featuredToPublicModels(featured);
-    let notice: string;
-
-    if (!options.token) {
-      notice =
-        "Sign in to load the full roster from GET /v1/users (roles=MODEL). Showing featured models.";
-    } else if (rosterResult.status === 401) {
-      notice = "Session expired. Sign in again to load models from GET /v1/users.";
-    } else if (rosterResult.status === 403) {
-      notice =
-        "Your account needs user:read:any permission for GET /v1/users. Showing featured models.";
-    } else {
-      notice = rosterResult.message;
-    }
+    const featuredResult = await fetchFeaturedModels();
+    const fallback = featuredResult.ok ? featuredToPublicModels(featuredResult.data) : [];
 
     return {
       models: fallback,
       restricted: true,
-      notice,
+      notice: fallback.length > 0 ? rosterResult.message : undefined,
       error: fallback.length === 0 ? rosterResult.message : undefined,
     };
   }
 
+  let models = rosterResult.data;
+
+  if (options.token) {
+    models = await enrichModelsWithProfiles(models, options.token);
+  }
+
+  const hasFullProfiles = models.some(hasProfileFields);
+
   return {
-    models: featuredToPublicModels(featured),
-    restricted: true,
-    notice: "Unable to load roster. Showing featured models.",
+    models,
+    restricted: !hasFullProfiles,
+    notice:
+      options.token && !hasFullProfiles
+        ? "Sign in with a client account to view full model profiles, measurements, and filters."
+        : undefined,
   };
 }
 

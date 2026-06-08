@@ -1,4 +1,4 @@
-export type AdminSection = "students" | "models";
+export type AdminSection = "dashboard" | "models";
 
 export interface AdminNavItem {
   id: AdminSection;
@@ -8,9 +8,9 @@ export interface AdminNavItem {
 
 export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   {
-    id: "students",
-    label: "Students",
-    description: "Registrations and academy onboarding",
+    id: "dashboard",
+    label: "Dashboard",
+    description: "Overview and model activity",
   },
   {
     id: "models",

@@ -6,6 +6,22 @@ export interface PublicFeaturedModel {
   imageUrl: string | null;
 }
 
+/** GET /v1/public/models — no auth required */
+export interface PublicApiModel {
+  name: string;
+  imageUrl: string | null;
+}
+
+export interface PublicModelsPageResponse {
+  data: PublicApiModel[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
 export interface PublicModel {
   id: string;
   name: string;

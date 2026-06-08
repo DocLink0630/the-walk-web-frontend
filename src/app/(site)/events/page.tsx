@@ -1,16 +1,12 @@
 import type { Metadata } from "next";
-import UnderConstructionPage from "@/components/UnderConstructionPage";
+import EventsPageContent from "@/components/events/EventsPageContent";
 
 export const metadata: Metadata = {
   title: "Events — The Walk",
-  description: "The Walk events page is coming soon.",
+  description:
+    "Runway shows, graduate showcases, editorials and industry galas from The Walk Agency and Academy.",
 };
 
 export default function EventsPage() {
-  return (
-    <UnderConstructionPage
-      title="Events"
-      description="Our events section is being built. Check back soon for showcases, runway shows, and academy highlights."
-    />
-  );
+  return <EventsPageContent />;
 }

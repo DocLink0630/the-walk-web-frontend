@@ -43,6 +43,7 @@ const defaultFormState = (prefix: "STU" | "MOD"): RegistrationFormState => ({
   nicFront: null,
   nicBack: null,
   portfolioPhotos: [],
+  workExperiences: [],
   step: 1,
   isSubmitting: false,
   error: null,

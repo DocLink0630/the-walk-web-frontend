@@ -57,9 +57,7 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
 
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
-  const [statusFilter, setStatusFilter] = useState<UserStatus | "">(
-    "PENDING_ADMIN_REVIEW",
-  );
+  const [statusFilter, setStatusFilter] = useState<UserStatus | "">("");
 
   const [pendingStatus, setPendingStatus] = useState<Record<string, UserStatus>>({});
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -215,7 +213,15 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
 
       {!loading && users.length === 0 && (
         <div className="md:hidden border border-[#E0E0E0] bg-white px-4 py-10 text-center">
-          <p className="font-ui text-[10px] text-[#9A9A9A]">No models found</p>
+          <p className="font-ui text-[10px] text-[#9A9A9A] leading-relaxed">
+            No models found
+            {statusFilter === "PENDING_ADMIN_REVIEW" && (
+              <span className="block mt-2 text-[#4A4A4A]">
+                Try &ldquo;Pending email&rdquo; or &ldquo;All statuses&rdquo; — new sign-ups verify
+                email before appearing here.
+              </span>
+            )}
+          </p>
         </div>
       )}
 
@@ -248,8 +254,15 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
               </tr>
             ) : users.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center font-ui text-[10px] text-[#9A9A9A]">
+                <td colSpan={5} className="px-4 py-8 text-center font-ui text-[10px] text-[#9A9A9A] max-w-lg mx-auto leading-relaxed">
                   No models found
+                  {statusFilter === "PENDING_ADMIN_REVIEW" && (
+                    <span className="block mt-2 text-[#4A4A4A]">
+                      New registrations stay in &ldquo;Pending email&rdquo; until they verify their
+                      email. Change the Status filter to &ldquo;Pending email&rdquo; or &ldquo;All
+                      statuses&rdquo; to see them.
+                    </span>
+                  )}
                 </td>
               </tr>
             ) : (
