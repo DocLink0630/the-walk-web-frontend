@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import AdminShell from "@/components/admin/AdminShell";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import { useAdminAuthStore } from "@/stores/adminAuthStore";
+import type { AdminSection } from "@/types/admin-nav";
 
 export default function AdminDashboardClient() {
   const router = useRouter();
   const { fetchSession, probeAdminAccess, session, isLoading } = useAdminAuthStore();
   const [ready, setReady] = useState(false);
+  const [section, setSection] = useState<AdminSection>("students");
 
   useEffect(() => {
     let cancelled = false;
@@ -39,7 +41,7 @@ export default function AdminDashboardClient() {
 
   if (!ready || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA]">
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F5F5]">
         <p className="font-ui text-[10px] tracking-[0.2em] uppercase text-[#9A9A9A]">
           Loading dashboard…
         </p>
@@ -52,8 +54,8 @@ export default function AdminDashboardClient() {
   }
 
   return (
-    <AdminShell>
-      <AdminDashboard />
+    <AdminShell activeSection={section} onSectionChange={setSection}>
+      <AdminDashboard section={section} />
     </AdminShell>
   );
 }

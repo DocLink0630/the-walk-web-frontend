@@ -1,13 +1,20 @@
 import type { ContactDetail } from "@/types/contact";
 
+export const CONTACT_PHONE = "0769242088";
+export const CONTACT_EMAIL = "thewalkmodelagency@gmail.cm";
+
 export const CONTACT_DETAILS: ContactDetail[] = [
   {
     label: "LOCATION",
-    lines: ["No. 45, Galle Road", "Colombo 03", "Sri Lanka"],
+    lines: [
+      "THE WALK MODEL ACADEMY",
+      "Colombo Road, Pepiliyane",
+      "Sri Lanka",
+    ],
   },
   {
     label: "CONTACT",
-    lines: ["+94 11 234 5678", "info@thewalkacademy.lk"],
+    lines: [CONTACT_PHONE, CONTACT_EMAIL],
   },
   {
     label: "HOURS",

@@ -1,4 +1,4 @@
-import type { ModelTier } from "@/types/api/model-profile";
+import type { AssignableModelTier } from "@/types/api/model-profile";
 
 export type RegistrationVariant = "student" | "model";
 
@@ -25,8 +25,10 @@ export interface RegistrationFormState {
   talents: string;
   shortBio: string;
   skinColorOptionId: string;
-  /** ModelProfileDto.tier — required for model registration */
-  tier: ModelTier | "";
+  /** Admin-assigned tier when adding a model manually */
+  tier: AssignableModelTier | "";
+  /** Applicant rate / price range (modelProfile.rate) */
+  rate: string;
   source: string;
   preferredBranch: string;
   preferredDate: string;

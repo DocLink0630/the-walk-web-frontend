@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -69,6 +70,16 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             Sign In
           </button>
         </form>
+        <p className="mt-6 font-ui text-[10px] text-[#6B6B6B] text-center leading-relaxed">
+          Booking talent?{" "}
+          <Link
+            href="/register/client"
+            onClick={onClose}
+            className="text-[#9A7329] underline underline-offset-2"
+          >
+            Register as a client
+          </Link>
+        </p>
       </div>
     </div>
   );

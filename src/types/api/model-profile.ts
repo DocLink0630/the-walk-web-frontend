@@ -2,7 +2,10 @@
 
 export type ModelSource = "WALK_IN" | "ONLINE" | "REFERRAL" | "OTHER";
 
-export type ModelTier = "FRESHER" | "EXPERIENCED" | "SUPERMODEL";
+export type AssignableModelTier = "FRESHER" | "EXPERIENCED" | "SUPERMODEL";
+
+/** walk-web-backend ModelTier enum */
+export type ModelTier = "PENDING" | AssignableModelTier;
 
 /** JSON body for multipart `modelProfile` when role is MODEL */
 export interface ModelProfilePayload {
@@ -17,6 +20,8 @@ export interface ModelProfilePayload {
   whatsappNumberEnc: string;
   tier: ModelTier;
   isLoginEnabled: boolean;
+  /** Applicant-claimed rate / price range — reviewed by admin on approval */
+  rate?: string;
   source?: ModelSource;
   heightEnc?: string;
   weightEnc?: string;

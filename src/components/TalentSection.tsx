@@ -1,11 +1,18 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { featuredTalents } from "@/data/featured-talents";
-import type { FeaturedTalent } from "@/types/featured-talents";
+import { useAuth } from "@/context/AuthContext";
+import ModelDetailModal from "@/components/models/ModelDetailModal";
+import {
+  fetchFeaturedModels,
+  getFirstName,
+  PORTRAIT_OFFSETS,
+} from "@/lib/public/featured-models";
+import { featuredModelToPublicModel } from "@/lib/public/models";
+import type { PublicFeaturedModel, PublicModel } from "@/types/public-model";
 import SectionHeading from "@/components/ui/SectionHeading";
 import PortraitCard from "@/components/ui/PortraitCard";
 
@@ -17,7 +24,15 @@ export interface TalentSectionProps {
   heading?: string;
   ctaLabel?: string;
   ctaHref?: string;
-  items?: FeaturedTalent[];
+}
+
+function SkeletonCard({ offset }: { offset: number }) {
+  return (
+    <div style={{ marginTop: offset > 0 ? `${offset}px` : undefined }}>
+      <div className="aspect-[3/4] bg-[#F0F0F0] border border-[#E8E8E8] animate-pulse" />
+      <div className="mt-3 h-3 w-2/3 bg-[#F0F0F0] animate-pulse" />
+    </div>
+  );
 }
 
 export default function TalentSection({
@@ -26,14 +41,43 @@ export default function TalentSection({
   heading = "Signature Models",
   ctaLabel = "VIEW FULL ROSTER",
   ctaHref = "/models",
-  items = featuredTalents,
 }: TalentSectionProps) {
+  const { isAuthenticated } = useAuth();
   const sectionRef = useRef<HTMLElement>(null);
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const cardRefs = useRef<(HTMLDivElement | HTMLButtonElement | null)[]>([]);
+
+  const [models, setModels] = useState<PublicFeaturedModel[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedModel, setSelectedModel] = useState<PublicModel | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setError(null);
+      const result = await fetchFeaturedModels();
+      if (cancelled) return;
+
+      if (!result.ok) {
+        setError(result.message);
+        setModels([]);
+      } else {
+        setModels(result.data);
+      }
+      setLoading(false);
+    }
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const setupAnimations = useCallback(() => {
     const section = sectionRef.current;
-    if (!section) return;
+    if (!section || loading) return;
 
     const cleanups: (() => void)[] = [];
 
@@ -66,10 +110,11 @@ export default function TalentSection({
             0,
           );
 
-        const handleMouseEnter = (e: MouseEvent) => {
+        const handleMouseEnter = (e: Event) => {
+          const me = e as globalThis.MouseEvent;
           const rect = card.getBoundingClientRect();
-          const rotateY = ((e.clientX - rect.left - rect.width / 2) / (rect.width / 2)) * 8;
-          const rotateX = ((rect.height / 2 - (e.clientY - rect.top)) / (rect.height / 2)) * 8;
+          const rotateY = ((me.clientX - rect.left - rect.width / 2) / (rect.width / 2)) * 8;
+          const rotateX = ((rect.height / 2 - (me.clientY - rect.top)) / (rect.height / 2)) * 8;
           gsap.to(cardInner, {
             rotateX,
             rotateY,
@@ -79,10 +124,11 @@ export default function TalentSection({
           });
         };
 
-        const handleMouseMove = (e: MouseEvent) => {
+        const handleMouseMove = (e: Event) => {
+          const me = e as globalThis.MouseEvent;
           const rect = card.getBoundingClientRect();
-          const rotateY = ((e.clientX - rect.left - rect.width / 2) / (rect.width / 2)) * 8;
-          const rotateX = ((rect.height / 2 - (e.clientY - rect.top)) / (rect.height / 2)) * 8;
+          const rotateY = ((me.clientX - rect.left - rect.width / 2) / (rect.width / 2)) * 8;
+          const rotateX = ((rect.height / 2 - (me.clientY - rect.top)) / (rect.height / 2)) * 8;
           gsap.to(cardInner, { rotateX, rotateY, duration: 0.3, ease: "power2.out" });
         };
 
@@ -111,41 +157,96 @@ export default function TalentSection({
       cleanups.forEach((fn) => fn());
       ctx.revert();
     };
-  }, [items]);
+  }, [loading, models.length]);
+
+  useEffect(() => {
+    return setupAnimations();
+  }, [setupAnimations]);
+
+  const displayItems = loading
+    ? Array.from({ length: 8 }, (_, i) => ({ skeleton: true as const, index: i }))
+    : models.map((model, index) => ({ skeleton: false as const, model, index }));
 
   return (
-    <section ref={sectionRef} id={id} className="bg-white py-16 md:py-24 lg:py-[160px]">
-      <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-[80px]">
-        <SectionHeading
-          className="mb-12 md:mb-16 lg:mb-[80px]"
-          eyebrow={eyebrow}
-          title={heading}
-          action={
-            <Link
-              href={ctaHref}
-              data-cursor="button"
-              className="inline-block text-center md:text-left font-ui text-[9px] md:text-[10px] lg:text-[11px] font-light tracking-[0.25em] uppercase px-6 md:px-8 py-3 md:py-4 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] transition-colors duration-300"
-            >
-              {ctaLabel}
-            </Link>
-          }
-        />
+    <>
+      <section ref={sectionRef} id={id} className="bg-white py-16 md:py-24 lg:py-[160px]">
+        <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-[80px]">
+          <SectionHeading
+            className="mb-12 md:mb-16 lg:mb-[80px]"
+            eyebrow={eyebrow}
+            title={heading}
+            action={
+              <Link
+                href={ctaHref}
+                data-cursor="button"
+                className="inline-block text-center md:text-left font-ui text-[9px] md:text-[10px] lg:text-[11px] font-light tracking-[0.25em] uppercase px-6 md:px-8 py-3 md:py-4 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] transition-colors duration-300"
+              >
+                {ctaLabel}
+              </Link>
+            }
+          />
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5 lg:gap-6">
-          {items.map((talent, index) => (
-            <PortraitCard
-              key={talent.name}
-              ref={(el) => {
-                cardRefs.current[index] = el;
-              }}
-              title={talent.name}
-              subtitle={talent.specialty}
-              image={talent.image}
-              offset={talent.offset}
-            />
-          ))}
+          {error && (
+            <p className="font-ui text-[10px] text-[#9A9A9A] mb-6">
+              Our featured roster is updating. Please refresh in a moment.
+            </p>
+          )}
+
+          {!loading && !error && models.length === 0 && (
+            <div className="border border-[#E0E0E0] bg-[#FAFAFA] px-8 py-16 text-center">
+              <p className="font-ui text-sm text-[#4A4A4A] mb-4">
+                New signature faces will be featured here soon.
+              </p>
+              <Link
+                href={ctaHref}
+                className="font-ui text-[10px] tracking-[0.2em] uppercase text-[#9A7329] underline underline-offset-4"
+              >
+                Browse roster
+              </Link>
+            </div>
+          )}
+
+          {(loading || models.length > 0) && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5 lg:gap-6">
+              {displayItems.map((item) => {
+                const offset = PORTRAIT_OFFSETS[item.index % PORTRAIT_OFFSETS.length];
+
+                if (item.skeleton) {
+                  return <SkeletonCard key={`skel-${item.index}`} offset={offset} />;
+                }
+
+                const { model } = item;
+                const cardTitle = isAuthenticated
+                  ? model.name.toUpperCase()
+                  : getFirstName(model.name).toUpperCase();
+
+                return (
+                  <PortraitCard
+                    key={`${model.name}-${item.index}`}
+                    ref={(el) => {
+                      cardRefs.current[item.index] = el;
+                    }}
+                    title={cardTitle}
+                    image={model.imageUrl}
+                    offset={offset}
+                    interactive
+                    onClick={() =>
+                      setSelectedModel(featuredModelToPublicModel(model, item.index))
+                    }
+                  />
+                );
+              })}
+            </div>
+          )}
         </div>
-      </div>
-    </section>
+      </section>
+
+      {selectedModel && (
+        <ModelDetailModal
+          model={selectedModel}
+          onClose={() => setSelectedModel(null)}
+        />
+      )}
+    </>
   );
 }

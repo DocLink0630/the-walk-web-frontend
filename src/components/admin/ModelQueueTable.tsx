@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { fetchAdminUsers, updateUserStatus } from "@/lib/admin/users-api";
 import type { AdminUser, UserStatus } from "@/types/admin";
+import AdminModelMobileList from "./AdminModelMobileList";
+import ModelReviewPanel from "./ModelReviewPanel";
 
 const MODEL_ROLES = ["MODEL"] as const;
 
@@ -61,6 +63,7 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
 
   const [pendingStatus, setPendingStatus] = useState<Record<string, UserStatus>>({});
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [reviewUser, setReviewUser] = useState<AdminUser | null>(null);
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -115,12 +118,12 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
-        <div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:items-end">
+        <div className="sm:col-span-1 lg:col-span-1">
           <label className="block font-ui text-[9px] tracking-[0.25em] uppercase text-[#4A4A4A] mb-1">
             Search email
           </label>
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <input
               type="search"
               value={searchInput}
@@ -132,7 +135,7 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
                 }
               }}
               placeholder="model@example.com"
-              className={inputCls + " min-w-[200px]"}
+              className={inputCls + " w-full flex-1"}
             />
             <button
               type="button"
@@ -140,7 +143,7 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
                 setPage(1);
                 setSearch(searchInput.trim());
               }}
-              className="font-ui text-[9px] tracking-[0.2em] uppercase px-4 py-2 border border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-colors"
+              className="font-ui text-[9px] tracking-[0.2em] uppercase px-4 py-2 border border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-colors shrink-0"
             >
               Search
             </button>
@@ -157,7 +160,7 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
               setPage(1);
               setStatusFilter(e.target.value as UserStatus | "");
             }}
-            className={inputCls}
+            className={inputCls + " w-full"}
           >
             <option value="">All statuses</option>
             {ALL_STATUSES.map((s) => (
@@ -194,7 +197,35 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
         </div>
       )}
 
-      <div className="border border-[#E0E0E0] bg-white overflow-x-auto">
+      {!loading && users.length > 0 && (
+        <AdminModelMobileList
+          users={users}
+          statusLabels={STATUS_LABELS}
+          allStatuses={ALL_STATUSES}
+          pendingStatus={pendingStatus}
+          updatingId={updatingId}
+          onStatusChange={(userId, status) =>
+            setPendingStatus((prev) => ({ ...prev, [userId]: status }))
+          }
+          onUpdate={handleUpdate}
+          onReview={setReviewUser}
+          formatDate={formatDate}
+        />
+      )}
+
+      {!loading && users.length === 0 && (
+        <div className="md:hidden border border-[#E0E0E0] bg-white px-4 py-10 text-center">
+          <p className="font-ui text-[10px] text-[#9A9A9A]">No models found</p>
+        </div>
+      )}
+
+      {loading && (
+        <div className="md:hidden border border-[#E0E0E0] bg-white px-4 py-10 text-center">
+          <p className="font-ui text-[10px] text-[#9A9A9A]">Loading models…</p>
+        </div>
+      )}
+
+      <div className="hidden md:block border border-[#E0E0E0] bg-white overflow-x-auto">
         <table className="w-full min-w-[720px]">
           <thead>
             <tr className="border-b border-[#E0E0E0] bg-[#FAFAFA]">
@@ -241,7 +272,14 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
                     {formatDate(user.createdAt)}
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setReviewUser(user)}
+                        className="font-ui text-[8px] tracking-[0.15em] uppercase px-3 py-2 border border-[#C8A97A] text-[#0A0A0A] hover:bg-[#C8A97A] hover:text-white transition-colors whitespace-nowrap"
+                      >
+                        Review
+                      </button>
                       <select
                         value={pendingStatus[user.id] ?? user.status}
                         onChange={(e) =>
@@ -300,6 +338,17 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
             Next
           </button>
         </div>
+      )}
+
+      {reviewUser && (
+        <ModelReviewPanel
+          user={reviewUser}
+          onClose={() => setReviewUser(null)}
+          onUpdated={() => {
+            void loadUsers();
+            onUsersChanged?.();
+          }}
+        />
       )}
     </div>
   );

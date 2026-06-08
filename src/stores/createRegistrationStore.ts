@@ -35,6 +35,7 @@ const defaultFormState = (prefix: "STU" | "MOD"): RegistrationFormState => ({
   shortBio: "",
   skinColorOptionId: "",
   tier: prefix === "STU" ? "FRESHER" : "",
+  rate: "",
   source: "",
   preferredBranch: "",
   preferredDate: "",

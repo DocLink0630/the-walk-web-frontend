@@ -27,9 +27,9 @@ export interface AcademyCourse {
 export interface AcademyTestimonial {
   quote: string;
   name: string;
-  course: string;
-  year: string;
-  image: string;
+  course?: string;
+  year?: string;
+  image?: string;
 }
 
 export interface AcademyFeeInstallment {

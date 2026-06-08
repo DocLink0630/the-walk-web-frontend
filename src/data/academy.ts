@@ -2,12 +2,12 @@ import type { AcademyImage } from "@/types/academy";
 
 export const ACADEMY_IMAGES: AcademyImage[] = [
   {
-    src: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80",
+    src: "/images/Gallery/DSC09664%20copy.jpg",
     alt: "Academy training session",
     variant: "main",
   },
   {
-    src: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=500&q=80",
+    src: "/images/Gallery/DSC09640%20copy.jpg",
     alt: "Model development portrait",
     variant: "accent-overlap",
   },
