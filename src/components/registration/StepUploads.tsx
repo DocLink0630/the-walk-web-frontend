@@ -7,6 +7,10 @@ import { validateWorkExperienceDrafts } from "@/lib/registration/build-work-expe
 import { submitRegistration } from "@/lib/registration/submit-registration";
 import type { RegistrationStore } from "@/types/registration-form";
 import type { RegistrationVariant } from "@/types/registration-form";
+import {
+  ACCEPTED_IMAGE_LABEL,
+  ACCEPTED_IMAGE_MIME,
+} from "@/lib/registration/accepted-image-types";
 import WorkExperienceSection from "./WorkExperienceSection";
 
 export type RegistrationSubmitResult =
@@ -26,8 +30,6 @@ import {
   formRequiredMark,
   formSubtitle,
 } from "./form-styles";
-
-const ACCEPTED = "image/jpeg,image/png,image/jpg";
 
 interface FileDropZoneProps {
   label: string;
@@ -72,7 +74,7 @@ function FileDropZone({ label, required, file, onFile, error }: FileDropZoneProp
             <span className="font-ui text-[11px] tracking-[0.1em] uppercase text-[#4A4A4A]">
               Click to upload
             </span>
-            <span className="font-ui text-[11px] text-[#6B6B6B]">JPEG or PNG</span>
+            <span className="font-ui text-[11px] text-[#6B6B6B]">{ACCEPTED_IMAGE_LABEL}</span>
           </div>
         )}
       </button>
@@ -92,7 +94,7 @@ function FileDropZone({ label, required, file, onFile, error }: FileDropZoneProp
       <input
         ref={inputRef}
         type="file"
-        accept={ACCEPTED}
+        accept={ACCEPTED_IMAGE_MIME}
         className="hidden"
         onChange={(e) => {
           onFile(e.target.files?.[0] ?? null);
@@ -164,7 +166,7 @@ function PortfolioGrid({
       <input
         ref={inputRef}
         type="file"
-        accept={ACCEPTED}
+        accept={ACCEPTED_IMAGE_MIME}
         multiple
         className="hidden"
         onChange={(e) => {

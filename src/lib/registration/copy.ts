@@ -23,7 +23,7 @@ export const REGISTRATION_COPY: Record<RegistrationVariant, RegistrationCopy> = 
     personalTitle: "Personal details",
     personalSubtitle: "Fields marked * are required",
     uploadsTitle: "Documents & photos",
-    uploadsSubtitle: "All photos must be JPEG or PNG — step 3 of 3",
+    uploadsSubtitle: "All photos must be JPEG, PNG, or WebP — step 3 of 3",
     submitLabel: "Submit application",
     successTitle: "Application submitted",
     successMessage:

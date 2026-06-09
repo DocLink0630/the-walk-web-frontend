@@ -2,9 +2,8 @@
 
 import { useRef } from "react";
 import type { WorkExperienceDraft } from "@/types/registration-form";
+import { ACCEPTED_IMAGE_MIME } from "@/lib/registration/accepted-image-types";
 import { formHint, formLabel, formRequiredMark } from "./form-styles";
-
-const ACCEPTED = "image/jpeg,image/png,image/jpg";
 const MAX_IMAGES_PER_ENTRY = 5;
 
 function createEntry(): WorkExperienceDraft {
@@ -189,7 +188,7 @@ function WorkExperienceEntryCard({
         <input
           ref={inputRef}
           type="file"
-          accept={ACCEPTED}
+          accept={ACCEPTED_IMAGE_MIME}
           multiple
           className="hidden"
           onChange={(e) => {

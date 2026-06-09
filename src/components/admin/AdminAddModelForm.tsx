@@ -8,6 +8,10 @@ import {
 } from "@/lib/admin/submit-admin-model";
 import { validateAdminModelForm } from "@/lib/admin/validate-admin-model";
 import { ADMIN_ASSIGNABLE_TIERS } from "@/lib/admin/model-tiers";
+import {
+  ACCEPTED_IMAGE_LABEL,
+  ACCEPTED_IMAGE_MIME,
+} from "@/lib/registration/accepted-image-types";
 import { useAdminModelAddStore } from "@/stores/adminModelAddStore";
 import {
   adminHint,
@@ -77,7 +81,9 @@ function FilePicker({
         {file ? (
           <span className="font-ui text-[10px] text-[#0A0A0A] truncate block">{file.name}</span>
         ) : (
-          <span className="font-ui text-[10px] text-[#9A9A9A]">Choose file (JPEG or PNG)</span>
+          <span className="font-ui text-[10px] text-[#9A9A9A]">
+            Choose file ({ACCEPTED_IMAGE_LABEL})
+          </span>
         )}
       </button>
       {file && (
@@ -93,7 +99,7 @@ function FilePicker({
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/png,image/jpg"
+        accept={ACCEPTED_IMAGE_MIME}
         className="hidden"
         onChange={(e) => {
           onChange(e.target.files?.[0] ?? null);
@@ -412,7 +418,7 @@ export default function AdminAddModelForm({ onSuccess }: AdminAddModelFormProps)
           </p>
           <input
             type="file"
-            accept="image/jpeg,image/png,image/jpg"
+            accept={ACCEPTED_IMAGE_MIME}
             multiple
             className="block w-full font-ui text-[10px] text-[#4A4A4A] file:mr-4 file:py-2 file:px-4 file:border file:border-[#E0E0E0] file:bg-white file:font-ui file:text-[9px] file:uppercase file:tracking-wider hover:file:border-[#C8A97A]"
             onChange={(e) => {
