@@ -9,26 +9,16 @@ import {
   updateUserStatus,
 } from "@/lib/admin/users-api";
 import { ADMIN_ASSIGNABLE_TIERS, formatModelTier } from "@/lib/admin/model-tiers";
+import { MODEL_STATUS_LABELS } from "@/lib/admin/model-user-status";
 import { SKIN_COLOR_OPTIONS } from "@/components/registration/personal/constants";
 import type {
   AdminUser,
   AdminUserDetail,
   AssignableModelTier,
-  UserStatus,
 } from "@/types/admin";
 
 const inputCls =
   "w-full border border-[#E0E0E0] px-3 py-2 font-ui text-[10px] tracking-[0.1em] outline-none focus:border-[#C8A97A] bg-white";
-
-const STATUS_LABELS: Record<UserStatus, string> = {
-  PENDING_EMAIL_VERIFICATION: "Pending email",
-  PENDING_ADMIN_REVIEW: "Pending review",
-  PENDING_PAYMENT: "Pending payment",
-  ACTIVE: "Active",
-  INACTIVE: "Inactive",
-  SUSPENDED: "Suspended",
-  DELETED: "Deleted",
-};
 
 function skinColorLabel(id?: string | null): string {
   if (!id) return "—";
@@ -63,12 +53,15 @@ export default function ModelReviewPanel({
   const [error, setError] = useState<string | null>(null);
   const [banner, setBanner] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [saving, setSaving] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
 
   const [rate, setRate] = useState("");
   const [tier, setTier] = useState<AssignableModelTier>("FRESHER");
   const [talents, setTalents] = useState("");
   const [isFeatured, setIsFeatured] = useState(false);
   const [togglingFeatured, setTogglingFeatured] = useState(false);
+
+  const canReview = user.status === "PENDING_ADMIN_REVIEW";
 
   useEffect(() => {
     let cancelled = false;
@@ -137,8 +130,12 @@ export default function ModelReviewPanel({
   }
 
   async function handleApprove() {
-    if (!rate.trim() || !talents.trim()) {
-      setBanner({ type: "err", text: "Rate and talents are required to approve." });
+    if (!rate.trim()) {
+      setBanner({ type: "err", text: "Price range per event is required." });
+      return;
+    }
+    if (!talents.trim()) {
+      setBanner({ type: "err", text: "Talents are required to approve." });
       return;
     }
 
@@ -157,21 +154,42 @@ export default function ModelReviewPanel({
       return;
     }
 
-    if (user.status === "PENDING_ADMIN_REVIEW") {
-      const statusResult = await updateUserStatus(user.id, "ACTIVE");
-      if (!statusResult.ok) {
-        setBanner({
-          type: "err",
-          text: `Profile approved but status update failed: ${statusResult.message}`,
-        });
-        setSaving(false);
-        onUpdated();
-        return;
-      }
+    const statusResult = await updateUserStatus(user.id, "ACTIVE");
+    if (!statusResult.ok) {
+      setBanner({
+        type: "err",
+        text: `Tier and rate saved but activation failed: ${statusResult.message}`,
+      });
+      setSaving(false);
+      onUpdated();
+      return;
     }
 
-    setBanner({ type: "ok", text: "Model profile approved with tier and rate." });
+    setBanner({
+      type: "ok",
+      text: `Model approved as ${formatModelTier(tier)} and set to Active.`,
+    });
     setSaving(false);
+    onUpdated();
+  }
+
+  async function handleReject() {
+    if (!window.confirm("Reject this model application? They will not appear on the public roster.")) {
+      return;
+    }
+
+    setRejecting(true);
+    setBanner(null);
+
+    const result = await updateUserStatus(user.id, "REJECTED");
+    if (!result.ok) {
+      setBanner({ type: "err", text: result.message });
+      setRejecting(false);
+      return;
+    }
+
+    setBanner({ type: "ok", text: "Model application rejected." });
+    setRejecting(false);
     onUpdated();
   }
 
@@ -227,17 +245,11 @@ export default function ModelReviewPanel({
                   Account
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
-                  <DetailRow label="Status" value={STATUS_LABELS[user.status]} />
+                  <DetailRow label="Status" value={MODEL_STATUS_LABELS[user.status]} />
+                  <DetailRow label="Model code" value={profile?.modelCode} />
+                  <DetailRow label="Current tier" value={formatModelTier(profile?.tier)} />
                   <DetailRow
-                    label="Model code"
-                    value={profile?.modelCode}
-                  />
-                  <DetailRow
-                    label="Current tier"
-                    value={formatModelTier(profile?.tier)}
-                  />
-                  <DetailRow
-                    label="Approved rate"
+                    label="Approved price range"
                     value={profile?.rate || "Not set"}
                   />
                 </div>
@@ -255,7 +267,7 @@ export default function ModelReviewPanel({
                     type="button"
                     role="switch"
                     aria-checked={isFeatured}
-                    disabled={togglingFeatured}
+                    disabled={togglingFeatured || user.status !== "ACTIVE"}
                     onClick={() => handleFeaturedToggle(!isFeatured)}
                     className={[
                       "relative shrink-0 w-11 h-6 rounded-full transition-colors duration-300 disabled:opacity-50",
@@ -270,6 +282,11 @@ export default function ModelReviewPanel({
                     />
                   </button>
                 </div>
+                {user.status !== "ACTIVE" && (
+                  <p className="font-ui text-[9px] text-[#9A9A9A]">
+                    Approve the model before featuring on the homepage.
+                  </p>
+                )}
               </section>
 
               {expectations && (
@@ -283,7 +300,7 @@ export default function ModelReviewPanel({
                       value={formatModelTier(expectations.tier)}
                     />
                     <DetailRow
-                      label="Requested rate / range"
+                      label="Requested price range"
                       value={expectations.rateEnc}
                     />
                     <DetailRow label="Talents" value={expectations.talentsEnc} />
@@ -320,86 +337,124 @@ export default function ModelReviewPanel({
                 </p>
               </section>
 
-              <section className="space-y-4 border-t border-[#E0E0E0] pt-6">
-                <h3 className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#0A0A0A]">
-                  Approve — assign tier & rate
-                </h3>
-                <p className="font-ui text-[10px] text-[#6B6B6B] leading-relaxed">
-                  Confirms the official listing tier, rate, and talents on the model profile.
-                  Pending-review models are set to Active after approval.
-                </p>
+              {canReview && (
+                <section className="space-y-4 border-t border-[#E0E0E0] pt-6">
+                  <h3 className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#0A0A0A]">
+                    Approve or reject
+                  </h3>
+                  <p className="font-ui text-[10px] text-[#6B6B6B] leading-relaxed">
+                    Assign the official listing tier and price range per event. On approval the
+                    model is set to Active and can appear on the public roster.
+                  </p>
 
-                <div>
-                  <label className="block font-ui text-[9px] tracking-[0.25em] uppercase text-[#4A4A4A] mb-1">
-                    Official rate / price range
-                  </label>
-                  <input
-                    type="text"
-                    value={rate}
-                    onChange={(e) => setRate(e.target.value)}
-                    placeholder="e.g. 15,000 LKR per hour"
-                    className={inputCls}
-                  />
-                </div>
+                  <div>
+                    <label className="block font-ui text-[9px] tracking-[0.25em] uppercase text-[#4A4A4A] mb-1">
+                      Price range per event
+                    </label>
+                    <input
+                      type="text"
+                      value={rate}
+                      onChange={(e) => setRate(e.target.value)}
+                      placeholder="e.g. 15,000 LKR per event"
+                      className={inputCls}
+                    />
+                  </div>
 
-                <div>
-                  <label className="block font-ui text-[9px] tracking-[0.25em] uppercase text-[#4A4A4A] mb-1">
-                    Official tier
-                  </label>
-                  <select
-                    value={tier}
-                    onChange={(e) => setTier(e.target.value as AssignableModelTier)}
-                    className={inputCls}
-                  >
-                    {ADMIN_ASSIGNABLE_TIERS.map((t) => (
-                      <option key={t.value} value={t.value}>
-                        {t.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                  <div>
+                    <label className="block font-ui text-[9px] tracking-[0.25em] uppercase text-[#4A4A4A] mb-1">
+                      Model tier
+                    </label>
+                    <select
+                      value={tier}
+                      onChange={(e) => setTier(e.target.value as AssignableModelTier)}
+                      className={inputCls}
+                    >
+                      {ADMIN_ASSIGNABLE_TIERS.map((t) => (
+                        <option key={t.value} value={t.value}>
+                          {t.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-                <div>
-                  <label className="block font-ui text-[9px] tracking-[0.25em] uppercase text-[#4A4A4A] mb-1">
-                    Talents
-                  </label>
-                  <textarea
-                    value={talents}
-                    onChange={(e) => setTalents(e.target.value)}
-                    rows={3}
-                    placeholder="Confirmed talents for listing"
-                    className={inputCls + " resize-y min-h-[80px]"}
-                  />
-                </div>
+                  <div>
+                    <label className="block font-ui text-[9px] tracking-[0.25em] uppercase text-[#4A4A4A] mb-1">
+                      Talents
+                    </label>
+                    <textarea
+                      value={talents}
+                      onChange={(e) => setTalents(e.target.value)}
+                      rows={3}
+                      placeholder="Confirmed talents for listing"
+                      className={inputCls + " resize-y min-h-[80px]"}
+                    />
+                  </div>
 
-                {banner && (
-                  <div
-                    className={
-                      banner.type === "ok"
-                        ? "border border-[#C8A97A] bg-[#C8A97A]/10 px-4 py-3"
-                        : "border border-red-300 bg-red-50 px-4 py-3"
-                    }
-                  >
-                    <p
+                  {banner && (
+                    <div
                       className={
-                        "font-ui text-[10px] " +
-                        (banner.type === "ok" ? "text-[#0A0A0A]" : "text-red-700")
+                        banner.type === "ok"
+                          ? "border border-[#C8A97A] bg-[#C8A97A]/10 px-4 py-3"
+                          : "border border-red-300 bg-red-50 px-4 py-3"
                       }
                     >
-                      {banner.text}
-                    </p>
-                  </div>
-                )}
+                      <p
+                        className={
+                          "font-ui text-[10px] " +
+                          (banner.type === "ok" ? "text-[#0A0A0A]" : "text-red-700")
+                        }
+                      >
+                        {banner.text}
+                      </p>
+                    </div>
+                  )}
 
-                <button
-                  type="button"
-                  disabled={saving}
-                  onClick={handleApprove}
-                  className="w-full font-ui text-[9px] tracking-[0.2em] uppercase px-4 py-3 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] disabled:opacity-50 transition-colors"
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      type="button"
+                      disabled={saving || rejecting}
+                      onClick={handleApprove}
+                      className="flex-1 font-ui text-[9px] tracking-[0.2em] uppercase px-4 py-3 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] disabled:opacity-50 transition-colors"
+                    >
+                      {saving ? "Approving…" : "Approve model"}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={saving || rejecting}
+                      onClick={handleReject}
+                      className="flex-1 font-ui text-[9px] tracking-[0.2em] uppercase px-4 py-3 border border-[#0A0A0A] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white disabled:opacity-50 transition-colors"
+                    >
+                      {rejecting ? "Rejecting…" : "Reject"}
+                    </button>
+                  </div>
+                </section>
+              )}
+
+              {!canReview && banner && (
+                <div
+                  className={
+                    banner.type === "ok"
+                      ? "border border-[#C8A97A] bg-[#C8A97A]/10 px-4 py-3"
+                      : "border border-red-300 bg-red-50 px-4 py-3"
+                  }
                 >
-                  {saving ? "Saving…" : "Approve tier & rate"}
-                </button>
-              </section>
+                  <p
+                    className={
+                      "font-ui text-[10px] " +
+                      (banner.type === "ok" ? "text-[#0A0A0A]" : "text-red-700")
+                    }
+                  >
+                    {banner.text}
+                  </p>
+                </div>
+              )}
+
+              {!canReview && user.status !== "PENDING_ADMIN_REVIEW" && (
+                <p className="font-ui text-[10px] text-[#9A9A9A] leading-relaxed border-t border-[#E0E0E0] pt-6">
+                  This application is {MODEL_STATUS_LABELS[user.status].toLowerCase()}. Approval
+                  and rejection actions are only available while status is Pending review.
+                </p>
+              )}
             </>
           )}
         </div>

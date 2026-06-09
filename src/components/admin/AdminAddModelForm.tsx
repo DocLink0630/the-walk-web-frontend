@@ -160,7 +160,7 @@ export default function AdminAddModelForm({ onSuccess }: AdminAddModelFormProps)
           Model added
         </p>
         <p className="font-ui text-[10px] text-[#4A4A4A] leading-relaxed max-w-sm mx-auto">
-          Profile saved, approved, and set to Active. The model may receive a verification email.
+          Profile saved with tier and price range, approved, and set to Active.
         </p>
       </div>
     );

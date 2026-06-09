@@ -48,10 +48,10 @@ export const REGISTRATION_COPY: Record<RegistrationVariant, RegistrationCopy> = 
     submitLabel: "Submit profile",
     successTitle: "Profile submitted",
     successMessage:
-      "Thank you for registering with The Walk. Verify your email, then our team will review your profile for listing on the platform.",
+      "Thank you for registering with The Walk. Our team will review your profile and assign your listing tier and price range.",
     successSteps: [
-      "Check your inbox and verify your email address",
-      "Our team reviews your profile and portfolio",
+      "Your profile and portfolio are submitted for admin review",
+      "Our team reviews your application and work samples",
       "Once approved, your profile may be visible to clients on the platform",
     ],
     resetLabel: "Register another model",
@@ -71,11 +71,11 @@ export const ADMIN_MODEL_COPY: RegistrationCopy = {
   submitLabel: "Save & activate model",
   successTitle: "Model added",
   successMessage:
-    "The model profile was saved, approved with your tier and rate, and set to Active. The backend may still send a verification email to the model.",
+    "The model profile was saved, approved with tier and price range, and set to Active.",
   successSteps: [
     "Profile and documents are stored on the platform",
-    "Tier, rate, and talents were applied via approval",
-    "Account status is Active — the model can sign in after verifying email if required",
+    "Tier, price range per event, and talents were applied via approval",
+    "Account status is Active — the model can sign in immediately",
   ],
   resetLabel: "Add another model",
 };

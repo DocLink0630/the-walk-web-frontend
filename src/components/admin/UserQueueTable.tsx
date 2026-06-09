@@ -19,6 +19,7 @@ const STATUS_LABELS: Record<UserStatus, string> = {
   PENDING_EMAIL_VERIFICATION: "Pending email",
   PENDING_ADMIN_REVIEW: "Pending review",
   PENDING_PAYMENT: "Pending payment",
+  REJECTED: "Rejected",
   ACTIVE: "Active",
   INACTIVE: "Inactive",
   SUSPENDED: "Suspended",

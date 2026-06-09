@@ -2,31 +2,15 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { fetchAdminUsers, updateUserStatus } from "@/lib/admin/users-api";
+import {
+  MODEL_QUEUE_STATUSES,
+  MODEL_STATUS_LABELS,
+} from "@/lib/admin/model-user-status";
 import type { AdminUser, UserStatus } from "@/types/admin";
 import AdminModelMobileList from "./AdminModelMobileList";
 import ModelReviewPanel from "./ModelReviewPanel";
 
 const MODEL_ROLES = ["MODEL"] as const;
-
-const ALL_STATUSES: UserStatus[] = [
-  "PENDING_EMAIL_VERIFICATION",
-  "PENDING_ADMIN_REVIEW",
-  "PENDING_PAYMENT",
-  "ACTIVE",
-  "INACTIVE",
-  "SUSPENDED",
-  "DELETED",
-];
-
-const STATUS_LABELS: Record<UserStatus, string> = {
-  PENDING_EMAIL_VERIFICATION: "Pending email",
-  PENDING_ADMIN_REVIEW: "Pending review",
-  PENDING_PAYMENT: "Pending payment",
-  ACTIVE: "Active",
-  INACTIVE: "Inactive",
-  SUSPENDED: "Suspended",
-  DELETED: "Deleted",
-};
 
 const inputCls =
   "border border-[#E0E0E0] px-3 py-2 font-ui text-[10px] tracking-[0.1em] outline-none focus:border-[#C8A97A] bg-white";
@@ -57,7 +41,9 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
 
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
-  const [statusFilter, setStatusFilter] = useState<UserStatus | "">("");
+  const [statusFilter, setStatusFilter] = useState<UserStatus | "">(
+    "PENDING_ADMIN_REVIEW",
+  );
 
   const [pendingStatus, setPendingStatus] = useState<Record<string, UserStatus>>({});
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -107,12 +93,12 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
       return;
     }
 
-    setBanner({ type: "ok", text: `Updated ${user.email} to ${STATUS_LABELS[next]}` });
+    setBanner({ type: "ok", text: `Updated ${user.email} to ${MODEL_STATUS_LABELS[next]}` });
     await loadUsers();
     onUsersChanged?.();
   }
 
-  const headers = ["Email", "Status", "Email verified", "Joined", "Action"];
+  const headers = ["Email", "Status", "Joined", "Action"];
 
   return (
     <div className="space-y-4">
@@ -161,9 +147,9 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
             className={inputCls + " w-full"}
           >
             <option value="">All statuses</option>
-            {ALL_STATUSES.map((s) => (
+            {MODEL_QUEUE_STATUSES.map((s) => (
               <option key={s} value={s}>
-                {STATUS_LABELS[s]}
+                {MODEL_STATUS_LABELS[s]}
               </option>
             ))}
           </select>
@@ -198,8 +184,8 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
       {!loading && users.length > 0 && (
         <AdminModelMobileList
           users={users}
-          statusLabels={STATUS_LABELS}
-          allStatuses={ALL_STATUSES}
+          statusLabels={MODEL_STATUS_LABELS}
+          allStatuses={MODEL_QUEUE_STATUSES}
           pendingStatus={pendingStatus}
           updatingId={updatingId}
           onStatusChange={(userId, status) =>
@@ -217,8 +203,8 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
             No models found
             {statusFilter === "PENDING_ADMIN_REVIEW" && (
               <span className="block mt-2 text-[#4A4A4A]">
-                Try &ldquo;Pending email&rdquo; or &ldquo;All statuses&rdquo; — new sign-ups verify
-                email before appearing here.
+                New registrations appear here as Pending review. Try &ldquo;All statuses&rdquo; to
+                browse the full roster.
               </span>
             )}
           </p>
@@ -248,19 +234,18 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center font-ui text-[10px] text-[#9A9A9A]">
+                <td colSpan={4} className="px-4 py-8 text-center font-ui text-[10px] text-[#9A9A9A]">
                   Loading models…
                 </td>
               </tr>
             ) : users.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center font-ui text-[10px] text-[#9A9A9A] max-w-lg mx-auto leading-relaxed">
+                <td colSpan={4} className="px-4 py-8 text-center font-ui text-[10px] text-[#9A9A9A] max-w-lg mx-auto leading-relaxed">
                   No models found
                   {statusFilter === "PENDING_ADMIN_REVIEW" && (
                     <span className="block mt-2 text-[#4A4A4A]">
-                      New registrations stay in &ldquo;Pending email&rdquo; until they verify their
-                      email. Change the Status filter to &ldquo;Pending email&rdquo; or &ldquo;All
-                      statuses&rdquo; to see them.
+                      New registrations appear here as Pending review. Change the filter to &ldquo;All
+                      statuses&rdquo; to see the full roster.
                     </span>
                   )}
                 </td>
@@ -272,14 +257,7 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
                     {user.email}
                   </td>
                   <td className="px-4 py-3 font-ui text-[9px] tracking-[0.1em] uppercase text-[#4A4A4A]">
-                    {STATUS_LABELS[user.status]}
-                  </td>
-                  <td className="px-4 py-3 font-ui text-[10px] text-[#4A4A4A]">
-                    {user.emailVerified === true
-                      ? "Yes"
-                      : user.emailVerified === false
-                        ? "No"
-                        : "—"}
+                    {MODEL_STATUS_LABELS[user.status]}
                   </td>
                   <td className="px-4 py-3 font-ui text-[10px] text-[#9A9A9A]">
                     {formatDate(user.createdAt)}
@@ -303,9 +281,9 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
                         }
                         className={inputCls + " min-w-[140px]"}
                       >
-                        {ALL_STATUSES.map((s) => (
+                        {MODEL_QUEUE_STATUSES.map((s) => (
                           <option key={s} value={s}>
-                            {STATUS_LABELS[s]}
+                            {MODEL_STATUS_LABELS[s]}
                           </option>
                         ))}
                       </select>
