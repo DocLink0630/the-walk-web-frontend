@@ -35,7 +35,7 @@ async function countFor(
 
 export default function ModelDashboardKpiRow() {
   const [pendingReview, setPendingReview] = useState<number | null>(null);
-  const [pendingEmail, setPendingEmail] = useState<number | null>(null);
+  const [rejected, setRejected] = useState<number | null>(null);
   const [active, setActive] = useState<number | null>(null);
   const [total, setTotal] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -45,15 +45,15 @@ export default function ModelDashboardKpiRow() {
 
     async function load() {
       setLoading(true);
-      const [review, email, activeCount, totalCount] = await Promise.all([
+      const [review, rejectedCount, activeCount, totalCount] = await Promise.all([
         countFor({ roles: MODEL_ROLES, status: "PENDING_ADMIN_REVIEW" }),
-        countFor({ roles: MODEL_ROLES, status: "PENDING_EMAIL_VERIFICATION" }),
+        countFor({ roles: MODEL_ROLES, status: "REJECTED" }),
         countFor({ roles: MODEL_ROLES, status: "ACTIVE" }),
         countFor({ roles: MODEL_ROLES }),
       ]);
       if (!cancelled) {
         setPendingReview(review);
-        setPendingEmail(email);
+        setRejected(rejectedCount);
         setActive(activeCount);
         setTotal(totalCount);
         setLoading(false);
@@ -69,7 +69,7 @@ export default function ModelDashboardKpiRow() {
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-4 mb-10">
       <KpiTile label="Pending model review" value={pendingReview} loading={loading} />
-      <KpiTile label="Pending email" value={pendingEmail} loading={loading} />
+      <KpiTile label="Rejected" value={rejected} loading={loading} />
       <KpiTile label="Active models" value={active} loading={loading} />
       <KpiTile label="Total models" value={total} loading={loading} />
     </div>

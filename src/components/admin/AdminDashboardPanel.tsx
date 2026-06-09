@@ -19,8 +19,8 @@ export default function AdminDashboardPanel({ onSectionChange }: AdminDashboardP
           Model agency at a glance
         </h2>
         <p className="font-ui text-[11px] tracking-[0.05em] text-[#6B6B6B] max-w-xl leading-relaxed">
-          Track pending applications, email verification, and active roster counts. Open Models to
-          review profiles and approve listings.
+          Track pending applications, rejections, and active roster counts. Open Models to review
+          profiles, assign tiers, and set price ranges.
         </p>
       </div>
 
@@ -39,7 +39,8 @@ export default function AdminDashboardPanel({ onSectionChange }: AdminDashboardP
             Manage model applications
           </p>
           <p className="font-ui text-[10px] text-[#6B6B6B] leading-relaxed mb-4">
-            Review registrations, assign tiers and rates, and activate models on the public roster.
+            Review registrations, assign Fresher / Experienced / Supermodel tiers, set price range
+            per event, and approve or reject applications.
           </p>
           <span className="inline-flex items-center gap-2 font-ui text-[9px] tracking-[0.2em] uppercase text-[#0A0A0A] group-hover:text-[#C8A97A] transition-colors">
             Go to Models
@@ -52,13 +53,10 @@ export default function AdminDashboardPanel({ onSectionChange }: AdminDashboardP
             Approval flow
           </p>
           <ol className="space-y-2 font-ui text-[10px] text-[#4A4A4A] leading-relaxed list-decimal list-inside">
-            <li>Model registers → Pending email</li>
-            <li>Email verified → Pending review</li>
-            <li>Admin approves tier &amp; rate → Active</li>
+            <li>Model registers → Pending review</li>
+            <li>Admin assigns tier &amp; price range per event → Approve or Reject</li>
+            <li>Approved models become Active on the public roster</li>
           </ol>
-          <p className="mt-4 font-ui text-[9px] tracking-[0.08em] text-[#9A9A9A] leading-relaxed">
-            You can move a model to Pending review manually if email verification is skipped.
-          </p>
         </div>
       </div>
     </div>

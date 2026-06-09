@@ -44,27 +44,13 @@ export default function AdminModelMobileList({
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <p className="font-ui text-[8px] tracking-[0.2em] uppercase text-[#9A9A9A] mb-1">
-                Status
-              </p>
-              <p className="font-ui text-[9px] tracking-[0.1em] uppercase text-[#4A4A4A]">
-                {statusLabels[user.status]}
-              </p>
-            </div>
-            <div>
-              <p className="font-ui text-[8px] tracking-[0.2em] uppercase text-[#9A9A9A] mb-1">
-                Email verified
-              </p>
-              <p className="font-ui text-[10px] text-[#4A4A4A]">
-                {user.emailVerified === true
-                  ? "Yes"
-                  : user.emailVerified === false
-                    ? "No"
-                    : "—"}
-              </p>
-            </div>
+          <div>
+            <p className="font-ui text-[8px] tracking-[0.2em] uppercase text-[#9A9A9A] mb-1">
+              Status
+            </p>
+            <p className="font-ui text-[9px] tracking-[0.1em] uppercase text-[#4A4A4A]">
+              {statusLabels[user.status]}
+            </p>
           </div>
 
           <div className="space-y-2 pt-1">

@@ -12,6 +12,7 @@ export type UserStatus =
   | "PENDING_EMAIL_VERIFICATION"
   | "PENDING_ADMIN_REVIEW"
   | "PENDING_PAYMENT"
+  | "REJECTED"
   | "ACTIVE"
   | "INACTIVE"
   | "SUSPENDED"
