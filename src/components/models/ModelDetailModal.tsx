@@ -317,7 +317,7 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
                   href="/?login=1"
                   className="block w-full text-center font-ui text-[10px] tracking-[0.2em] uppercase px-6 py-3 border border-[#0A0A0A] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-colors"
                 >
-                  Sign in to book
+                  Sign in to inquiry
                 </Link>
               )}
             </div>

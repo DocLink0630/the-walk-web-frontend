@@ -333,13 +333,13 @@ export default function AdminAddModelForm({ onSuccess }: AdminAddModelFormProps)
               ))}
             </select>
           </AdminField>
-          <AdminField label="Official rate" required hint="e.g. 15,000 LKR per hour">
+          <AdminField label="Official rate" required hint="e.g. 15,000 LKR per event">
             <input
               type="text"
               value={store.rate}
               onChange={(e) => store.set({ rate: e.target.value })}
               className={adminInput}
-              placeholder="15,000 LKR / hour"
+              placeholder="15,000 LKR / event"
             />
           </AdminField>
         </div>
