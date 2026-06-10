@@ -65,10 +65,11 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
       setLoading(false);
       return;
     }
-    setUsers(result.data.data);
+    const pageUsers = result.data.data;
+    setUsers(pageUsers);
     setTotalPages(result.data.meta.totalPages);
     const initial: Record<string, UserStatus> = {};
-    for (const u of result.data.data) {
+    for (const u of pageUsers) {
       initial[u.id] = u.status;
     }
     setPendingStatus(initial);
@@ -98,7 +99,7 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
     onUsersChanged?.();
   }
 
-  const headers = ["Email", "Status", "Joined", "Action"];
+  const headers = ["Name", "Email", "Status", "Joined", "Action"];
 
   return (
     <div className="space-y-4">
@@ -234,13 +235,13 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center font-ui text-[10px] text-[#9A9A9A]">
+                <td colSpan={5} className="px-4 py-8 text-center font-ui text-[10px] text-[#9A9A9A]">
                   Loading models…
                 </td>
               </tr>
             ) : users.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center font-ui text-[10px] text-[#9A9A9A] max-w-lg mx-auto leading-relaxed">
+                <td colSpan={5} className="px-4 py-8 text-center font-ui text-[10px] text-[#9A9A9A] max-w-lg mx-auto leading-relaxed">
                   No models found
                   {statusFilter === "PENDING_ADMIN_REVIEW" && (
                     <span className="block mt-2 text-[#4A4A4A]">
@@ -253,6 +254,9 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
             ) : (
               users.map((user) => (
                 <tr key={user.id} className="border-b border-[#F0F0F0] last:border-0">
+                  <td className="px-4 py-3 font-ui text-[10px] tracking-[0.05em] text-[#0A0A0A]">
+                    {user.displayName ?? "—"}
+                  </td>
                   <td className="px-4 py-3 font-ui text-[10px] tracking-[0.05em] text-[#0A0A0A]">
                     {user.email}
                   </td>

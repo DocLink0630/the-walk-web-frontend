@@ -20,6 +20,7 @@ export type RegistrationSubmitResult =
 export type RegistrationSubmitHandler = (
   store: RegistrationStore,
   variant: RegistrationVariant,
+  onUploadProgress?: (completed: number, total: number) => void,
 ) => Promise<RegistrationSubmitResult>;
 import {
   formActions,
@@ -192,6 +193,7 @@ export default function StepUploads({
   onSubmit,
 }: StepUploadsProps) {
   const [submitted, setSubmitted] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{ completed: number; total: number } | null>(null);
 
   const workExperienceError =
     submitted && variant === "model"
@@ -237,18 +239,23 @@ export default function StepUploads({
     }
 
     store.set({ isSubmitting: true });
+    setUploadProgress(null);
     try {
       const submitFn = onSubmit ?? submitRegistration;
-      const result = await submitFn(store, variant);
+      const result = await submitFn(store, variant, (completed, total) => {
+        setUploadProgress({ completed, total });
+      });
 
       if (result.ok) {
         store.set({ success: true, isSubmitting: false });
       } else {
         store.set({ error: result.message, isSubmitting: false });
+        setUploadProgress(null);
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Submission failed";
       store.set({ error: msg, isSubmitting: false });
+      setUploadProgress(null);
     }
   }
 
@@ -334,7 +341,11 @@ export default function StepUploads({
           data-cursor="button"
           className={CTA_PRIMARY_FILLED + " flex-1 text-center block disabled:opacity-60"}
         >
-          {store.isSubmitting ? "Submitting…" : copy.submitLabel}
+          {store.isSubmitting
+            ? uploadProgress
+              ? `Uploading image ${uploadProgress.completed} of ${uploadProgress.total}…`
+              : "Submitting…"
+            : copy.submitLabel}
         </button>
       </div>
     </form>

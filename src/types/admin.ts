@@ -36,6 +36,8 @@ export interface AdminUser {
   createdAt: string;
   updatedAt?: string;
   emailVerified?: boolean;
+  /** From GET /v1/users list when profile exists */
+  displayName?: string;
 }
 
 export interface AdminModelProfile {
@@ -77,9 +79,37 @@ export interface AdminModelExpectations {
   talentsEnc?: string | null;
 }
 
+export interface AdminModelMediaItem {
+  storageFileId: string;
+  url: string;
+  order: number;
+  alt?: string | null;
+}
+
+export interface AdminModelWorkExperienceMedia {
+  id: string;
+  title: string;
+  images: AdminModelMediaItem[];
+}
+
+export interface AdminModelRegistrationMedia {
+  profilePhoto?: AdminModelMediaItem | null;
+  nicFront?: AdminModelMediaItem | null;
+  nicBack?: AdminModelMediaItem | null;
+  portfolioPhotos: AdminModelMediaItem[];
+  workExperience: AdminModelWorkExperienceMedia[];
+}
+
+export interface MediaOrderUpdateItem {
+  storageFileId: string;
+  order: number;
+}
+
 export interface AdminUserDetail extends AdminUser {
   modelProfile?: AdminModelProfile;
   model_expectations?: AdminModelExpectations | null;
+  /** Populated when backend exposes registration file URLs on user detail */
+  registrationMedia?: AdminModelRegistrationMedia | null;
 }
 
 export interface ModelApprovalPayload {

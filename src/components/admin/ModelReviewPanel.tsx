@@ -16,6 +16,7 @@ import type {
   AdminUserDetail,
   AssignableModelTier,
 } from "@/types/admin";
+import ModelReviewMediaSection from "./ModelReviewMediaSection";
 
 const inputCls =
   "w-full border border-[#E0E0E0] px-3 py-2 font-ui text-[10px] tracking-[0.1em] outline-none focus:border-[#C8A97A] bg-white";
@@ -204,7 +205,7 @@ export default function ModelReviewPanel({
         className="absolute inset-0 bg-black/40"
         onClick={onClose}
       />
-      <aside className="relative w-full max-w-lg bg-white h-full overflow-y-auto shadow-2xl flex flex-col">
+      <aside className="relative w-full max-w-3xl bg-white h-full overflow-y-auto shadow-2xl flex flex-col">
         <div className="sticky top-0 z-10 border-b border-[#E0E0E0] bg-white px-4 py-4 md:px-6 flex items-start justify-between gap-4">
           <div className="min-w-0">
             <p className="font-ui text-[9px] tracking-[0.3em] uppercase text-[#C8A97A] mb-1">
@@ -326,16 +327,13 @@ export default function ModelReviewPanel({
                 <DetailRow label="Address" value={profile?.addressEnc} />
               </section>
 
-              <section className="space-y-3 border border-dashed border-[#E0E0E0] p-4">
-                <p className="font-ui text-[9px] tracking-[0.15em] uppercase text-[#9A9A9A]">
-                  Work samples
-                </p>
-                <p className="font-ui text-[10px] text-[#4A4A4A] leading-relaxed">
-                  Profile photo, NIC, and portfolio/work images were uploaded at registration
-                  and stored on the server. Image URLs are not returned by the current user
-                  detail API.
-                </p>
-              </section>
+              <ModelReviewMediaSection
+                userId={user.id}
+                media={detail?.registrationMedia}
+                onMediaUpdated={(registrationMedia) =>
+                  setDetail((prev) => (prev ? { ...prev, registrationMedia } : prev))
+                }
+              />
 
               {canReview && (
                 <section className="space-y-4 border-t border-[#E0E0E0] pt-6">

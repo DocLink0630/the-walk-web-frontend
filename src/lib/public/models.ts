@@ -72,6 +72,7 @@ export function mapPublicApiModelToPublicModel(
     id: makePublicModelId(item.name, index),
     name: item.name,
     imageUrl: item.imageUrl,
+    height: item.height?.trim() || undefined,
     portfolioImages,
   };
 }
@@ -113,6 +114,7 @@ export function featuredModelToPublicModel(
     id: `featured-${index}-${normalizeModelName(model.name).replace(/\s/g, "-")}`,
     name: model.name,
     imageUrl: model.imageUrl,
+    height: model.height?.trim() || undefined,
     portfolioImages: model.imageUrl ? [model.imageUrl] : [],
     isFeaturedOnly: true,
   };
@@ -156,12 +158,50 @@ function mergePublicWithDetail(
     ...detail,
     id: detail.id,
     name: detail.name || publicModel.name,
+    height: detail.height || publicModel.height,
     imageUrl: publicModel.imageUrl ?? detail.imageUrl,
     portfolioImages:
       publicModel.portfolioImages.length > 0
         ? publicModel.portfolioImages
         : detail.portfolioImages,
   };
+}
+
+function isSyntheticModelId(id: string): boolean {
+  return id.startsWith("public-") || id.startsWith("featured-");
+}
+
+/** Loads full profile fields (e.g. height) via existing authenticated user APIs. */
+export async function resolveModelProfileForModal(
+  model: PublicModel,
+  token: string,
+): Promise<PublicModel> {
+  if (model.height?.trim()) return model;
+
+  if (!isSyntheticModelId(model.id)) {
+    const detail = await fetchModelDetail(model.id, token);
+    if (detail) return mergePublicWithDetail(model, mapDetailToPublicModel(detail));
+  }
+
+  const usersResult = await fetchAllModelUsers(token);
+  if (!usersResult.ok) return model;
+
+  const targetName = normalizeModelName(model.name);
+  const details = await mapWithConcurrency(
+    usersResult.users,
+    (user) => fetchModelDetail(user.id, token),
+    DETAIL_CONCURRENCY,
+  );
+
+  for (const detail of details) {
+    if (!detail) continue;
+    const mapped = mapDetailToPublicModel(detail);
+    if (normalizeModelName(mapped.name) === targetName) {
+      return mergePublicWithDetail(model, mapped);
+    }
+  }
+
+  return model;
 }
 
 async function fetchModelDetail(
@@ -337,16 +377,19 @@ async function enrichModelsWithProfiles(
     DETAIL_CONCURRENCY,
   );
 
+  const detailById = new Map<string, PublicModel>();
   const detailByName = new Map<string, PublicModel>();
   for (const detail of details) {
     if (!detail) continue;
     const mapped = mapDetailToPublicModel(detail);
+    detailById.set(mapped.id, mapped);
     detailByName.set(normalizeModelName(mapped.name), mapped);
   }
 
   let enrichedCount = 0;
   const enriched = models.map((model) => {
-    const detail = detailByName.get(normalizeModelName(model.name));
+    const detail =
+      detailById.get(model.id) ?? detailByName.get(normalizeModelName(model.name));
     if (!detail) return model;
     enrichedCount += 1;
     return mergePublicWithDetail(model, detail);

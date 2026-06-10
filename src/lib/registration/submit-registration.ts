@@ -2,10 +2,15 @@ import type { RegistrationFormState, RegistrationVariant } from "@/types/registr
 import { buildPublicModelProfilePayload } from "./build-model-profile";
 import { buildStudentProfilePayload } from "./build-student-profile";
 import { buildWorkExperiencePayload, validateWorkExperienceDrafts } from "./build-work-experience-payload";
+import {
+  appendRegistrationImageTokens,
+  uploadRegistrationImageTokens,
+} from "./upload-registration-image-tokens";
 
 export async function submitRegistration(
   state: RegistrationFormState,
   variant: RegistrationVariant,
+  onUploadProgress?: (completed: number, total: number) => void,
 ): Promise<{ ok: true } | { ok: false; message: string }> {
   if (variant === "model") {
     const workError = validateWorkExperienceDrafts(state.workExperiences);
@@ -14,9 +19,34 @@ export async function submitRegistration(
     }
   }
 
+  const workImageCount =
+    variant === "model"
+      ? state.workExperiences.reduce((sum, e) => sum + e.images.length, 0)
+      : 0;
+  const total = 3 + state.portfolioPhotos.length + workImageCount;
+  let completed = 0;
+  const tick = () => onUploadProgress?.(++completed, total);
+
+  const imageTokensResult = await uploadRegistrationImageTokens(state, tick);
+  if (!imageTokensResult.ok) {
+    return { ok: false, message: imageTokensResult.message };
+  }
+
+  let workPayload: Awaited<ReturnType<typeof buildWorkExperiencePayload>>;
+  if (variant === "model") {
+    workPayload = await buildWorkExperiencePayload(state.workExperiences, tick);
+  } else {
+    workPayload = { ok: true, payload: [] };
+  }
+
+  if (!workPayload.ok) {
+    return { ok: false, message: workPayload.message };
+  }
+
   const formData = new FormData();
   formData.append("email", state.email);
   formData.append("password", state.password);
+  appendRegistrationImageTokens(formData, imageTokensResult.tokens);
 
   if (variant === "student") {
     formData.append("role", "STUDENT");
@@ -31,21 +61,10 @@ export async function submitRegistration(
       JSON.stringify(buildPublicModelProfilePayload(state)),
     );
 
-    const workResult = await buildWorkExperiencePayload(state.workExperiences);
-    if (!workResult.ok) {
-      return { ok: false, message: workResult.message };
-    }
-    if (workResult.payload.length > 0) {
-      formData.append("work_experience", JSON.stringify(workResult.payload));
+    if (workPayload.payload.length > 0) {
+      formData.append("work_experience", JSON.stringify(workPayload.payload));
     }
   }
-
-  if (state.profilePhoto) formData.append("profile_photo", state.profilePhoto);
-  if (state.nicFront) formData.append("nicFront", state.nicFront);
-  if (state.nicBack) formData.append("nicBack", state.nicBack);
-  state.portfolioPhotos.forEach((file) => {
-    formData.append("portfolio_photos", file);
-  });
 
   try {
     const res = await fetch("/api/register", { method: "POST", body: formData });

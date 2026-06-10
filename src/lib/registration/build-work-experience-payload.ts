@@ -33,6 +33,7 @@ export function getCompleteWorkExperienceDrafts(
 
 export async function buildWorkExperiencePayload(
   entries: WorkExperienceDraft[],
+  onProgress?: () => void,
 ): Promise<
   | { ok: true; payload: WorkExperiencePayload[] }
   | { ok: false; message: string }
@@ -44,7 +45,7 @@ export async function buildWorkExperiencePayload(
     const images: WorkExperiencePayload["images"] = [];
 
     for (const image of entry.images) {
-      const upload = await uploadFloatingImage(image.file);
+      const upload = await uploadFloatingImage(image.file, onProgress);
       if (!upload.ok) {
         return {
           ok: false,

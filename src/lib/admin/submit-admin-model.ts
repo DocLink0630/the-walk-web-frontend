@@ -15,6 +15,7 @@ export type AdminModelSubmitResult =
 export async function submitAdminModelWithApproval(
   state: RegistrationFormState,
   onPhase?: (phase: AdminModelSubmitPhase) => void,
+  onUploadProgress?: (completed: number, total: number) => void,
 ): Promise<AdminModelSubmitResult> {
   try {
     if (!state.tier) {
@@ -37,7 +38,7 @@ export async function submitAdminModelWithApproval(
     }
 
     onPhase?.("uploading");
-    const saveResult = await saveAdminModel(state);
+    const saveResult = await saveAdminModel(state, onUploadProgress);
     if (!saveResult.ok) {
       if (saveResult.status === 502) {
         return {
