@@ -1,7 +1,7 @@
 import type { RegistrationFormState, RegistrationVariant } from "@/types/registration-form";
 import { buildPublicModelProfilePayload } from "./build-model-profile";
-import { buildStudentProfilePayload } from "./build-student-profile";
 import { buildWorkExperiencePayload, validateWorkExperienceDrafts } from "./build-work-experience-payload";
+import { submitStudentRegistration } from "./submit-student-registration";
 import {
   appendRegistrationImageTokens,
   uploadRegistrationImageTokens,
@@ -12,17 +12,16 @@ export async function submitRegistration(
   variant: RegistrationVariant,
   onUploadProgress?: (completed: number, total: number) => void,
 ): Promise<{ ok: true } | { ok: false; message: string }> {
-  if (variant === "model") {
-    const workError = validateWorkExperienceDrafts(state.workExperiences);
-    if (workError) {
-      return { ok: false, message: workError };
-    }
+  if (variant === "student") {
+    return submitStudentRegistration(state, onUploadProgress);
   }
 
-  const workImageCount =
-    variant === "model"
-      ? state.workExperiences.reduce((sum, e) => sum + e.images.length, 0)
-      : 0;
+  const workError = validateWorkExperienceDrafts(state.workExperiences);
+  if (workError) {
+    return { ok: false, message: workError };
+  }
+
+  const workImageCount = state.workExperiences.reduce((sum, e) => sum + e.images.length, 0);
   const total = 3 + state.portfolioPhotos.length + workImageCount;
   let completed = 0;
   const tick = () => onUploadProgress?.(++completed, total);
@@ -32,13 +31,7 @@ export async function submitRegistration(
     return { ok: false, message: imageTokensResult.message };
   }
 
-  let workPayload: Awaited<ReturnType<typeof buildWorkExperiencePayload>>;
-  if (variant === "model") {
-    workPayload = await buildWorkExperiencePayload(state.workExperiences, tick);
-  } else {
-    workPayload = { ok: true, payload: [] };
-  }
-
+  const workPayload = await buildWorkExperiencePayload(state.workExperiences, tick);
   if (!workPayload.ok) {
     return { ok: false, message: workPayload.message };
   }
@@ -47,23 +40,14 @@ export async function submitRegistration(
   formData.append("email", state.email);
   formData.append("password", state.password);
   appendRegistrationImageTokens(formData, imageTokensResult.tokens);
+  formData.append("role", "MODEL");
+  formData.append(
+    "modelProfile",
+    JSON.stringify(buildPublicModelProfilePayload(state)),
+  );
 
-  if (variant === "student") {
-    formData.append("role", "STUDENT");
-    formData.append(
-      "studentProfile",
-      JSON.stringify(buildStudentProfilePayload(state)),
-    );
-  } else {
-    formData.append("role", "MODEL");
-    formData.append(
-      "modelProfile",
-      JSON.stringify(buildPublicModelProfilePayload(state)),
-    );
-
-    if (workPayload.payload.length > 0) {
-      formData.append("work_experience", JSON.stringify(workPayload.payload));
-    }
+  if (workPayload.payload.length > 0) {
+    formData.append("work_experience", JSON.stringify(workPayload.payload));
   }
 
   try {

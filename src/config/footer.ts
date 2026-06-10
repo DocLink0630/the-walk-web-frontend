@@ -72,6 +72,6 @@ export function getFooterCopyright(
 }
 
 export const DEFAULT_FOOTER_LEGAL_LINKS: FooterLink[] = [
-  { label: "PRIVACY POLICY", href: "#" },
+  { label: "PRIVACY POLICY", href: "/privacy" },
   { label: "TERMS OF SERVICE", href: "#" },
 ];

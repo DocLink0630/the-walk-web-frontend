@@ -1,14 +1,19 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
+
+/** Runway fashion photography — same verified asset as Events hero */
+const MODELS_HERO_IMAGE =
+  "https://images.unsplash.com/photo-1635279474047-ab3cda78bbe8?w=1920&q=85";
 
 interface ModelsHeroSectionProps {
   backgroundImage?: string;
 }
 
 export default function ModelsHeroSection({
-  backgroundImage = "/images/Gallery/DSC09407.webp",
+  backgroundImage = MODELS_HERO_IMAGE,
 }: ModelsHeroSectionProps) {
   const heroImageRef = useRef<HTMLDivElement>(null);
   const heroOverlayRef = useRef<HTMLDivElement>(null);
@@ -42,11 +47,16 @@ export default function ModelsHeroSection({
 
   return (
     <section className="relative h-[50vh] md:h-[60vh] w-full overflow-hidden">
-      <div
-        ref={heroImageRef}
-        className="absolute inset-0 z-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${backgroundImage})` }}
-      />
+      <div ref={heroImageRef} className="absolute inset-0 z-0 overflow-hidden">
+        <Image
+          src={backgroundImage}
+          alt=""
+          fill
+          priority
+          className="object-cover object-center"
+          sizes="100vw"
+        />
+      </div>
       <div
         ref={heroOverlayRef}
         className="absolute inset-0 z-10"
