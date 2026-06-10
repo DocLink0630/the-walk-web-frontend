@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       headers: { "Content-Type": contentType },
       body,
       // Registration includes images — allow longer upstream time
-      signal: AbortSignal.timeout(120_000),
+      signal: AbortSignal.timeout(300_000),
     });
   } catch (err) {
     const detail = err instanceof Error ? err.message : "Backend unreachable";
