@@ -3,12 +3,14 @@ import type { ModelTier } from "@/types/admin";
 
 export interface PublicFeaturedModel {
   name: string;
+  height?: string | null;
   imageUrl: string | null;
 }
 
 /** GET /v1/public/models — no auth required */
 export interface PublicApiModel {
   name: string;
+  height?: string | null;
   imageUrl: string | null;
 }
 

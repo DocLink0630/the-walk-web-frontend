@@ -36,6 +36,11 @@ export default function AdminModelMobileList({
           className="border border-[#E0E0E0] bg-white p-4 space-y-3"
         >
           <div>
+            {user.displayName && (
+              <p className="font-display text-[15px] font-light text-[#0A0A0A] mb-1">
+                {user.displayName}
+              </p>
+            )}
             <p className="font-ui text-[10px] tracking-[0.05em] text-[#0A0A0A] break-all">
               {user.email}
             </p>

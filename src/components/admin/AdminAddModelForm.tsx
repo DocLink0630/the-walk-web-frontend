@@ -115,6 +115,7 @@ export default function AdminAddModelForm({ onSuccess }: AdminAddModelFormProps)
   const [submitted, setSubmitted] = useState(false);
   const [phase, setPhase] = useState<"idle" | AdminModelSubmitPhase | "done">("idle");
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [uploadProgress, setUploadProgress] = useState<{ completed: number; total: number } | null>(null);
 
   function handleDobChange(value: string) {
     const age = ageFromDateOfBirth(value);
@@ -137,7 +138,10 @@ export default function AdminAddModelForm({ onSuccess }: AdminAddModelFormProps)
     }
 
     setPhase("uploading");
-    const result = await submitAdminModelWithApproval(store, setPhase);
+    setUploadProgress(null);
+    const result = await submitAdminModelWithApproval(store, setPhase, (completed, total) => {
+      setUploadProgress({ completed, total });
+    });
 
     if (result.ok) {
       setPhase("done");
@@ -147,6 +151,7 @@ export default function AdminAddModelForm({ onSuccess }: AdminAddModelFormProps)
     }
 
     setPhase("idle");
+    setUploadProgress(null);
     store.set({ error: result.message });
     if (result.partial) {
       setValidationErrors([
@@ -176,7 +181,9 @@ export default function AdminAddModelForm({ onSuccess }: AdminAddModelFormProps)
 
   const phaseLabel =
     phase === "uploading"
-      ? "Uploading files and creating account…"
+      ? uploadProgress
+        ? `Uploading files (${uploadProgress.completed} / ${uploadProgress.total})…`
+        : "Uploading files and creating account…"
       : phase === "approving"
         ? "Applying tier and rate…"
         : phase === "activating"

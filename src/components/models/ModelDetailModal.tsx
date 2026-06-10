@@ -7,7 +7,12 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useBooking } from "@/context/BookingContext";
 import { getFirstName } from "@/lib/public/featured-models";
-import { mapTierToCategory, mapToTalentProfile } from "@/lib/public/models";
+import { getClientToken } from "@/lib/client/token";
+import {
+  mapTierToCategory,
+  mapToTalentProfile,
+  resolveModelProfileForModal,
+} from "@/lib/public/models";
 import type { PublicModel } from "@/types/public-model";
 import ModelDetailField from "./ModelDetailField";
 
@@ -20,22 +25,43 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
   const { isAuthenticated } = useAuth();
   const { addToCart, isInCart } = useBooking();
   const [slideIndex, setSlideIndex] = useState(0);
+  const [resolvedModel, setResolvedModel] = useState(model);
+
+  useEffect(() => {
+    setResolvedModel(model);
+  }, [model]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const token = getClientToken();
+    if (!token) return;
+
+    let cancelled = false;
+    void resolveModelProfileForModal(model, token).then((enriched) => {
+      if (!cancelled) setResolvedModel(enriched);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, model]);
 
   const displayName = isAuthenticated
-    ? model.name
-    : getFirstName(model.name).toUpperCase();
+    ? resolvedModel.name
+    : getFirstName(resolvedModel.name).toUpperCase();
 
   const slideImages = useMemo(() => {
     const images =
-      model.portfolioImages.length > 0
-        ? model.portfolioImages
-        : model.imageUrl
-          ? [model.imageUrl]
+      resolvedModel.portfolioImages.length > 0
+        ? resolvedModel.portfolioImages
+        : resolvedModel.imageUrl
+          ? [resolvedModel.imageUrl]
           : [];
     if (images.length === 0) return [];
     if (images.length >= 3) return images.slice(0, 3);
     return [...images, ...Array(3 - images.length).fill(images[0])];
-  }, [model.imageUrl, model.portfolioImages]);
+  }, [resolvedModel.imageUrl, resolvedModel.portfolioImages]);
 
   const slideCount = Math.max(slideImages.length, 1);
 
@@ -78,11 +104,11 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
 
   const currentSlide = slides[slideIndex];
   const hasImage = !!currentSlide?.image;
-  const tierLabel = model.category ?? mapTierToCategory(model.tier);
-  const inCart = isInCart(model.id);
+  const tierLabel = resolvedModel.category ?? mapTierToCategory(resolvedModel.tier);
+  const inCart = isInCart(resolvedModel.id);
 
   function handleAddToCart() {
-    addToCart(mapToTalentProfile(model));
+    addToCart(mapToTalentProfile(resolvedModel));
   }
 
   return (
@@ -131,8 +157,8 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
                   alt={displayName}
                   fill
                   className={[
-                    "object-cover transition-all duration-500",
-                    currentSlide?.locked ? "blur-md scale-105" : "",
+                    "object-contain object-center transition-all duration-500",
+                    currentSlide?.locked ? "blur-md" : "",
                   ].join(" ")}
                   sizes="(max-width: 1024px) 100vw, 55vw"
                   unoptimized
@@ -218,25 +244,25 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
 
               <ModelDetailField
                 label="Height"
-                value={isAuthenticated ? model.height ?? null : null}
+                value={resolvedModel.height ?? null}
                 locked={false}
                 placeholder="Available soon"
               />
               <ModelDetailField
                 label="Weight"
-                value={isAuthenticated ? model.weight ?? null : null}
+                value={isAuthenticated ? resolvedModel.weight ?? null : null}
                 locked={!isAuthenticated}
                 placeholder="Members only"
               />
               <ModelDetailField
                 label="Chest"
-                value={isAuthenticated ? model.chest ?? null : null}
+                value={isAuthenticated ? resolvedModel.chest ?? null : null}
                 locked={!isAuthenticated}
                 placeholder="Members only"
               />
               <ModelDetailField
                 label="Rate"
-                value={isAuthenticated ? model.rate ?? "On request" : null}
+                value={isAuthenticated ? resolvedModel.rate ?? "On request" : null}
                 locked={!isAuthenticated}
                 placeholder="Members only"
               />
@@ -248,19 +274,19 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
               />
               <ModelDetailField
                 label="Eye colour"
-                value={isAuthenticated ? model.eyeColor ?? null : null}
+                value={isAuthenticated ? resolvedModel.eyeColor ?? null : null}
                 locked={!isAuthenticated}
                 placeholder="Members only"
               />
               <ModelDetailField
                 label="Hair colour"
-                value={isAuthenticated ? model.hairColor ?? null : null}
+                value={isAuthenticated ? resolvedModel.hairColor ?? null : null}
                 locked={!isAuthenticated}
                 placeholder="Members only"
               />
               <ModelDetailField
                 label="Bio"
-                value={isAuthenticated ? model.bio ?? null : null}
+                value={isAuthenticated ? resolvedModel.bio ?? null : null}
                 locked={!isAuthenticated}
                 placeholder="Members only"
               />

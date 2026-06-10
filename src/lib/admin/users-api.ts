@@ -3,10 +3,16 @@ import {
   buildWorkExperiencePayload,
   validateWorkExperienceDrafts,
 } from "@/lib/registration/build-work-experience-payload";
+import {
+  appendRegistrationImageTokens,
+  uploadRegistrationImageTokens,
+} from "@/lib/registration/upload-registration-image-tokens";
 import { adminAuthHeaders, getAdminToken } from "@/lib/admin/token";
 import type {
+  AdminModelRegistrationMedia,
   AdminUser,
   AdminUserDetail,
+  MediaOrderUpdateItem,
   ModelApprovalPayload,
   PaginatedUsersResponse,
   UserRole,
@@ -75,6 +81,38 @@ export async function fetchAdminUserDetail(
   return { ok: true, data };
 }
 
+export async function updateModelMediaOrder(
+  userId: string,
+  items: MediaOrderUpdateItem[],
+): Promise<
+  | { ok: true; registrationMedia: AdminModelRegistrationMedia }
+  | { ok: false; message: string }
+> {
+  const res = await fetch(`/api/admin/users/${userId}/media/order`, {
+    method: "PATCH",
+    headers: adminAuthHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify({ items }),
+  });
+
+  if (!res.ok) {
+    let message = "Failed to update image order";
+    try {
+      const body = await res.json();
+      if (body?.message) message = String(body.message);
+    } catch {
+      /* ignore */
+    }
+    return { ok: false, message };
+  }
+
+  const body = (await res.json()) as { registrationMedia?: AdminModelRegistrationMedia };
+  if (!body.registrationMedia) {
+    return { ok: false, message: "Order saved but media was not returned." };
+  }
+
+  return { ok: true, registrationMedia: body.registrationMedia };
+}
+
 export async function updateUserStatus(
   userId: string,
   status: UserStatus,
@@ -121,6 +159,7 @@ function parseApiError(body: unknown, fallback: string): string {
 
 export async function saveAdminModel(
   state: RegistrationFormState,
+  onUploadProgress?: (completed: number, total: number) => void,
 ): Promise<
   { ok: true; userId: string } | { ok: false; message: string; status?: number }
 > {
@@ -145,26 +184,31 @@ export async function saveAdminModel(
     return { ok: false, message: msg };
   }
 
+  const workImageCount = state.workExperiences.reduce((sum, e) => sum + e.images.length, 0);
+  const total = 3 + state.portfolioPhotos.length + workImageCount;
+  let completed = 0;
+  const tick = () => onUploadProgress?.(++completed, total);
+
+  const imageTokensResult = await uploadRegistrationImageTokens(state, tick);
+  if (!imageTokensResult.ok) {
+    return { ok: false, message: imageTokensResult.message };
+  }
+
+  const workResult = await buildWorkExperiencePayload(state.workExperiences, tick);
+  if (!workResult.ok) {
+    return { ok: false, message: workResult.message };
+  }
+
   const formData = new FormData();
   formData.append("email", state.email);
   formData.append("password", state.password);
   formData.append("role", "MODEL");
   formData.append("modelProfile", profileJson);
+  appendRegistrationImageTokens(formData, imageTokensResult.tokens);
 
-  const workResult = await buildWorkExperiencePayload(state.workExperiences);
-  if (!workResult.ok) {
-    return { ok: false, message: workResult.message };
-  }
   if (workResult.payload.length > 0) {
     formData.append("work_experience", JSON.stringify(workResult.payload));
   }
-
-  if (state.profilePhoto) formData.append("profile_photo", state.profilePhoto);
-  if (state.nicFront) formData.append("nicFront", state.nicFront);
-  if (state.nicBack) formData.append("nicBack", state.nicBack);
-  state.portfolioPhotos.forEach((file) => {
-    formData.append("portfolio_photos", file);
-  });
 
   let res: Response;
   try {
