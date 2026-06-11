@@ -1,5 +1,5 @@
 import type { RegistrationFormState } from "@/types/registration-form";
-import { buildStudentEdgePayload } from "./build-student-edge-payload";
+import { buildStudentProfilePayload } from "./build-student-profile";
 import { compressImage } from "./compress-image";
 
 export async function submitStudentRegistration(
@@ -31,41 +31,40 @@ export async function submitStudentRegistration(
   const [profilePhoto, nicFront, nicBack, ...portfolioPhotos] = compressed;
 
   const formData = new FormData();
-  formData.append("payload", JSON.stringify(buildStudentEdgePayload(state)));
-  formData.append("profilePhoto", profilePhoto);
+  formData.append("email", state.email);
+  formData.append("password", state.password);
+  formData.append("role", "STUDENT");
+  formData.append("studentProfile", JSON.stringify(buildStudentProfilePayload(state)));
+  formData.append("profile_photo", profilePhoto);
   formData.append("nicFront", nicFront);
   formData.append("nicBack", nicBack);
   for (const photo of portfolioPhotos) {
-    formData.append("portfolioPhotos", photo);
+    formData.append("portfolio_photos", photo);
   }
 
   try {
-    const res = await fetch("/api/student-register", {
+    const res = await fetch("/api/register", {
       method: "POST",
       body: formData,
       signal: AbortSignal.timeout(300_000),
     });
 
-    const data = (await res.json()) as { message?: string; error?: string };
+    const data = (await res.json()) as { message?: string };
 
     if (res.status === 201) return { ok: true };
 
+    if (res.status === 429) {
+      return { ok: false, message: "Too many requests. Please wait a moment and try again." };
+    }
     if (res.status === 409) {
       return {
         ok: false,
-        message:
-          data.message ??
-          data.error ??
-          "An application with this email or NIC already exists.",
+        message: data.message ?? "An account with this email or NIC already exists.",
       };
     }
-
     return {
       ok: false,
-      message:
-        data.message ??
-        data.error ??
-        "Registration failed. Please check your details and try again.",
+      message: data.message ?? "Registration failed. Please check your details and try again.",
     };
   } catch {
     return { ok: false, message: "Unable to connect to the server. Please try again." };
