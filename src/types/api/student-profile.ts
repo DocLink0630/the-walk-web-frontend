@@ -18,7 +18,7 @@ export interface StudentProfilePayload {
   addressEnc?: string;
   contactNumberEnc: string;
   whatsappNumberEnc?: string;
-  tier: ModelTier;
+  tier: AssignableModelTier;
   isLoginEnabled: boolean;
   source?: StudentSource;
   heightEnc?: string;

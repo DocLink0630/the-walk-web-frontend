@@ -11,6 +11,11 @@ export const formSubtitle =
 export const formInput =
   "w-full border border-[#D4D4D4] bg-white px-4 py-3 font-ui text-sm text-[#0A0A0A] placeholder:text-[#9A9A9A] outline-none transition-colors focus:border-[#C8A97A] focus:ring-1 focus:ring-[#C8A97A]/30";
 
+export const formSelect =
+  "w-full border border-[#D4D4D4] bg-white px-4 py-3.5 font-ui text-base md:text-[17px] leading-snug text-[#0A0A0A] outline-none transition-colors focus:border-[#C8A97A] focus:ring-1 focus:ring-[#C8A97A]/30 cursor-pointer";
+
+export const formSelectError = formSelect + " border-red-500";
+
 export const formInputError =
   "w-full border border-red-500 bg-white px-4 py-3 font-ui text-sm text-[#0A0A0A] outline-none";
 

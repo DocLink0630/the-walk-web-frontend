@@ -1,5 +1,10 @@
+import type { AssignableModelTier } from "@/types/api/model-profile";
 import type { StudentProfilePayload, StudentSource } from "@/types/api/student-profile";
 import type { RegistrationFormState } from "@/types/registration-form";
+
+function resolveStudentTier(tier: RegistrationFormState["tier"]): AssignableModelTier {
+  return tier || "FRESHER";
+}
 
 export function buildStudentProfilePayload(
   state: RegistrationFormState,
@@ -8,7 +13,7 @@ export function buildStudentProfilePayload(
     modelCode: state.modelCode,
     fullName: state.fullName.trim(),
     contactNumberEnc: state.contactNumber.trim(),
-    tier: state.tier || ("FRESHER" as const),
+    tier: resolveStudentTier(state.tier),
     isLoginEnabled: false,
   };
 
