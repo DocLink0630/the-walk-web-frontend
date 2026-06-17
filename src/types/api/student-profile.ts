@@ -1,8 +1,11 @@
 /** Mirrors walk-web-backend StudentProfileDto + Prisma enums */
 
+import type { AssignableModelTier } from "./model-profile";
+
 export type StudentSource = "WALK_IN" | "ONLINE" | "REFERRAL" | "OTHER";
 
-export type ModelTier = "FRESHER" | "EXPERIENCED" | "SUPERMODEL";
+/** Student registration tier — same assignable set as model profiles */
+export type ModelTier = AssignableModelTier;
 
 /** JSON body for multipart `studentProfile` when role is STUDENT */
 export interface StudentProfilePayload {

@@ -8,7 +8,7 @@ export function buildStudentProfilePayload(
     modelCode: state.modelCode,
     fullName: state.fullName.trim(),
     contactNumberEnc: state.contactNumber.trim(),
-    tier: state.tier || "FRESHER",
+    tier: state.tier || ("FRESHER" as const),
     isLoginEnabled: false,
   };
 
