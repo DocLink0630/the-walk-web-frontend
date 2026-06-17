@@ -11,7 +11,7 @@ export default function About() {
         tagline="Connecting Sri Lanka's creative talent with the clients who need them."
         background={{
           type: "image",
-          src: "/images/abothero.jpeg",
+          src: "/images/about2.jpeg",
           alt: "The Walk Agency",
         }}
         overlay="dark"
