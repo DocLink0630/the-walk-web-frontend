@@ -6,7 +6,7 @@ export const ACADEMY_PAGE: AcademyPageContent = {
     heading: "THE WALK ACADEMY",
     description:
       "Comprehensive professional training designed to launch and elevate modelling careers — led by industry veterans in a world-class environment.",
-    image: "/images/Gallery/DSC09812%20copy.webp",
+    image: "/images/abothero.jpeg",
   },
   stats: [
     { value: "200+", label: "Graduates" },
