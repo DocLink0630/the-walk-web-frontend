@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { CTA_PRIMARY_FILLED } from "@/config/cta-styles";
 import type { RegistrationStore } from "@/types/registration-form";
 import {
@@ -99,6 +100,22 @@ export function IdentitySection({ store, idPrefix, err, handleDobChange }: Secti
 }
 
 export function ContactSection({ store, idPrefix, err }: SectionProps) {
+  const [whatsappSameAsContact, setWhatsappSameAsContact] = useState(false);
+
+  const handleContactChange = (value: string) => {
+    store.set({
+      contactNumber: value,
+      ...(whatsappSameAsContact ? { whatsappNumber: value } : {}),
+    });
+  };
+
+  const handleWhatsappSameToggle = (checked: boolean) => {
+    setWhatsappSameAsContact(checked);
+    if (checked) {
+      store.set({ whatsappNumber: store.contactNumber });
+    }
+  };
+
   return (
     <section className="space-y-4">
       <h3 className={formSectionTitle}>Contact</h3>
@@ -118,7 +135,7 @@ export function ContactSection({ store, idPrefix, err }: SectionProps) {
             id={`${idPrefix}-contact`}
             type="tel"
             value={store.contactNumber}
-            onChange={(e) => store.set({ contactNumber: e.target.value })}
+            onChange={(e) => handleContactChange(e.target.value)}
             placeholder="+94 77 123 4567"
             className={err("contactNumber") ? formInputError : formInput}
           />
@@ -129,10 +146,28 @@ export function ContactSection({ store, idPrefix, err }: SectionProps) {
             type="tel"
             value={store.whatsappNumber}
             onChange={(e) => store.set({ whatsappNumber: e.target.value })}
+            readOnly={whatsappSameAsContact}
             placeholder="+94 77 123 4567"
-            className={err("whatsappNumber") ? formInputError : formInput}
+            className={
+              err("whatsappNumber")
+                ? formInputError
+                : whatsappSameAsContact
+                  ? formInputReadOnly
+                  : formInput
+            }
           />
         </Field>
+        <label className="sm:col-span-2 flex items-center gap-3 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={whatsappSameAsContact}
+            onChange={(e) => handleWhatsappSameToggle(e.target.checked)}
+            className="size-4 shrink-0 accent-[#0A0A0A] cursor-pointer"
+          />
+          <span className="font-ui text-[11px] text-[#4A4A4A] tracking-normal normal-case">
+            WhatsApp number is the same as contact number
+          </span>
+        </label>
       </div>
     </section>
   );

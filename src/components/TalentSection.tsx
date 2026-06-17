@@ -190,6 +190,15 @@ export default function TalentSection({
             className="mb-12 md:mb-16 lg:mb-[80px]"
             eyebrow={eyebrow}
             title={heading}
+            action={
+              <NavLinkWithStatus
+                href="/register/model"
+                data-cursor="button"
+                className="inline-flex items-center justify-center shrink-0 self-start md:self-auto font-ui text-[9px] md:text-[10px] lg:text-[11px] font-light tracking-[0.25em] uppercase px-6 md:px-8 py-3 md:py-4 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] transition-colors duration-300"
+              >
+                Join Agency
+              </NavLinkWithStatus>
+            }
           />
 
           {error && (
