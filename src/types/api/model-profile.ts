@@ -1,6 +1,13 @@
 /** Mirrors walk-web-backend ModelProfileDto + Prisma enums */
 
-export type ModelSource = "WALK_IN" | "ONLINE" | "REFERRAL" | "OTHER";
+export type ModelSource =
+  | "WALK_IN"
+  | "ONLINE"
+  | "TIKTOK"
+  | "INSTAGRAM"
+  | "FACEBOOK"
+  | "REFERRAL"
+  | "OTHER";
 
 export type AssignableModelTier = "FRESHER" | "EXPERIENCED" | "SUPERMODEL" | "INFLUENCER";
 

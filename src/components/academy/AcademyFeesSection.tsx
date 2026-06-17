@@ -10,7 +10,7 @@ export default function AcademyFeesSection({ fees }: AcademyFeesSectionProps) {
 
   return (
     <section className="py-16 md:py-24 lg:py-32 bg-white">
-      <div className="max-w-[1000px] mx-auto px-4 md:px-8 lg:px-[80px]">
+      <div className="max-w-[1280px] mx-auto px-4 md:px-8 lg:px-[80px]">
         <div
           data-academy-reveal-group
           data-academy-start="top 85%"
@@ -55,8 +55,8 @@ export default function AcademyFeesSection({ fees }: AcademyFeesSectionProps) {
               Course Fee — Choose Your Payment Plan
             </p>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-              <div className="bg-white border-2 border-[#E5E3E0] p-6 md:p-8 hover:border-[#9A7329] transition-colors duration-300">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
+              <div className="bg-white border-2 border-[#E5E3E0] p-7 md:p-9 min-w-0 hover:border-[#9A7329] transition-colors duration-300">
                 <p className="font-ui text-[11px] md:text-[12px] tracking-[0.3em] uppercase text-[#4A4A4A] mb-6 font-semibold">
                   OPTION 1: Installments
                 </p>
@@ -76,7 +76,7 @@ export default function AcademyFeesSection({ fees }: AcademyFeesSectionProps) {
                   ))}
                 </div>
                 <div className="pt-6 border-t-2 border-[#0A0A0A]">
-                  <div className="flex items-baseline justify-between">
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
                     <span className="font-ui text-[11px] md:text-[12px] tracking-[0.25em] uppercase text-[#0A0A0A] font-semibold">
                       TOTAL
                     </span>
@@ -93,31 +93,33 @@ export default function AcademyFeesSection({ fees }: AcademyFeesSectionProps) {
               </div>
 
               <div
-                className="bg-[#0A0A0A] border-2 p-6 md:p-8 relative"
+                className="bg-[#0A0A0A] border-2 p-7 md:p-9 min-w-0"
                 style={{ borderColor: gold }}
               >
-                <span
-                  className="absolute top-4 right-4 font-ui text-[10px] md:text-[11px] tracking-[0.2em] uppercase px-3 py-1.5 text-white font-semibold"
-                  style={{ backgroundColor: gold }}
-                >
-                  {fees.fullPayment.badge}
-                </span>
-                <p
-                  className="font-ui text-[11px] md:text-[12px] tracking-[0.3em] uppercase mb-6 font-semibold"
-                  style={{ color: goldBright }}
-                >
-                  OPTION 2: Full Payment
-                </p>
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+                  <p
+                    className="font-ui text-[11px] md:text-[12px] tracking-[0.22em] uppercase font-semibold"
+                    style={{ color: goldBright }}
+                  >
+                    OPTION 2: Full Payment
+                  </p>
+                  <span
+                    className="shrink-0 self-start font-ui text-[10px] md:text-[11px] tracking-[0.15em] uppercase px-3 py-1.5 text-white font-semibold whitespace-nowrap"
+                    style={{ backgroundColor: gold }}
+                  >
+                    {fees.fullPayment.badge}
+                  </span>
+                </div>
                 <p className="font-display text-[16px] md:text-[18px] font-normal text-white/90 mb-6">
                   {fees.fullPayment.note}
                 </p>
                 <div className="bg-white/10 p-5 md:p-6 mb-4">
-                  <p className="font-ui text-[11px] md:text-[12px] tracking-[0.15em] uppercase text-white/75 mb-3 line-through font-medium">
+                  <p className="font-ui text-[11px] md:text-[12px] tracking-[0.12em] uppercase text-white/75 mb-3 line-through font-medium">
                     {fees.fullPayment.regular}
                   </p>
-                  <div className="flex items-baseline gap-3">
+                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                     <span
-                      className="font-display text-[52px] md:text-[64px] font-medium leading-[1]"
+                      className="font-display text-[48px] md:text-[58px] lg:text-[64px] font-medium leading-[1]"
                       style={{ color: goldBright }}
                     >
                       {fees.fullPayment.amount}
@@ -129,7 +131,7 @@ export default function AcademyFeesSection({ fees }: AcademyFeesSectionProps) {
                 </div>
                 <div className="pt-6 border-t border-white/20">
                   <div
-                    className="flex items-center justify-between"
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2"
                     style={{ color: goldBright }}
                   >
                     <span className="font-ui text-[11px] md:text-[12px] tracking-[0.25em] uppercase font-semibold">

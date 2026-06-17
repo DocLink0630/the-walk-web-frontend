@@ -11,7 +11,9 @@ export const SKIN_COLOR_OPTIONS = [
 /** ModelSource / StudentSource — same enum values in Prisma */
 export const REFERRAL_SOURCE_OPTIONS = [
   { value: "WALK_IN", label: "Walk in" },
-  { value: "ONLINE", label: "TikTok, Instagram or Facebook" },
+  { value: "TIKTOK", label: "TikTok" },
+  { value: "INSTAGRAM", label: "Instagram" },
+  { value: "FACEBOOK", label: "Facebook" },
   { value: "REFERRAL", label: "Referral" },
   { value: "OTHER", label: "Other" },
 ] as const;
