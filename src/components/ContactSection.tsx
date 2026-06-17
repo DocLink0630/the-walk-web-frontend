@@ -83,19 +83,19 @@ export default function ContactSection({
       <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-[80px]">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-10 lg:gap-12">
           <div ref={introRef} className="lg:col-span-7">
-            <p className="font-ui text-[11px] md:text-[12px] font-light tracking-[0.25em] md:tracking-[0.3em] uppercase text-[#C8A97A] mb-4 md:mb-6">
+            <p className="font-ui text-[12px] md:text-[13px] font-medium tracking-[0.25em] md:tracking-[0.3em] uppercase text-[#9A7329] mb-4 md:mb-6">
               {eyebrow}
             </p>
-            <h2 className="font-display text-[48px] md:text-[64px] lg:text-[84px] font-light tracking-[0.05em] text-[#0A0A0A] leading-[0.9] mb-6 md:mb-10 lg:mb-12">
+            <h2 className="font-display text-[48px] md:text-[64px] lg:text-[84px] font-light tracking-[0.05em] text-[#0A0A0A] leading-[1.05] mb-6 md:mb-10 lg:mb-12 pb-1">
               {heading}
             </h2>
-            <p className="font-display italic text-[16px] md:text-[20px] lg:text-[24px] font-light tracking-[0.05em] text-[#4A4A4A] leading-[1.5] max-w-[500px]">
+            <p className="font-display italic text-[18px] md:text-[22px] lg:text-[26px] font-normal tracking-[0.02em] text-[#3A3A3A] leading-[1.55] max-w-[500px]">
               {description}
             </p>
 
             <MagneticButton
               onClick={onInquiry}
-              className="mt-8 md:mt-10 lg:mt-12 font-ui text-[11px] md:text-[12px] font-light tracking-[0.2em] uppercase px-8 md:px-10 lg:px-12 py-4 md:py-4.5 lg:py-5 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] transition-colors duration-300 w-full sm:w-auto text-center"
+              className="mt-8 md:mt-10 lg:mt-12 font-ui text-[12px] md:text-[13px] font-medium tracking-[0.18em] uppercase px-8 md:px-10 lg:px-12 py-4 md:py-4.5 lg:py-5 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] transition-colors duration-300 w-full sm:w-auto text-center"
             >
               {buttonLabel}
             </MagneticButton>

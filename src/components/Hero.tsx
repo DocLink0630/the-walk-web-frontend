@@ -150,7 +150,7 @@ export default function Hero({
     headingEl.innerHTML = words
       .map(
         (word) =>
-          `<span class="inline-block overflow-hidden"><span class="inline-block word-reveal">${word}</span></span>`,
+          `<span class="inline-block overflow-hidden pb-[0.12em] align-bottom"><span class="inline-block word-reveal">${word}</span></span>`,
       )
       .join('<span class="inline-block">&nbsp;</span>');
 
@@ -240,7 +240,7 @@ export default function Hero({
 
             <h1
               ref={headingRef}
-              className="font-display text-[clamp(72px,9vw,140px)] font-light tracking-[0.06em] text-white leading-[0.88] mb-6 md:mb-8"
+              className="font-display text-[clamp(72px,9vw,140px)] font-light tracking-[0.06em] text-white leading-[1.05] mb-6 md:mb-8 pb-1"
             >
               {heading}
             </h1>

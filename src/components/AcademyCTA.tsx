@@ -106,17 +106,17 @@ export default function AcademyCTA({
             className="lg:col-span-5 flex items-center order-1 lg:order-2 lg:pl-16 mb-12 lg:mb-0"
           >
             <div className="max-w-[480px]">
-              <p className="font-ui text-[9px] md:text-[10px] tracking-[0.4em] uppercase text-[#C8A97A] mb-8">
+              <p className="font-ui text-[11px] md:text-[12px] font-medium tracking-[0.35em] uppercase text-[#9A7329] mb-8">
                 {eyebrow}
               </p>
 
-              <h2 className="font-display text-[68px] md:text-[84px] lg:text-[96px] font-light text-[#0A0A0A] leading-[0.88] tracking-[0.02em] mb-12">
+              <h2 className="font-display text-[68px] md:text-[84px] lg:text-[96px] font-light text-[#0A0A0A] leading-[1.08] tracking-[0.02em] mb-12 pb-1">
                 {renderMultilineHeading(heading)}
               </h2>
 
               <AccentDivider ref={lineRef} className="h-px bg-[#C8A97A] w-24 mb-12" />
 
-              <p className="font-display italic text-[20px] md:text-[22px] text-[#4A4A4A] leading-[1.8] mb-16">
+              <p className="font-display italic text-[22px] md:text-[26px] font-normal text-[#3A3A3A] leading-[1.65] mb-16">
                 {description}
               </p>
 
