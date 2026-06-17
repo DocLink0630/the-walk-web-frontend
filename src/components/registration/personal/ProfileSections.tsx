@@ -11,6 +11,8 @@ import {
   formInputReadOnly,
   formSectionHint,
   formSectionTitle,
+  formSelect,
+  formSelectError,
   formTextarea,
 } from "../form-styles";
 import { REFERRAL_SOURCE_OPTIONS, SKIN_COLOR_OPTIONS } from "./constants";
@@ -45,7 +47,7 @@ export function IdentitySection({ store, idPrefix, err, handleDobChange }: Secti
             id={`${idPrefix}-gender`}
             value={store.gender}
             onChange={(e) => store.set({ gender: e.target.value })}
-            className={err("gender") ? formInputError : formInput}
+            className={err("gender") ? formSelectError : formSelect}
           >
             <option value="">Select…</option>
             <option value="Female">Female</option>
@@ -258,7 +260,7 @@ export function ModelReferralSection({ store, idPrefix }: Pick<SectionProps, "st
           id={`${idPrefix}-source`}
           value={store.source}
           onChange={(e) => store.set({ source: e.target.value })}
-          className={formInput}
+          className={formSelect}
         >
           <option value="">Select…</option>
           {REFERRAL_SOURCE_OPTIONS.map(({ value, label }) => (
@@ -284,7 +286,7 @@ export function StudentAcademySection({ store, idPrefix }: Pick<SectionProps, "s
             id={`${idPrefix}-source`}
             value={store.source}
             onChange={(e) => store.set({ source: e.target.value })}
-            className={formInput}
+            className={formSelect}
           >
             <option value="">Select…</option>
             {REFERRAL_SOURCE_OPTIONS.map(({ value, label }) => (
