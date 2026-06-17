@@ -23,6 +23,8 @@ const NAV_LINKS = [
   { href: "/about", label: "About" },
 ] as const;
 
+//Nav
+
 const desktopLinkClass =
   "font-ui text-[10px] font-light tracking-[0.25em] uppercase text-[#0A0A0A] hover:text-[#C8A97A] transition-colors duration-300";
 
