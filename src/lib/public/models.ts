@@ -69,11 +69,16 @@ export function mapPublicApiModelToPublicModel(
   item: PublicApiModel,
   index: number,
 ): PublicModel {
-  const portfolioImages = item.imageUrl ? [item.imageUrl] : [];
+  const portfolioImages =
+    item.portfolioImages && item.portfolioImages.length > 0
+      ? item.portfolioImages
+      : item.imageUrl
+        ? [item.imageUrl]
+        : [];
   return {
     id: makePublicModelId(item.name, index),
     name: item.name,
-    imageUrl: item.imageUrl,
+    imageUrl: portfolioImages[0] ?? item.imageUrl,
     height: item.height?.trim() || undefined,
     portfolioImages,
   };
@@ -112,12 +117,18 @@ export function featuredModelToPublicModel(
   model: PublicFeaturedModel,
   index = 0,
 ): PublicModel {
+  const portfolioImages =
+    model.portfolioImages && model.portfolioImages.length > 0
+      ? model.portfolioImages
+      : model.imageUrl
+        ? [model.imageUrl]
+        : [];
   return {
     id: `featured-${index}-${normalizeModelName(model.name).replace(/\s/g, "-")}`,
     name: model.name,
-    imageUrl: model.imageUrl,
+    imageUrl: portfolioImages[0] ?? model.imageUrl,
     height: model.height?.trim() || undefined,
-    portfolioImages: model.imageUrl ? [model.imageUrl] : [],
+    portfolioImages,
     isFeaturedOnly: true,
   };
 }
@@ -176,9 +187,9 @@ function mergePublicWithDetail(
     height: detail.height || publicModel.height,
     imageUrl: publicModel.imageUrl ?? detail.imageUrl,
     portfolioImages:
-      publicModel.portfolioImages.length > 0
-        ? publicModel.portfolioImages
-        : detail.portfolioImages,
+      detail.portfolioImages.length > 0
+        ? detail.portfolioImages
+        : publicModel.portfolioImages,
     workExperienceImages:
       detail.workExperienceImages && detail.workExperienceImages.length > 0
         ? detail.workExperienceImages

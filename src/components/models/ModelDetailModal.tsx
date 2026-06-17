@@ -71,6 +71,15 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
     }));
   }, [isAuthenticated, slideCount, slideImages]);
 
+  const galleryImages = useMemo(() => {
+    const portfolio = resolvedModel.portfolioImages.filter(Boolean);
+    if (portfolio.length > 0) return portfolio;
+    return resolvedModel.workExperienceImages ?? [];
+  }, [resolvedModel.portfolioImages, resolvedModel.workExperienceImages]);
+
+  const galleryLabel =
+    resolvedModel.portfolioImages.filter(Boolean).length > 0 ? "Portfolio" : "Work";
+
   useEffect(() => {
     setSlideIndex(0);
   }, [model.id]);
@@ -333,20 +342,32 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
 
         <div className="shrink-0 border-t border-[#E0E0E0] bg-[#FAFAFA] px-5 py-5 md:px-8">
           <p className="font-ui text-[8px] tracking-[0.3em] uppercase text-[#9A9A9A] mb-3">
-            Work
+            {galleryLabel}
           </p>
           <div className="flex gap-3 overflow-x-auto pb-1">
-            {(resolvedModel.workExperienceImages ?? []).length > 0 ? (
-              (resolvedModel.workExperienceImages ?? []).map((imgUrl, idx) => {
+            {galleryImages.length > 0 ? (
+              galleryImages.map((imgUrl, idx) => {
                 const locked = !isAuthenticated && idx > 0;
                 return (
-                  <div
-                    key={idx}
-                    className="relative shrink-0 w-24 h-32 border border-[#E0E0E0] overflow-hidden"
+                  <button
+                    key={`${imgUrl}-${idx}`}
+                    type="button"
+                    onClick={() => {
+                      if (locked) return;
+                      const slideIdx = slideImages.indexOf(imgUrl);
+                      if (slideIdx >= 0) setSlideIndex(slideIdx);
+                    }}
+                    className={[
+                      "relative shrink-0 w-24 h-32 border overflow-hidden",
+                      slideIndex === slideImages.indexOf(imgUrl) && slideImages.indexOf(imgUrl) >= 0
+                        ? "border-[#C8A97A]"
+                        : "border-[#E0E0E0]",
+                      locked ? "cursor-default" : "cursor-pointer",
+                    ].join(" ")}
                   >
                     <Image
                       src={imgUrl}
-                      alt={`${displayName} work ${idx + 1}`}
+                      alt={`${displayName} ${galleryLabel.toLowerCase()} ${idx + 1}`}
                       fill
                       className={["object-cover", locked ? "blur-sm" : ""].join(" ")}
                       sizes="96px"
@@ -357,18 +378,19 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
                         <Link
                           href="/?login=1"
                           className="font-ui text-[7px] tracking-[0.15em] uppercase text-white text-center px-2"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           Sign in
                         </Link>
                       </div>
                     )}
-                  </div>
+                  </button>
                 );
               })
             ) : (
               <div className="relative shrink-0 w-24 h-32 border border-[#E0E0E0] bg-[#F0F0F0] flex items-center justify-center">
                 <span className="font-ui text-[7px] tracking-[0.1em] uppercase text-[#C0C0C0] text-center px-2">
-                  No work photos
+                  No portfolio photos
                 </span>
               </div>
             )}

@@ -5,6 +5,7 @@ export interface PublicFeaturedModel {
   name: string;
   height?: string | null;
   imageUrl: string | null;
+  portfolioImages?: string[];
 }
 
 /** GET /v1/public/models — no auth required */
@@ -12,6 +13,7 @@ export interface PublicApiModel {
   name: string;
   height?: string | null;
   imageUrl: string | null;
+  portfolioImages?: string[];
 }
 
 export interface PublicModelsPageResponse {
