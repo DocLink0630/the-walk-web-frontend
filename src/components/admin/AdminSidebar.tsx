@@ -1,12 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { LayoutDashboard, LayoutGrid, LogOut, UserCircle } from "lucide-react";
+import { CalendarDays, GraduationCap, ImageIcon, LayoutDashboard, LogOut, MessageSquare, UserCircle } from "lucide-react";
 import { ADMIN_NAV_ITEMS, type AdminSection } from "@/types/admin-nav";
 
 const NAV_ICONS: Record<AdminSection, typeof LayoutDashboard> = {
   dashboard: LayoutDashboard,
   models: UserCircle,
+  students: GraduationCap,
+  events: CalendarDays,
+  gallery: ImageIcon,
+  inquiries: MessageSquare,
 };
 
 interface AdminSidebarProps {
@@ -25,24 +29,19 @@ export default function AdminSidebar({
   onNavigate,
 }: AdminSidebarProps) {
   return (
-    <div className="flex h-full flex-col bg-[#0A0A0A] text-white">
-      <div className="border-b border-white/10 px-5 py-6">
+    <div className="flex h-full flex-col bg-white border-r border-gray-200 shadow-sm">
+      <div className="border-b border-gray-200 px-5 py-5">
         <Link
           href="/"
           onClick={onNavigate}
-          className="font-display text-xl font-light tracking-widest text-white hover:text-[#C8A97A] transition-colors"
+          className="text-lg font-semibold text-gray-900 hover:text-amber-600 transition-colors"
         >
-          THE WALK
+          The Walk
         </Link>
-        <div className="mt-3 flex items-center gap-2">
-          <LayoutGrid className="size-3.5 text-[#C8A97A]" strokeWidth={1.5} />
-          <span className="font-ui text-[9px] tracking-[0.3em] uppercase text-[#C8A97A]">
-            Admin
-          </span>
-        </div>
+        <p className="text-sm text-gray-500 mt-0.5">Admin</p>
       </div>
 
-      <nav className="flex-1 px-3 py-5 space-y-1" aria-label="Admin navigation">
+      <nav className="flex-1 p-3 space-y-1" aria-label="Admin navigation">
         {ADMIN_NAV_ITEMS.map((item) => {
           const Icon = NAV_ICONS[item.id];
           const active = activeSection === item.id;
@@ -55,49 +54,39 @@ export default function AdminSidebar({
                 onSectionChange(item.id);
                 onNavigate?.();
               }}
-              className={`w-full flex items-start gap-3 rounded-sm px-3 py-3 text-left transition-colors ${
+              className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                 active
-                  ? "bg-white/10 text-white"
-                  : "text-white/60 hover:bg-white/5 hover:text-white"
+                  ? "bg-gray-900 text-white shadow-sm"
+                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
               }`}
             >
-              <Icon
-                className={`mt-0.5 size-4 shrink-0 ${active ? "text-[#C8A97A]" : ""}`}
-                strokeWidth={1.5}
-              />
-              <span>
-                <span className="block font-ui text-[10px] tracking-[0.2em] uppercase">
-                  {item.label}
-                </span>
-                <span className="mt-1 block font-ui text-[8px] tracking-[0.08em] text-white/40 normal-case leading-snug">
-                  {item.description}
-                </span>
-              </span>
+              <Icon className="size-[18px] shrink-0" strokeWidth={1.75} />
+              {item.label}
             </button>
           );
         })}
       </nav>
 
-      <div className="border-t border-white/10 px-5 py-5 space-y-4">
+      <div className="border-t border-gray-200 p-4 space-y-3">
         {userEmail && (
-          <p className="font-ui text-[9px] tracking-[0.08em] text-white/50 truncate">
+          <p className="text-sm text-gray-500 truncate" title={userEmail}>
             {userEmail}
           </p>
         )}
         <Link
           href="/"
           onClick={onNavigate}
-          className="block font-ui text-[9px] tracking-[0.2em] uppercase text-white/50 hover:text-[#C8A97A] transition-colors"
+          className="block text-sm text-gray-600 hover:text-gray-900"
         >
           Public site
         </Link>
         <button
           type="button"
           onClick={onLogout}
-          className="flex w-full items-center gap-2 font-ui text-[9px] tracking-[0.2em] uppercase text-white/70 hover:text-white transition-colors"
+          className="flex w-full items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900"
         >
-          <LogOut className="size-3.5" strokeWidth={1.5} />
-          Logout
+          <LogOut className="size-4" />
+          Log out
         </button>
       </div>
     </div>

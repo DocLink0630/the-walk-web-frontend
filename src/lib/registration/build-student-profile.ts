@@ -7,16 +7,17 @@ export function buildStudentProfilePayload(
   const payload: StudentProfilePayload = {
     modelCode: state.modelCode,
     fullName: state.fullName.trim(),
-    gender: state.gender,
-    age: Number(state.age),
-    nicEnc: state.nic.trim(),
-    dobEnc: state.dob,
-    addressEnc: state.address.trim(),
     contactNumberEnc: state.contactNumber.trim(),
-    whatsappNumberEnc: state.whatsappNumber.trim(),
     tier: state.tier || "FRESHER",
     isLoginEnabled: false,
   };
+
+  if (state.gender) payload.gender = state.gender;
+  if (state.age && Number(state.age)) payload.age = Number(state.age);
+  if (state.nic.trim()) payload.nicEnc = state.nic.trim();
+  if (state.dob) payload.dobEnc = state.dob;
+  if (state.address.trim()) payload.addressEnc = state.address.trim();
+  if (state.whatsappNumber.trim()) payload.whatsappNumberEnc = state.whatsappNumber.trim();
 
   if (state.height.trim()) payload.heightEnc = state.height.trim();
   if (state.weight.trim()) payload.weightEnc = state.weight.trim();

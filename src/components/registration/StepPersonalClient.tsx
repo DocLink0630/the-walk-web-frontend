@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { CTA_PRIMARY_FILLED } from "@/config/cta-styles";
+import { useAuth } from "@/context/AuthContext";
 import { CLIENT_REGISTRATION_COPY } from "@/lib/registration/client-copy";
 import { submitClientRegistration } from "@/lib/registration/submit-client-registration";
 import type { ClientRegistrationStore } from "@/types/client-registration";
@@ -27,6 +29,8 @@ export default function StepPersonalClient({
   idPrefix = "cli",
 }: StepPersonalClientProps) {
   const [submitted, setSubmitted] = useState(false);
+  const { login } = useAuth();
+  const router = useRouter();
   const copy = CLIENT_REGISTRATION_COPY;
 
   const fullNameError =
@@ -43,6 +47,11 @@ export default function StepPersonalClient({
     const result = await submitClientRegistration(store);
 
     if (result.ok) {
+      const loginResult = await login(store.email, store.password);
+      if (loginResult.ok) {
+        router.push("/models");
+        return;
+      }
       store.set({ success: true, isSubmitting: false });
     } else {
       store.set({ error: result.message, isSubmitting: false });

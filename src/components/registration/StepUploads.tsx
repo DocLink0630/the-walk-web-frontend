@@ -128,7 +128,7 @@ function PortfolioGrid({
   return (
     <div className="space-y-2">
       <p className={formLabel}>
-        {label} <span className={formRequiredMark}>*</span>
+        {label}
         <span className="text-[#6B6B6B] normal-case tracking-normal font-normal ml-2">
           ({portfolioPhotos.length}/{MAX})
         </span>
@@ -215,26 +215,15 @@ export default function StepUploads({
     }
   }
 
-  const profilePhotoError = submitted && !store.profilePhoto ? "Profile photo is required" : null;
-  const nicFrontError = submitted && !store.nicFront ? "NIC front image is required" : null;
-  const nicBackError = submitted && !store.nicBack ? "NIC back image is required" : null;
-  const portfolioError =
-    submitted && store.portfolioPhotos.length === 0
-      ? "At least 1 portfolio photo is required"
-      : null;
+  const hasPhoto = !!store.profilePhoto || store.portfolioPhotos.length > 0;
+  const photoError = submitted && !hasPhoto ? "At least one photo (profile or portfolio) is required" : null;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitted(true);
     store.set({ error: null });
 
-    if (
-      !store.profilePhoto ||
-      !store.nicFront ||
-      !store.nicBack ||
-      store.portfolioPhotos.length === 0 ||
-      workExperienceError
-    ) {
+    if (!hasPhoto || workExperienceError) {
       return;
     }
 
@@ -269,27 +258,21 @@ export default function StepUploads({
       <div className="max-w-[200px]">
         <FileDropZone
           label="Profile photo"
-          required
           file={store.profilePhoto}
           onFile={(f) => store.set({ profilePhoto: f })}
-          error={profilePhotoError}
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <FileDropZone
-          label="NIC — Front"
-          required
+          label="NIC — Front (optional)"
           file={store.nicFront}
           onFile={(f) => store.set({ nicFront: f })}
-          error={nicFrontError}
         />
         <FileDropZone
-          label="NIC — Back"
-          required
+          label="NIC — Back (optional)"
           file={store.nicBack}
           onFile={(f) => store.set({ nicBack: f })}
-          error={nicBackError}
         />
       </div>
 
@@ -307,7 +290,7 @@ export default function StepUploads({
             : undefined
         }
       />
-      {portfolioError && <p className={formHint + " text-red-600"}>{portfolioError}</p>}
+      {photoError && <p className={formHint + " text-red-600"}>{photoError}</p>}
 
       {variant === "model" && (
         <WorkExperienceSection

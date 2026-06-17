@@ -3,6 +3,9 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
 import { GALLERY_PAGE } from "@/data/gallery-page";
+import { fetchSiteContentOverridesClient } from "@/lib/site-content/fetch-site-content";
+import { mergeGalleryCategories, mergeGalleryItems } from "@/lib/site-content/merge-gallery";
+import type { GalleryItem } from "@/types/gallery-page";
 import GalleryGridSection from "./GalleryGridSection";
 import GalleryHeroSection from "./GalleryHeroSection";
 import GalleryLightbox from "./GalleryLightbox";
@@ -10,6 +13,8 @@ import GalleryLightbox from "./GalleryLightbox";
 export default function GalleryPageContent() {
   const content = GALLERY_PAGE;
   const gridWrapRef = useRef<HTMLDivElement>(null);
+  const [items, setItems] = useState<GalleryItem[]>(content.items);
+  const [categories, setCategories] = useState<string[]>([...content.categories]);
   const [activeCategory, setActiveCategory] = useState("All");
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -18,12 +23,29 @@ export default function GalleryPageContent() {
     window.scrollTo(0, 0);
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      const overrides = await fetchSiteContentOverridesClient();
+      if (cancelled) return;
+      const merged = mergeGalleryItems(content.items, overrides);
+      setItems(merged);
+      setCategories(mergeGalleryCategories(content.categories, merged));
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [content.categories, content.items]);
+
   const filteredItems = useMemo(
     () =>
       activeCategory === "All"
-        ? content.items
-        : content.items.filter((item) => item.category === activeCategory),
-    [activeCategory, content.items],
+        ? items
+        : items.filter((item) => item.category === activeCategory),
+    [activeCategory, items],
   );
 
   useEffect(() => {
@@ -67,7 +89,7 @@ export default function GalleryPageContent() {
       <GalleryHeroSection
         eyebrow={content.eyebrow}
         heading={content.heading}
-        categories={content.categories}
+        categories={categories}
         activeCategory={activeCategory}
         onCategoryChange={handleCategoryChange}
         imageCount={filteredItems.length}

@@ -1,0 +1,260 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { getClientToken } from "@/lib/client/token";
+import type { AdminModelRegistrationMedia } from "@/types/admin";
+import { patchOwnModelProfile } from "@/lib/model/profile-api";
+import ModelProfileMediaSection from "./ModelProfileMediaSection";
+
+interface ModelOwnProfile {
+  id: string;
+  email: string;
+  status: string;
+  modelProfile?: {
+    fullName?: string;
+    shortBio?: string | null;
+    heightEnc?: string | null;
+    weightEnc?: string | null;
+    chestEnc?: string | null;
+    waistEnc?: string | null;
+    eyeColorEnc?: string | null;
+    hairColorEnc?: string | null;
+    tier?: string;
+    rate?: string | null;
+    gender?: string;
+  } | null;
+  registrationMedia?: AdminModelRegistrationMedia | null;
+}
+
+async function fetchOwnProfile(token: string): Promise<ModelOwnProfile | null> {
+  try {
+    const res = await fetch("/api/model/profile", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+export default function ModelProfilePage() {
+  const { user, isAuthenticated, isModel, isLoading } = useAuth();
+  const router = useRouter();
+
+  const [profile, setProfile] = useState<ModelOwnProfile | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [banner, setBanner] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+
+  const [bio, setBio] = useState("");
+  const [height, setHeight] = useState("");
+  const [weight, setWeight] = useState("");
+  const [chest, setChest] = useState("");
+  const [waist, setWaist] = useState("");
+  const [eyeColor, setEyeColor] = useState("");
+  const [hairColor, setHairColor] = useState("");
+  const [registrationMedia, setRegistrationMedia] =
+    useState<AdminModelRegistrationMedia | null>(null);
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (!isAuthenticated) {
+      router.replace("/?login=1");
+      return;
+    }
+    if (!isModel) {
+      router.replace("/");
+      return;
+    }
+
+    const token = getClientToken();
+    if (!token) return;
+
+    void fetchOwnProfile(token).then((data) => {
+      setProfile(data);
+      if (data?.modelProfile) {
+        setBio(data.modelProfile.shortBio ?? "");
+        setHeight(data.modelProfile.heightEnc ?? "");
+        setWeight(data.modelProfile.weightEnc ?? "");
+        setChest(data.modelProfile.chestEnc ?? "");
+        setWaist(data.modelProfile.waistEnc ?? "");
+        setEyeColor(data.modelProfile.eyeColorEnc ?? "");
+        setHairColor(data.modelProfile.hairColorEnc ?? "");
+      }
+      setRegistrationMedia(data?.registrationMedia ?? null);
+      setLoadingProfile(false);
+    });
+  }, [isAuthenticated, isLoading, isModel, router]);
+
+  const isActive = profile?.status === "ACTIVE";
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    const token = getClientToken();
+    if (!token) return;
+
+    setSaving(true);
+    setBanner(null);
+
+    const result = await patchOwnModelProfile({
+      shortBio: bio,
+      heightEnc: height,
+      weightEnc: weight,
+      chestEnc: chest,
+      waistEnc: waist,
+      eyeColorEnc: eyeColor,
+      hairColorEnc: hairColor,
+    });
+
+    setSaving(false);
+    setBanner(result.ok ? { type: "ok", text: "Profile updated." } : { type: "err", text: result.message ?? "Update failed" });
+  }
+
+  const inputCls =
+    "w-full border border-[#E0E0E0] px-3 py-2.5 font-ui text-[10px] tracking-[0.05em] bg-white outline-none focus:border-[#C8A97A] transition-colors";
+
+  if (isLoading || loadingProfile) {
+    return (
+      <main className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">
+        <p className="font-ui text-[10px] tracking-[0.2em] uppercase text-[#9A9A9A]">
+          Loading…
+        </p>
+      </main>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-[#FAFAFA] pt-24 pb-16 px-4">
+      <div className="max-w-xl mx-auto">
+        <p className="font-ui text-[8px] tracking-[0.35em] uppercase text-[#C8A97A] mb-2">
+          Model account
+        </p>
+        <h1 className="font-display text-3xl font-light text-[#0A0A0A] mb-1">
+          {profile?.modelProfile?.fullName ?? user?.name ?? user?.email}
+        </h1>
+        <p className="font-ui text-[9px] tracking-[0.1em] text-[#9A9A9A] mb-8">
+          {user?.email}
+        </p>
+
+        {!isActive && (
+          <div className="border border-[#C8A97A] bg-[#C8A97A]/10 px-5 py-4 mb-8">
+            <p className="font-ui text-[9px] tracking-[0.2em] uppercase text-[#9A7329] mb-1">
+              Under admin review
+            </p>
+            <p className="font-ui text-[10px] text-[#0A0A0A] leading-relaxed">
+              Your profile has been submitted and is currently being reviewed by the team. You
+              will be notified once your account is activated.
+            </p>
+          </div>
+        )}
+
+        {isActive && (
+          <form onSubmit={handleSave} className="space-y-6">
+            <section className="bg-white border border-[#E0E0E0] p-6 space-y-5">
+              <h2 className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#0A0A0A]">
+                Profile details
+              </h2>
+
+              <div className="space-y-1">
+                <label className="font-ui text-[8px] tracking-[0.2em] uppercase text-[#9A9A9A]">
+                  Bio
+                </label>
+                <textarea
+                  rows={4}
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  className={inputCls + " resize-y"}
+                  placeholder="Tell clients about yourself…"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { label: "Height", value: height, set: setHeight, placeholder: "e.g. 178cm" },
+                  { label: "Weight", value: weight, set: setWeight, placeholder: "e.g. 65kg" },
+                  { label: "Chest", value: chest, set: setChest, placeholder: "e.g. 90cm" },
+                  { label: "Waist", value: waist, set: setWaist, placeholder: "e.g. 70cm" },
+                  { label: "Eye colour", value: eyeColor, set: setEyeColor, placeholder: "e.g. Brown" },
+                  { label: "Hair colour", value: hairColor, set: setHairColor, placeholder: "e.g. Black" },
+                ].map(({ label, value, set, placeholder }) => (
+                  <div key={label} className="space-y-1">
+                    <label className="font-ui text-[8px] tracking-[0.2em] uppercase text-[#9A9A9A]">
+                      {label}
+                    </label>
+                    <input
+                      type="text"
+                      value={value}
+                      onChange={(e) => set(e.target.value)}
+                      className={inputCls}
+                      placeholder={placeholder}
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <ModelProfileMediaSection
+              media={registrationMedia}
+              onMediaChange={setRegistrationMedia}
+              onError={(message) => setBanner({ type: "err", text: message })}
+            />
+
+            {banner && (
+              <div
+                className={
+                  banner.type === "ok"
+                    ? "border border-[#C8A97A] bg-[#C8A97A]/10 px-5 py-3"
+                    : "border border-red-300 bg-red-50 px-5 py-3"
+                }
+              >
+                <p
+                  className={
+                    "font-ui text-[10px] " +
+                    (banner.type === "ok" ? "text-[#0A0A0A]" : "text-red-700")
+                  }
+                >
+                  {banner.text}
+                </p>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={saving}
+              className="w-full font-ui text-[10px] tracking-[0.2em] uppercase px-6 py-3.5 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] disabled:opacity-50 transition-colors"
+            >
+              {saving ? "Saving…" : "Save changes"}
+            </button>
+          </form>
+        )}
+
+        {!isActive && (
+          <div className="bg-white border border-[#E0E0E0] p-6">
+            <p className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#0A0A0A] mb-4">
+              Your details
+            </p>
+            <div className="space-y-3">
+              {[
+                ["Full name", profile?.modelProfile?.fullName],
+                ["Height", profile?.modelProfile?.heightEnc],
+                ["Gender", profile?.modelProfile?.gender],
+              ]
+                .filter(([, v]) => v)
+                .map(([label, val]) => (
+                  <div key={label as string}>
+                    <p className="font-ui text-[8px] tracking-[0.2em] uppercase text-[#9A9A9A]">
+                      {label}
+                    </p>
+                    <p className="font-ui text-[10px] text-[#0A0A0A]">{val}</p>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </main>
+  );
+}

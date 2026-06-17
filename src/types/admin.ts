@@ -105,8 +105,38 @@ export interface MediaOrderUpdateItem {
   order: number;
 }
 
+export interface AdminStudentProfile {
+  id?: string;
+  userId?: string;
+  fullName?: string;
+  gender?: string;
+  modelCode?: string;
+  source?: string;
+  age?: number;
+  tier?: ModelTier;
+  nicEnc?: string | null;
+  dobEnc?: string | null;
+  addressEnc?: string | null;
+  contactNumberEnc?: string | null;
+  whatsappNumberEnc?: string | null;
+  heightEnc?: string | null;
+  weightEnc?: string | null;
+  chestEnc?: string | null;
+  shoulderEnc?: string | null;
+  waistEnc?: string | null;
+  shoeSizeEnc?: string | null;
+  eyeColorEnc?: string | null;
+  hairColorEnc?: string | null;
+  talentsEnc?: string | null;
+  shortBio?: string | null;
+  skinColorOptionId?: string | null;
+  preferredBranchRaw?: string | null;
+  preferredDate?: string | null;
+}
+
 export interface AdminUserDetail extends AdminUser {
   modelProfile?: AdminModelProfile;
+  studentProfile?: AdminStudentProfile;
   model_expectations?: AdminModelExpectations | null;
   /** Populated when backend exposes registration file URLs on user detail */
   registrationMedia?: AdminModelRegistrationMedia | null;

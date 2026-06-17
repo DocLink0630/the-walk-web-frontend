@@ -6,6 +6,7 @@ import { Menu, X } from "lucide-react";
 import { useAdminAuthStore } from "@/stores/adminAuthStore";
 import { ADMIN_NAV_ITEMS, type AdminSection } from "@/types/admin-nav";
 import AdminSidebar from "./AdminSidebar";
+import { adminPageTitle } from "./admin-ui";
 
 interface AdminShellProps {
   activeSection: AdminSection;
@@ -32,7 +33,7 @@ export default function AdminShell({
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5]">
+    <div className="flex min-h-screen min-h-dvh bg-gray-100">
       {sidebarOpen && (
         <button
           type="button"
@@ -43,7 +44,7 @@ export default function AdminShell({
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-[min(100%,280px)] transform transition-transform duration-300 ease-out lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -56,39 +57,21 @@ export default function AdminShell({
         />
       </aside>
 
-      <div className="lg:pl-[280px] flex min-h-screen flex-col">
-        <header className="sticky top-0 z-30 border-b border-[#E0E0E0] bg-white/95 backdrop-blur-sm">
-          <div className="flex items-center justify-between gap-4 px-4 py-4 md:px-6 lg:px-8">
-            <div className="flex items-center gap-3 min-w-0">
-              <button
-                type="button"
-                onClick={() => setSidebarOpen((open) => !open)}
-                className="lg:hidden flex size-10 items-center justify-center border border-[#E0E0E0] text-[#0A0A0A] hover:border-[#C8A97A] transition-colors shrink-0"
-                aria-label="Open menu"
-              >
-                {sidebarOpen ? (
-                  <X className="size-5" strokeWidth={1.5} />
-                ) : (
-                  <Menu className="size-5" strokeWidth={1.5} />
-                )}
-              </button>
-              <div className="min-w-0">
-                <h1 className="font-display text-xl md:text-2xl font-light text-[#0A0A0A] truncate">
-                  {activeItem.label}
-                </h1>
-                <p className="font-ui text-[9px] tracking-[0.15em] text-[#9A9A9A] uppercase truncate hidden sm:block">
-                  {activeItem.description}
-                </p>
-              </div>
-            </div>
-            <span className="font-ui text-[8px] tracking-[0.2em] uppercase text-[#C8A97A] shrink-0 hidden md:inline">
-              Dashboard
-            </span>
-          </div>
+      <div className="flex min-h-screen min-h-dvh flex-1 flex-col lg:pl-64">
+        <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 sm:px-6">
+          <button
+            type="button"
+            onClick={() => setSidebarOpen((open) => !open)}
+            className="lg:hidden flex size-10 items-center justify-center rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+            aria-label="Toggle menu"
+          >
+            {sidebarOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+          </button>
+          <h1 className={`${adminPageTitle} min-w-0 truncate`}>{activeItem.label}</h1>
         </header>
 
-        <main className="flex-1 px-4 py-6 md:px-6 md:py-8 lg:px-8 lg:py-10 max-w-[1400px] w-full">
-          {children}
+        <main className="flex-1 px-4 py-5 sm:px-6 sm:py-8 lg:px-10">
+          <div className="mx-auto w-full max-w-5xl">{children}</div>
         </main>
       </div>
     </div>

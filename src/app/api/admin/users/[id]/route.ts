@@ -75,3 +75,35 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
   return NextResponse.json(data);
 }
+
+export async function DELETE(request: NextRequest, context: RouteContext) {
+  try {
+    getBackendUrl();
+  } catch {
+    return NextResponse.json(
+      { message: "BACKEND_URL is not configured" },
+      { status: 500 },
+    );
+  }
+
+  const token = getBearerToken(request);
+  if (!token) {
+    return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
+  }
+
+  const { id } = await context.params;
+
+  const { status, data } = await backendFetch(`/v1/users/${id}`, {
+    method: "DELETE",
+    token,
+  });
+
+  if (status !== 200 && status !== 204) {
+    return NextResponse.json(
+      data ?? { message: errorMessage(data, "Failed to delete user") },
+      { status },
+    );
+  }
+
+  return NextResponse.json({ message: "User deleted successfully" });
+}

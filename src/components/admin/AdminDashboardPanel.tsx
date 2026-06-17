@@ -3,6 +3,8 @@
 import { ArrowRight } from "lucide-react";
 import type { AdminSection } from "@/types/admin-nav";
 import ModelDashboardKpiRow from "./ModelDashboardKpiRow";
+import StudentDashboardKpiRow from "./StudentDashboardKpiRow";
+import { adminCard, adminPageDesc, adminSectionTitle } from "./admin-ui";
 
 interface AdminDashboardPanelProps {
   onSectionChange: (section: AdminSection) => void;
@@ -10,54 +12,126 @@ interface AdminDashboardPanelProps {
 
 export default function AdminDashboardPanel({ onSectionChange }: AdminDashboardPanelProps) {
   return (
-    <div className="space-y-10">
+    <div className="space-y-6 sm:space-y-8">
       <div>
-        <p className="font-ui text-[9px] tracking-[0.35em] uppercase text-[#C8A97A] mb-3">
-          Overview
-        </p>
-        <h2 className="font-display text-3xl md:text-4xl font-light text-[#0A0A0A] mb-2">
-          Model agency at a glance
-        </h2>
-        <p className="font-ui text-[11px] tracking-[0.05em] text-[#6B6B6B] max-w-xl leading-relaxed">
-          Track pending applications, rejections, and active roster counts. Open Models to review
-          profiles, assign tiers, and set price ranges.
+        <h2 className={`${adminSectionTitle} text-xl sm:text-2xl mb-2`}>Overview</h2>
+        <p className={adminPageDesc}>
+          Pending applications, enrolled students, and active roster at a glance.
         </p>
       </div>
 
       <ModelDashboardKpiRow />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <h3 className={`${adminSectionTitle} mb-3`}>Academy</h3>
+        <StudentDashboardKpiRow />
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
         <button
           type="button"
           onClick={() => onSectionChange("models")}
-          className="group text-left border border-[#E0E0E0] bg-white px-5 py-5 hover:border-[#C8A97A] transition-colors"
+          className={`${adminCard} group w-full text-left transition hover:border-amber-400 hover:shadow-md`}
         >
-          <p className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#9A9A9A] mb-2">
-            Quick action
-          </p>
-          <p className="font-display text-xl font-light text-[#0A0A0A] mb-2 group-hover:text-[#C8A97A] transition-colors">
-            Manage model applications
-          </p>
-          <p className="font-ui text-[10px] text-[#6B6B6B] leading-relaxed mb-4">
-            Review registrations, assign Fresher / Experienced / Supermodel tiers, set price range
-            per event, and approve or reject applications.
-          </p>
-          <span className="inline-flex items-center gap-2 font-ui text-[9px] tracking-[0.2em] uppercase text-[#0A0A0A] group-hover:text-[#C8A97A] transition-colors">
-            Go to Models
-            <ArrowRight className="size-3.5" strokeWidth={1.5} />
-          </span>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-gray-900 mb-1 group-hover:text-amber-700 transition-colors">
+                Manage models
+              </p>
+              <p className="text-sm text-gray-500">
+                Review applications, edit profiles, and approve or reject.
+              </p>
+            </div>
+            <span className="inline-flex items-center gap-2 text-sm font-medium text-gray-900 group-hover:text-amber-700 shrink-0">
+              Open models
+              <ArrowRight className="size-4" strokeWidth={1.75} />
+            </span>
+          </div>
         </button>
 
-        <div className="border border-[#E0E0E0] bg-white px-5 py-5">
-          <p className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#9A9A9A] mb-2">
-            Approval flow
-          </p>
-          <ol className="space-y-2 font-ui text-[10px] text-[#4A4A4A] leading-relaxed list-decimal list-inside">
-            <li>Model registers → Pending review</li>
-            <li>Admin assigns tier &amp; price range per event → Approve or Reject</li>
-            <li>Approved models become Active on the public roster</li>
-          </ol>
-        </div>
+        <button
+          type="button"
+          onClick={() => onSectionChange("students")}
+          className={`${adminCard} group w-full text-left transition hover:border-amber-400 hover:shadow-md`}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-gray-900 mb-1 group-hover:text-amber-700 transition-colors">
+                Manage students
+              </p>
+              <p className="text-sm text-gray-500">
+                Review academy applications submitted through the website.
+              </p>
+            </div>
+            <span className="inline-flex items-center gap-2 text-sm font-medium text-gray-900 group-hover:text-amber-700 shrink-0">
+              Open students
+              <ArrowRight className="size-4" strokeWidth={1.75} />
+            </span>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onSectionChange("events")}
+          className={`${adminCard} group w-full text-left transition hover:border-amber-400 hover:shadow-md`}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-gray-900 mb-1 group-hover:text-amber-700 transition-colors">
+                Manage events
+              </p>
+              <p className="text-sm text-gray-500">
+                Add events with detail pages or hide built-in listings.
+              </p>
+            </div>
+            <span className="inline-flex items-center gap-2 text-sm font-medium text-gray-900 group-hover:text-amber-700 shrink-0">
+              Open events
+              <ArrowRight className="size-4" strokeWidth={1.75} />
+            </span>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onSectionChange("gallery")}
+          className={`${adminCard} group w-full text-left transition hover:border-amber-400 hover:shadow-md`}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-gray-900 mb-1 group-hover:text-amber-700 transition-colors">
+                Manage gallery
+              </p>
+              <p className="text-sm text-gray-500">
+                Upload images, reorder the grid, and hide hardcoded photos.
+              </p>
+            </div>
+            <span className="inline-flex items-center gap-2 text-sm font-medium text-gray-900 group-hover:text-amber-700 shrink-0">
+              Open gallery
+              <ArrowRight className="size-4" strokeWidth={1.75} />
+            </span>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onSectionChange("inquiries")}
+          className={`${adminCard} group w-full text-left transition hover:border-amber-400 hover:shadow-md`}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-gray-900 mb-1 group-hover:text-amber-700 transition-colors">
+                Manage inquiries
+              </p>
+              <p className="text-sm text-gray-500">
+                Review client booking requests and update their status.
+              </p>
+            </div>
+            <span className="inline-flex items-center gap-2 text-sm font-medium text-gray-900 group-hover:text-amber-700 shrink-0">
+              Open inquiries
+              <ArrowRight className="size-4" strokeWidth={1.75} />
+            </span>
+          </div>
+        </button>
       </div>
     </div>
   );

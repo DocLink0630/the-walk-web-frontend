@@ -41,6 +41,7 @@ export interface PublicModel {
   hairColor?: string;
   bio?: string;
   portfolioImages: string[];
+  workExperienceImages?: string[];
   /** True when sourced from featured-only fallback (guest or permission denied) */
   isFeaturedOnly?: boolean;
 }

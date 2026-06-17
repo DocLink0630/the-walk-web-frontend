@@ -16,22 +16,24 @@ import {
   type ClientSession,
 } from "@/lib/client/session";
 import { clearClientToken, getClientToken, setClientToken } from "@/lib/client/token";
-import type { UserRole } from "@/types/admin";
+import type { UserRole, UserStatus } from "@/types/admin";
 
 export interface User {
   id: string;
   email: string;
   name: string;
   roles: UserRole[];
+  status: UserStatus;
   type: "client";
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<{ ok: boolean; isModel?: boolean; isClient?: boolean }>;
   logout: () => void;
   isAuthenticated: boolean;
   isClient: boolean;
+  isModel: boolean;
   isLoading: boolean;
 }
 
@@ -43,6 +45,7 @@ function toUser(session: ClientSession): User {
     email: session.email,
     name: session.name,
     roles: session.roles,
+    status: session.status,
     type: "client",
   };
 }
@@ -94,7 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void restore();
   }, [applySession]);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<{ ok: boolean; isModel?: boolean; isClient?: boolean }> => {
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
@@ -102,7 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ email, password }),
       });
 
-      if (!res.ok) return false;
+      if (!res.ok) return { ok: false };
 
       const data = (await res.json()) as {
         access_token?: string | null;
@@ -120,9 +123,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       applySession(buildClientSession(data.user));
-      return true;
+      const userIsModel = data.user.roles?.includes("MODEL") ?? false;
+      const userIsClient = data.user.roles?.includes("CORPORATE_CLIENT") ?? false;
+      return { ok: true, isModel: userIsModel, isClient: userIsClient };
     } catch {
-      return false;
+      return { ok: false };
     }
   };
 
@@ -135,6 +140,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isClient =
     !!user?.roles?.includes("CORPORATE_CLIENT") || user?.type === "client";
 
+  const isModel = !!user?.roles?.includes("MODEL");
+
   return (
     <AuthContext.Provider
       value={{
@@ -143,6 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         isAuthenticated: !!user,
         isClient,
+        isModel,
         isLoading,
       }}
     >

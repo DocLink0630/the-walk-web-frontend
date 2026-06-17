@@ -1,0 +1,74 @@
+/* Admin dashboard — isolated shell, readable sans-serif UI */
+
+.admin-app {
+  font-family: var(--font-poppins), "Poppins", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #111827;
+  background: #f3f4f6;
+  cursor: auto;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.admin-app *,
+.admin-app *::before,
+.admin-app *::after {
+  cursor: auto;
+}
+
+.admin-app .font-display,
+.admin-app .font-ui,
+.admin-app h1,
+.admin-app h2,
+.admin-app h3,
+.admin-app h4,
+.admin-app label,
+.admin-app button,
+.admin-app input,
+.admin-app select,
+.admin-app textarea,
+.admin-app p,
+.admin-app span,
+.admin-app td,
+.admin-app th {
+  font-family: inherit;
+}
+
+/* Lift tiny legacy utility sizes to readable minimums */
+.admin-app [class*="text-[7px]"],
+.admin-app [class*="text-[8px]"],
+.admin-app [class*="text-[9px]"] {
+  font-size: 0.8125rem !important;
+  line-height: 1.4 !important;
+  letter-spacing: normal !important;
+}
+
+.admin-app [class*="text-[10px]"],
+.admin-app [class*="text-[11px]"] {
+  font-size: 0.875rem !important;
+  line-height: 1.45 !important;
+  letter-spacing: normal !important;
+}
+
+.admin-app label,
+.admin-app button {
+  text-transform: none;
+  font-weight: 500;
+}
+
+.admin-app input,
+.admin-app select,
+.admin-app textarea {
+  font-size: 0.9375rem;
+}
+
+/* Softer section headings that still use uppercase utilities */
+.admin-app h3[class*="uppercase"],
+.admin-app [class*="tracking-[0.2em]"],
+.admin-app [class*="tracking-[0.25em]"],
+.admin-app [class*="tracking-[0.3em]"] {
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}

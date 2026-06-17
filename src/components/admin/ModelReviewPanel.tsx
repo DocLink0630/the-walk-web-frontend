@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import {
   approveModelProfile,
+  deleteAdminUser,
   fetchAdminUserDetail,
   toggleModelFeatured,
+  updateAdminModelProfile,
   updateUserStatus,
 } from "@/lib/admin/users-api";
 import { ADMIN_ASSIGNABLE_TIERS, formatModelTier } from "@/lib/admin/model-tiers";
@@ -17,23 +19,27 @@ import type {
   AssignableModelTier,
 } from "@/types/admin";
 import ModelReviewMediaSection from "./ModelReviewMediaSection";
+import {
+  adminAlertErr,
+  adminAlertOk,
+  adminBtnDanger,
+  adminBtnPrimary,
+  adminBtnSecondary,
+  adminCard,
+  adminInput,
+  adminMutedBox,
+  adminPageTitle,
+  adminSectionTitle,
+} from "./admin-ui";
 
-const inputCls =
-  "w-full border border-[#E0E0E0] px-3 py-2 font-ui text-[10px] tracking-[0.1em] outline-none focus:border-[#C8A97A] bg-white";
-
-function skinColorLabel(id?: string | null): string {
-  if (!id) return "—";
-  return SKIN_COLOR_OPTIONS.find((o) => o.id === id)?.label ?? id;
-}
+const inputCls = adminInput;
 
 function DetailRow({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null;
   return (
     <div>
-      <p className="font-ui text-[8px] tracking-[0.2em] uppercase text-[#9A9A9A] mb-1">
-        {label}
-      </p>
-      <p className="font-ui text-[10px] text-[#0A0A0A] leading-relaxed">{value}</p>
+      <p className="text-xs font-medium text-gray-500 mb-0.5">{label}</p>
+      <p className="text-sm text-gray-900">{value}</p>
     </div>
   );
 }
@@ -54,11 +60,33 @@ export default function ModelReviewPanel({
   const [error, setError] = useState<string | null>(null);
   const [banner, setBanner] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [saving, setSaving] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
   const [rejecting, setRejecting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const [rate, setRate] = useState("");
   const [tier, setTier] = useState<AssignableModelTier>("FRESHER");
   const [talents, setTalents] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [gender, setGender] = useState("");
+  const [age, setAge] = useState("");
+  const [nic, setNic] = useState("");
+  const [dob, setDob] = useState("");
+  const [address, setAddress] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
+  const [whatsappNumber, setWhatsappNumber] = useState("");
+  const [height, setHeight] = useState("");
+  const [weight, setWeight] = useState("");
+  const [chest, setChest] = useState("");
+  const [shoulder, setShoulder] = useState("");
+  const [waist, setWaist] = useState("");
+  const [shoeSize, setShoeSize] = useState("");
+  const [eyeColor, setEyeColor] = useState("");
+  const [hairColor, setHairColor] = useState("");
+  const [shortBio, setShortBio] = useState("");
+  const [skinColorOptionId, setSkinColorOptionId] = useState("");
+  const [preferredBranch, setPreferredBranch] = useState("");
+  const [preferredDate, setPreferredDate] = useState("");
   const [isFeatured, setIsFeatured] = useState(false);
   const [togglingFeatured, setTogglingFeatured] = useState(false);
 
@@ -93,6 +121,26 @@ export default function ModelReviewPanel({
       setTalents(
         expectations?.talentsEnc?.trim() || profile?.talentsEnc?.trim() || "",
       );
+      setFullName(profile?.fullName?.trim() || "");
+      setGender(profile?.gender?.trim() || "");
+      setAge(profile?.age != null ? String(profile.age) : "");
+      setNic((profile as { nicEnc?: string } | undefined)?.nicEnc?.trim() || "");
+      setDob((profile as { dobEnc?: string } | undefined)?.dobEnc?.trim() || "");
+      setAddress(profile?.addressEnc?.trim() || "");
+      setContactNumber(profile?.contactNumberEnc?.trim() || "");
+      setWhatsappNumber(profile?.whatsappNumberEnc?.trim() || "");
+      setHeight(profile?.heightEnc?.trim() || "");
+      setWeight(profile?.weightEnc?.trim() || "");
+      setChest(profile?.chestEnc?.trim() || "");
+      setShoulder(profile?.shoulderEnc?.trim() || "");
+      setWaist(profile?.waistEnc?.trim() || "");
+      setShoeSize(profile?.shoeSizeEnc?.trim() || "");
+      setEyeColor(profile?.eyeColorEnc?.trim() || "");
+      setHairColor(profile?.hairColorEnc?.trim() || "");
+      setShortBio(profile?.shortBio?.trim() || "");
+      setSkinColorOptionId(profile?.skinColorOptionId?.trim() || "");
+      setPreferredBranch(profile?.preferredBranchRaw?.trim() || "");
+      setPreferredDate(profile?.preferredDate?.trim() || "");
       setIsFeatured(profile?.isFeatured ?? false);
       setLoading(false);
     }
@@ -109,6 +157,52 @@ export default function ModelReviewPanel({
       document.body.style.overflow = "";
     };
   }, []);
+
+  async function handleSaveProfile() {
+    if (!fullName.trim()) {
+      setBanner({ type: "err", text: "Full name is required." });
+      return;
+    }
+
+    setSavingProfile(true);
+    setBanner(null);
+
+    const result = await updateAdminModelProfile(user.id, {
+      fullName: fullName.trim(),
+      gender: gender.trim() || undefined,
+      age: age.trim() ? Number(age.trim()) : undefined,
+      nicEnc: nic.trim() || undefined,
+      dobEnc: dob.trim() || undefined,
+      addressEnc: address.trim() || undefined,
+      contactNumberEnc: contactNumber.trim() || undefined,
+      whatsappNumberEnc: whatsappNumber.trim() || undefined,
+      heightEnc: height.trim() || undefined,
+      weightEnc: weight.trim() || undefined,
+      chestEnc: chest.trim() || undefined,
+      shoulderEnc: shoulder.trim() || undefined,
+      waistEnc: waist.trim() || undefined,
+      shoeSizeEnc: shoeSize.trim() || undefined,
+      eyeColorEnc: eyeColor.trim() || undefined,
+      hairColorEnc: hairColor.trim() || undefined,
+      shortBio: shortBio.trim() || undefined,
+      skinColorOptionId: skinColorOptionId.trim() || undefined,
+      preferredBranchRaw: preferredBranch.trim() || undefined,
+      preferredDate: preferredDate.trim() || undefined,
+      rate: rate.trim() || undefined,
+      tier,
+      talents: talents.trim() || undefined,
+    });
+
+    if (!result.ok) {
+      setBanner({ type: "err", text: result.message });
+      setSavingProfile(false);
+      return;
+    }
+
+    setBanner({ type: "ok", text: "Profile saved." });
+    setSavingProfile(false);
+    onUpdated();
+  }
 
   async function handleFeaturedToggle(next: boolean) {
     setTogglingFeatured(true);
@@ -194,6 +288,30 @@ export default function ModelReviewPanel({
     onUpdated();
   }
 
+  async function handleDelete() {
+    const name = profile?.fullName || user.email;
+    if (
+      !window.confirm(
+        `Permanently delete "${name}"?\n\nThis will remove their account from Auth0, all uploaded files, and all database records. This cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+
+    setDeleting(true);
+    setBanner(null);
+
+    const result = await deleteAdminUser(user.id);
+    if (!result.ok) {
+      setBanner({ type: "err", text: result.message });
+      setDeleting(false);
+      return;
+    }
+
+    onClose();
+    onUpdated();
+  }
+
   const profile = detail?.modelProfile;
   const expectations = detail?.model_expectations;
 
@@ -205,46 +323,34 @@ export default function ModelReviewPanel({
         className="absolute inset-0 bg-black/40"
         onClick={onClose}
       />
-      <aside className="relative w-full max-w-3xl bg-white h-full overflow-y-auto shadow-2xl flex flex-col">
-        <div className="sticky top-0 z-10 border-b border-[#E0E0E0] bg-white px-4 py-4 md:px-6 flex items-start justify-between gap-4">
+      <aside className="relative w-full max-w-3xl sm:max-w-2xl lg:max-w-3xl bg-white h-full overflow-y-auto shadow-2xl flex flex-col">
+        <div className="sticky top-0 z-10 border-b border-gray-200 bg-white px-4 py-4 md:px-6 flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="font-ui text-[9px] tracking-[0.3em] uppercase text-[#C8A97A] mb-1">
-              Model review
-            </p>
-            <h2 className="font-display text-xl font-light text-[#0A0A0A] truncate">
+            <p className="text-xs font-medium text-amber-700 mb-1">Model review</p>
+            <h2 className={`${adminPageTitle} truncate`}>
               {profile?.fullName || user.email}
             </h2>
-            <p className="font-ui text-[9px] tracking-[0.1em] text-[#9A9A9A] mt-1 truncate">
-              {user.email}
-            </p>
+            <p className="text-sm text-gray-500 mt-0.5 truncate">{user.email}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="shrink-0 p-2 border border-[#E0E0E0] hover:border-[#0A0A0A] transition-colors"
+            className="shrink-0 p-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
             aria-label="Close"
           >
-            <X className="size-4" strokeWidth={1.5} />
+            <X className="size-4" strokeWidth={1.75} />
           </button>
         </div>
 
-        <div className="flex-1 px-4 py-6 md:px-6 space-y-8">
-          {loading && (
-            <p className="font-ui text-[10px] text-[#9A9A9A]">Loading profile…</p>
-          )}
+        <div className="flex-1 px-4 py-5 md:px-6 space-y-6">
+          {loading && <p className="text-sm text-gray-500">Loading profile…</p>}
 
-          {error && (
-            <div className="border border-red-300 bg-red-50 px-4 py-3">
-              <p className="font-ui text-[10px] text-red-700">{error}</p>
-            </div>
-          )}
+          {error && <div className={adminAlertErr}>{error}</div>}
 
           {!loading && !error && (
             <>
               <section className="space-y-3">
-                <h3 className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#0A0A0A]">
-                  Account
-                </h3>
+                <h3 className={adminSectionTitle}>Account</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <DetailRow label="Status" value={MODEL_STATUS_LABELS[user.status]} />
                   <DetailRow label="Model code" value={profile?.modelCode} />
@@ -255,13 +361,11 @@ export default function ModelReviewPanel({
                   />
                 </div>
 
-                <div className="flex items-center justify-between gap-4 border border-[#E0E0E0] bg-[#FAFAFA] px-4 py-3 mt-2">
+                <div className={`${adminCard} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 !py-4`}>
                   <div>
-                    <p className="font-ui text-[9px] tracking-[0.2em] uppercase text-[#0A0A0A]">
-                      Featured on homepage
-                    </p>
-                    <p className="font-ui text-[9px] text-[#6B6B6B] mt-1 leading-relaxed">
-                      Shown in the Signature Models section on the public site.
+                    <p className="text-sm font-medium text-gray-900">Featured on homepage</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Shown in Signature Models on the public site.
                     </p>
                   </div>
                   <button
@@ -284,17 +388,13 @@ export default function ModelReviewPanel({
                   </button>
                 </div>
                 {user.status !== "ACTIVE" && (
-                  <p className="font-ui text-[9px] text-[#9A9A9A]">
-                    Approve the model before featuring on the homepage.
-                  </p>
+                  <p className="text-sm text-gray-500">Approve the model before featuring on the homepage.</p>
                 )}
               </section>
 
               {expectations && (
-                <section className="space-y-3 border border-[#E0E0E0] bg-[#FAFAFA] p-4">
-                  <h3 className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#0A0A0A]">
-                    Applicant submission
-                  </h3>
+                <section className={adminMutedBox + " space-y-2"}>
+                  <h3 className={adminSectionTitle}>Applicant submission</h3>
                   <div className="grid grid-cols-1 gap-3">
                     <DetailRow
                       label="Requested tier"
@@ -309,44 +409,237 @@ export default function ModelReviewPanel({
                 </section>
               )}
 
-              <section className="space-y-3">
-                <h3 className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#0A0A0A]">
-                  Profile details
-                </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <DetailRow label="Gender" value={profile?.gender} />
-                  <DetailRow label="Age" value={profile?.age?.toString()} />
-                  <DetailRow label="Height" value={profile?.heightEnc} />
-                  <DetailRow label="Weight" value={profile?.weightEnc} />
-                  <DetailRow label="Skin color" value={skinColorLabel(profile?.skinColorOptionId)} />
-                  <DetailRow label="Source" value={profile?.source} />
+              <section className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h3 className={adminSectionTitle}>Profile details</h3>
+                  <button
+                    type="button"
+                    disabled={savingProfile || saving || rejecting || deleting}
+                    onClick={() => void handleSaveProfile()}
+                    className={adminBtnPrimary}
+                  >
+                    {savingProfile ? "Saving…" : "Save profile"}
+                  </button>
                 </div>
-                <DetailRow label="Bio" value={profile?.shortBio} />
-                <DetailRow label="Contact" value={profile?.contactNumberEnc} />
-                <DetailRow label="WhatsApp" value={profile?.whatsappNumberEnc} />
-                <DetailRow label="Address" value={profile?.addressEnc} />
-              </section>
 
-              <ModelReviewMediaSection
-                userId={user.id}
-                media={detail?.registrationMedia}
-                onMediaUpdated={(registrationMedia) =>
-                  setDetail((prev) => (prev ? { ...prev, registrationMedia } : prev))
-                }
-              />
-
-              {canReview && (
-                <section className="space-y-4 border-t border-[#E0E0E0] pt-6">
-                  <h3 className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#0A0A0A]">
-                    Approve or reject
-                  </h3>
-                  <p className="font-ui text-[10px] text-[#6B6B6B] leading-relaxed">
-                    Assign the official listing tier and price range per event. On approval the
-                    model is set to Active and can appear on the public roster.
-                  </p>
-
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block font-ui text-[9px] tracking-[0.25em] uppercase text-[#4A4A4A] mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Full name
+                    </label>
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Gender
+                    </label>
+                    <select
+                      value={gender}
+                      onChange={(e) => setGender(e.target.value)}
+                      className={inputCls}
+                    >
+                      <option value="">Select…</option>
+                      <option value="Female">Female</option>
+                      <option value="Male">Male</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Age
+                    </label>
+                    <input
+                      type="number"
+                      value={age}
+                      onChange={(e) => setAge(e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Skin color
+                    </label>
+                    <select
+                      value={skinColorOptionId}
+                      onChange={(e) => setSkinColorOptionId(e.target.value)}
+                      className={inputCls}
+                    >
+                      <option value="">Select…</option>
+                      {SKIN_COLOR_OPTIONS.map((o) => (
+                        <option key={o.id} value={o.id}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      NIC
+                    </label>
+                    <input
+                      type="text"
+                      value={nic}
+                      onChange={(e) => setNic(e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Date of birth
+                    </label>
+                    <input
+                      type="date"
+                      value={dob}
+                      onChange={(e) => setDob(e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Contact number
+                    </label>
+                    <input
+                      type="text"
+                      value={contactNumber}
+                      onChange={(e) => setContactNumber(e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      WhatsApp
+                    </label>
+                    <input
+                      type="text"
+                      value={whatsappNumber}
+                      onChange={(e) => setWhatsappNumber(e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Address
+                    </label>
+                    <input
+                      type="text"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Height
+                    </label>
+                    <input
+                      type="text"
+                      value={height}
+                      onChange={(e) => setHeight(e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Weight
+                    </label>
+                    <input
+                      type="text"
+                      value={weight}
+                      onChange={(e) => setWeight(e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Chest
+                    </label>
+                    <input
+                      type="text"
+                      value={chest}
+                      onChange={(e) => setChest(e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Shoulder
+                    </label>
+                    <input
+                      type="text"
+                      value={shoulder}
+                      onChange={(e) => setShoulder(e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Waist
+                    </label>
+                    <input
+                      type="text"
+                      value={waist}
+                      onChange={(e) => setWaist(e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Shoe size
+                    </label>
+                    <input
+                      type="text"
+                      value={shoeSize}
+                      onChange={(e) => setShoeSize(e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Eye color
+                    </label>
+                    <input
+                      type="text"
+                      value={eyeColor}
+                      onChange={(e) => setEyeColor(e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Hair color
+                    </label>
+                    <input
+                      type="text"
+                      value={hairColor}
+                      onChange={(e) => setHairColor(e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Bio
+                  </label>
+                  <textarea
+                    value={shortBio}
+                    onChange={(e) => setShortBio(e.target.value)}
+                    rows={3}
+                    className={inputCls + " resize-y min-h-[80px]"}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-[#E0E0E0] pt-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Price range per event
                     </label>
                     <input
@@ -357,9 +650,8 @@ export default function ModelReviewPanel({
                       className={inputCls}
                     />
                   </div>
-
                   <div>
-                    <label className="block font-ui text-[9px] tracking-[0.25em] uppercase text-[#4A4A4A] mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Model tier
                     </label>
                     <select
@@ -374,9 +666,8 @@ export default function ModelReviewPanel({
                       ))}
                     </select>
                   </div>
-
-                  <div>
-                    <label className="block font-ui text-[9px] tracking-[0.25em] uppercase text-[#4A4A4A] mb-1">
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Talents
                     </label>
                     <textarea
@@ -387,23 +678,50 @@ export default function ModelReviewPanel({
                       className={inputCls + " resize-y min-h-[80px]"}
                     />
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Preferred branch
+                    </label>
+                    <input
+                      type="text"
+                      value={preferredBranch}
+                      onChange={(e) => setPreferredBranch(e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Preferred date
+                    </label>
+                    <input
+                      type="text"
+                      value={preferredDate}
+                      onChange={(e) => setPreferredDate(e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                </div>
+              </section>
+
+              <ModelReviewMediaSection
+                userId={user.id}
+                media={detail?.registrationMedia}
+                onMediaUpdated={(registrationMedia) =>
+                  setDetail((prev) => (prev ? { ...prev, registrationMedia } : prev))
+                }
+                onError={(text) => setBanner({ type: "err", text })}
+              />
+
+              {canReview && (
+                <section className="space-y-4 border-t border-[#E0E0E0] pt-6">
+                  <h3 className={adminSectionTitle}>Approve or reject</h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    Confirm tier and price above, then approve to activate the model.
+                  </p>
 
                   {banner && (
-                    <div
-                      className={
-                        banner.type === "ok"
-                          ? "border border-[#C8A97A] bg-[#C8A97A]/10 px-4 py-3"
-                          : "border border-red-300 bg-red-50 px-4 py-3"
-                      }
-                    >
-                      <p
-                        className={
-                          "font-ui text-[10px] " +
-                          (banner.type === "ok" ? "text-[#0A0A0A]" : "text-red-700")
-                        }
-                      >
-                        {banner.text}
-                      </p>
+                    <div className={banner.type === "ok" ? adminAlertOk : adminAlertErr}>
+                      {banner.text}
                     </div>
                   )}
 
@@ -412,7 +730,7 @@ export default function ModelReviewPanel({
                       type="button"
                       disabled={saving || rejecting}
                       onClick={handleApprove}
-                      className="flex-1 font-ui text-[9px] tracking-[0.2em] uppercase px-4 py-3 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] disabled:opacity-50 transition-colors"
+                      className={adminBtnPrimary + " flex-1"}
                     >
                       {saving ? "Approving…" : "Approve model"}
                     </button>
@@ -420,7 +738,7 @@ export default function ModelReviewPanel({
                       type="button"
                       disabled={saving || rejecting}
                       onClick={handleReject}
-                      className="flex-1 font-ui text-[9px] tracking-[0.2em] uppercase px-4 py-3 border border-[#0A0A0A] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white disabled:opacity-50 transition-colors"
+                      className={adminBtnSecondary + " flex-1"}
                     >
                       {rejecting ? "Rejecting…" : "Reject"}
                     </button>
@@ -429,30 +747,32 @@ export default function ModelReviewPanel({
               )}
 
               {!canReview && banner && (
-                <div
-                  className={
-                    banner.type === "ok"
-                      ? "border border-[#C8A97A] bg-[#C8A97A]/10 px-4 py-3"
-                      : "border border-red-300 bg-red-50 px-4 py-3"
-                  }
-                >
-                  <p
-                    className={
-                      "font-ui text-[10px] " +
-                      (banner.type === "ok" ? "text-[#0A0A0A]" : "text-red-700")
-                    }
-                  >
-                    {banner.text}
-                  </p>
+                <div className={banner.type === "ok" ? adminAlertOk : adminAlertErr}>
+                  {banner.text}
                 </div>
               )}
 
               {!canReview && user.status !== "PENDING_ADMIN_REVIEW" && (
-                <p className="font-ui text-[10px] text-[#9A9A9A] leading-relaxed border-t border-[#E0E0E0] pt-6">
+                <p className="text-sm text-gray-500 border-t border-gray-200 pt-6">
                   This application is {MODEL_STATUS_LABELS[user.status].toLowerCase()}. Approval
-                  and rejection actions are only available while status is Pending review.
+                  actions are only available while pending review.
                 </p>
               )}
+
+              <section className="border-t border-red-200 pt-6 space-y-3">
+                <h3 className="text-base font-semibold text-red-700">Danger zone</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  Permanently deletes this account, all files, and the Auth0 login.
+                </p>
+                <button
+                  type="button"
+                  disabled={deleting || saving || rejecting}
+                  onClick={handleDelete}
+                  className={adminBtnDanger}
+                >
+                  {deleting ? "Deleting…" : "Delete account permanently"}
+                </button>
+              </section>
             </>
           )}
         </div>

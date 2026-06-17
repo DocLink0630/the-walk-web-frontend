@@ -190,15 +190,6 @@ export default function TalentSection({
             className="mb-12 md:mb-16 lg:mb-[80px]"
             eyebrow={eyebrow}
             title={heading}
-            action={
-              <Link
-                href={ctaHref}
-                data-cursor="button"
-                className="inline-block text-center md:text-left font-ui text-[9px] md:text-[10px] lg:text-[11px] font-light tracking-[0.25em] uppercase px-6 md:px-8 py-3 md:py-4 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] transition-colors duration-300"
-              >
-                {ctaLabel}
-              </Link>
-            }
           />
 
           {error && (
@@ -222,36 +213,48 @@ export default function TalentSection({
           )}
 
           {(loading || models.length > 0) && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5 lg:gap-6">
-              {displayItems.map((item) => {
-                const offset = PORTRAIT_OFFSETS[item.index % PORTRAIT_OFFSETS.length];
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5 lg:gap-6">
+                {displayItems.map((item) => {
+                  const offset = PORTRAIT_OFFSETS[item.index % PORTRAIT_OFFSETS.length];
 
-                if (item.skeleton) {
-                  return <SkeletonCard key={`skel-${item.index}`} offset={offset} />;
-                }
+                  if (item.skeleton) {
+                    return <SkeletonCard key={`skel-${item.index}`} offset={offset} />;
+                  }
 
-                const { model } = item;
-                const cardTitle = isAuthenticated
-                  ? model.name.toUpperCase()
-                  : getFirstName(model.name).toUpperCase();
+                  const { model } = item;
+                  const cardTitle = isAuthenticated
+                    ? model.name.toUpperCase()
+                    : getFirstName(model.name).toUpperCase();
 
-                return (
-                  <PortraitCard
-                    key={`${model.name}-${item.index}`}
-                    ref={(el) => {
-                      cardRefs.current[item.index] = el;
-                    }}
-                    title={cardTitle}
-                    image={model.imageUrl}
-                    offset={offset}
-                    interactive
-                    onClick={() =>
-                      setSelectedModel(featuredModelToPublicModel(model, item.index))
-                    }
-                  />
-                );
-              })}
-            </div>
+                  return (
+                    <PortraitCard
+                      key={`${model.name}-${item.index}`}
+                      ref={(el) => {
+                        cardRefs.current[item.index] = el;
+                      }}
+                      title={cardTitle}
+                      image={model.imageUrl}
+                      offset={offset}
+                      interactive
+                      onClick={() =>
+                        setSelectedModel(featuredModelToPublicModel(model, item.index))
+                      }
+                    />
+                  );
+                })}
+              </div>
+
+              <div className="flex justify-center mt-12 md:mt-16 lg:mt-20">
+                <Link
+                  href={ctaHref}
+                  data-cursor="button"
+                  className="inline-block text-center font-ui text-[9px] md:text-[10px] lg:text-[11px] font-light tracking-[0.25em] uppercase px-8 md:px-10 py-3 md:py-4 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] transition-colors duration-300"
+                >
+                  {ctaLabel}
+                </Link>
+              </div>
+            </>
           )}
         </div>
       </section>

@@ -3,28 +3,17 @@ import AdminLoginForm from "@/components/admin/AdminLoginForm";
 
 export default function AdminLoginPage() {
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <div className="px-4 py-6 max-w-md mx-auto w-full flex items-center justify-between">
-        <Link
-          href="/"
-          className="font-display text-lg font-light text-[#0A0A0A] tracking-widest"
-        >
-          THE WALK
+    <div className="min-h-screen min-h-dvh flex flex-col items-center justify-center px-4 py-10 bg-gray-100">
+      <div className="w-full max-w-md mb-6 flex items-center justify-between">
+        <Link href="/" className="text-lg font-semibold text-gray-900 hover:text-amber-600">
+          The Walk
         </Link>
-        <Link
-          href="/"
-          className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#9A9A9A] hover:text-[#0A0A0A] transition-colors"
-        >
-          ← Site
+        <Link href="/" className="text-sm text-gray-500 hover:text-gray-900">
+          Back to site
         </Link>
       </div>
-      <div className="flex-1 flex items-center justify-center px-4 pb-16">
-        <div className="w-full max-w-md">
-          <p className="font-ui text-[9px] tracking-[0.35em] uppercase text-[#C8A97A] mb-8">
-            Internal access
-          </p>
-          <AdminLoginForm />
-        </div>
+      <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm">
+        <AdminLoginForm />
       </div>
     </div>
   );
