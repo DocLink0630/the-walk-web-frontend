@@ -33,7 +33,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         router.push("/models");
       }
     } else {
-      setError("Invalid email or password.");
+      setError(result.message ?? "Invalid email or password.");
     }
   };
 

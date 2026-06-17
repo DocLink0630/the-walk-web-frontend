@@ -29,7 +29,10 @@ export interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<{ ok: boolean; isModel?: boolean; isClient?: boolean }>;
+  login: (
+    email: string,
+    password: string,
+  ) => Promise<{ ok: boolean; message?: string; isModel?: boolean; isClient?: boolean }>;
   logout: () => void;
   isAuthenticated: boolean;
   isClient: boolean;
@@ -62,42 +65,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function restore() {
       const stored = getClientSession();
-      if (!stored) {
+      const token = getClientToken();
+
+      if (!stored || !token) {
+        if (stored || token) {
+          clearClientToken();
+          clearClientSession();
+        }
         setIsLoading(false);
         return;
       }
 
-      const token = getClientToken();
-      if (token) {
-        try {
-          const res = await fetch("/api/auth/me", {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (res.ok) {
-            const data = (await res.json()) as {
-              id: string;
-              email: string;
-              roles?: UserRole[];
-              status?: ClientSession["status"];
-              clientProfile?: { fullName?: string };
-            };
-            applySession(buildClientSession(data));
-            setIsLoading(false);
-            return;
-          }
-        } catch {
-          // Fall through to stored session
+      try {
+        const res = await fetch("/api/auth/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = (await res.json()) as {
+            id: string;
+            email: string;
+            roles?: UserRole[];
+            status?: ClientSession["status"];
+            clientProfile?: { fullName?: string };
+          };
+          applySession(buildClientSession(data));
+          setIsLoading(false);
+          return;
         }
+      } catch {
+        // Clear invalid session below
       }
 
-      setUser(toUser(stored));
+      clearClientToken();
+      clearClientSession();
+      setUser(null);
       setIsLoading(false);
     }
 
     void restore();
   }, [applySession]);
 
-  const login = async (email: string, password: string): Promise<{ ok: boolean; isModel?: boolean; isClient?: boolean }> => {
+  const login = async (
+    email: string,
+    password: string,
+  ): Promise<{ ok: boolean; message?: string; isModel?: boolean; isClient?: boolean }> => {
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
@@ -105,11 +116,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ email, password }),
       });
 
-      if (!res.ok) return { ok: false };
-
       const data = (await res.json()) as {
         access_token?: string | null;
-        user: {
+        message?: string;
+        user?: {
           id: string;
           email: string;
           roles?: UserRole[];
@@ -118,16 +128,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
       };
 
-      if (data.access_token) {
-        setClientToken(data.access_token);
+      if (!res.ok) {
+        return {
+          ok: false,
+          message: data.message ?? "Invalid email or password.",
+        };
       }
 
+      if (!data.access_token || !data.user) {
+        return {
+          ok: false,
+          message: data.message ?? "Sign-in succeeded but no session token was issued.",
+        };
+      }
+
+      setClientToken(data.access_token);
       applySession(buildClientSession(data.user));
       const userIsModel = data.user.roles?.includes("MODEL") ?? false;
       const userIsClient = data.user.roles?.includes("CORPORATE_CLIENT") ?? false;
       return { ok: true, isModel: userIsModel, isClient: userIsClient };
     } catch {
-      return { ok: false };
+      return { ok: false, message: "Unable to sign in. Please try again." };
     }
   };
 
@@ -148,7 +169,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         login,
         logout,
-        isAuthenticated: !!user,
+        isAuthenticated: !!user && !!getClientToken(),
         isClient,
         isModel,
         isLoading,
