@@ -22,7 +22,7 @@ interface ModelDetailModalProps {
 }
 
 export default function ModelDetailModal({ model, onClose }: ModelDetailModalProps) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { addToCart, isInCart } = useBooking();
   const [slideIndex, setSlideIndex] = useState(0);
   const [resolvedModel, setResolvedModel] = useState(model);
@@ -58,9 +58,7 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
         : resolvedModel.imageUrl
           ? [resolvedModel.imageUrl]
           : [];
-    if (images.length === 0) return [];
-    if (images.length >= 3) return images.slice(0, 3);
-    return [...images, ...Array(3 - images.length).fill(images[0])];
+    return images;
   }, [resolvedModel.imageUrl, resolvedModel.portfolioImages]);
 
   const slideCount = Math.max(slideImages.length, 1);
@@ -147,6 +145,15 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
             <X className="size-4" strokeWidth={1.5} />
           </button>
         </header>
+
+        {/* Under admin review banner — shown when the logged-in model views their own profile and is not yet active */}
+        {isAuthenticated && user && resolvedModel.id === user.id && user.status !== "ACTIVE" && (
+          <div className="shrink-0 border-b border-[#C8A97A] bg-[#C8A97A]/10 px-5 py-3 md:px-8">
+            <p className="font-ui text-[9px] tracking-[0.2em] uppercase text-[#9A7329]">
+              Under admin review — your profile is being reviewed before activation
+            </p>
+          </div>
+        )}
 
         <div className="flex-1 flex flex-col lg:flex-row min-h-0">
           <div className="relative lg:w-[55%] bg-[#0A0A0A] min-h-[320px] lg:min-h-0 flex items-center justify-center">
@@ -329,42 +336,42 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
             Work
           </p>
           <div className="flex gap-3 overflow-x-auto pb-1">
-            {slides.map((slide) => {
-              const locked = !isAuthenticated && slide.index > 0;
-              if (!slide.image) {
+            {(resolvedModel.workExperienceImages ?? []).length > 0 ? (
+              (resolvedModel.workExperienceImages ?? []).map((imgUrl, idx) => {
+                const locked = !isAuthenticated && idx > 0;
                 return (
                   <div
-                    key={slide.index}
-                    className="relative shrink-0 w-24 h-32 border border-[#E0E0E0] bg-[#F0F0F0]"
-                  />
+                    key={idx}
+                    className="relative shrink-0 w-24 h-32 border border-[#E0E0E0] overflow-hidden"
+                  >
+                    <Image
+                      src={imgUrl}
+                      alt={`${displayName} work ${idx + 1}`}
+                      fill
+                      className={["object-cover", locked ? "blur-sm" : ""].join(" ")}
+                      sizes="96px"
+                      unoptimized
+                    />
+                    {locked && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-[#0A0A0A]/30">
+                        <Link
+                          href="/?login=1"
+                          className="font-ui text-[7px] tracking-[0.15em] uppercase text-white text-center px-2"
+                        >
+                          Sign in
+                        </Link>
+                      </div>
+                    )}
+                  </div>
                 );
-              }
-              return (
-                <div
-                  key={slide.index}
-                  className="relative shrink-0 w-24 h-32 border border-[#E0E0E0] overflow-hidden"
-                >
-                  <Image
-                    src={slide.image}
-                    alt={`${displayName} work ${slide.index + 1}`}
-                    fill
-                    className={["object-cover", locked ? "blur-sm" : ""].join(" ")}
-                    sizes="96px"
-                    unoptimized
-                  />
-                  {locked && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-[#0A0A0A]/30">
-                      <Link
-                        href="/?login=1"
-                        className="font-ui text-[7px] tracking-[0.15em] uppercase text-white text-center px-2"
-                      >
-                        Sign in
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+              })
+            ) : (
+              <div className="relative shrink-0 w-24 h-32 border border-[#E0E0E0] bg-[#F0F0F0] flex items-center justify-center">
+                <span className="font-ui text-[7px] tracking-[0.1em] uppercase text-[#C0C0C0] text-center px-2">
+                  No work photos
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>

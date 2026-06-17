@@ -41,10 +41,8 @@ export default function AdminDashboardClient() {
 
   if (!ready || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F5F5F5]">
-        <p className="font-ui text-[10px] tracking-[0.2em] uppercase text-[#9A9A9A]">
-          Loading dashboard…
-        </p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-sm text-gray-500">Loading dashboard…</p>
       </div>
     );
   }

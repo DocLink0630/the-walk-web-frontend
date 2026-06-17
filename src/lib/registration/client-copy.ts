@@ -10,7 +10,7 @@ export const CLIENT_REGISTRATION_COPY = {
     "Welcome to The Walk. Verify your email, then you can submit booking inquiries for the talent in your cart.",
   successSteps: [
     "Check your inbox and verify your email address",
-    "Sign in with your new account",
+    "Browse models and add talent to your booking cart",
     "Submit an inquiry from your booking cart",
   ],
   resetLabel: "Register another client",

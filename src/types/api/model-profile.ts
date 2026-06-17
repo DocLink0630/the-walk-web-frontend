@@ -11,14 +11,14 @@ export type ModelTier = "PENDING" | AssignableModelTier;
 export interface ModelProfilePayload {
   modelCode: string;
   fullName: string;
-  gender: string;
-  age: number;
-  nicEnc: string;
-  dobEnc: string;
-  addressEnc: string;
+  gender?: string;
+  age?: number;
+  nicEnc?: string;
+  dobEnc?: string;
+  addressEnc?: string;
   contactNumberEnc: string;
-  whatsappNumberEnc: string;
-  tier: ModelTier;
+  whatsappNumberEnc?: string;
+  tier?: ModelTier;
   isLoginEnabled: boolean;
   /** Applicant-claimed rate / price range — reviewed by admin on approval */
   rate?: string;

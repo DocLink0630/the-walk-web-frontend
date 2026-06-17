@@ -2,18 +2,19 @@ import type { ModelProfilePayload, ModelSource } from "@/types/api/model-profile
 import type { RegistrationFormState } from "@/types/registration-form";
 
 function baseModelProfileFields(state: RegistrationFormState) {
-  return {
+  const base: ModelProfilePayload = {
     modelCode: state.modelCode,
     fullName: state.fullName.trim(),
-    gender: state.gender,
-    age: Number(state.age),
-    nicEnc: state.nic.trim(),
-    dobEnc: state.dob,
-    addressEnc: state.address.trim(),
     contactNumberEnc: state.contactNumber.trim(),
-    whatsappNumberEnc: state.whatsappNumber.trim(),
     isLoginEnabled: false,
   };
+  if (state.gender) base.gender = state.gender;
+  if (state.age && Number(state.age)) base.age = Number(state.age);
+  if (state.nic.trim()) base.nicEnc = state.nic.trim();
+  if (state.dob) base.dobEnc = state.dob;
+  if (state.address.trim()) base.addressEnc = state.address.trim();
+  if (state.whatsappNumber.trim()) base.whatsappNumberEnc = state.whatsappNumber.trim();
+  return base;
 }
 
 function applyOptionalModelProfileFields(

@@ -298,3 +298,198 @@ export async function approveModelProfile(
 
   return { ok: true };
 }
+
+export async function deleteAdminUser(
+  userId: string,
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  const res = await fetch(`/api/admin/users/${userId}`, {
+    method: "DELETE",
+    headers: adminAuthHeaders(),
+  });
+
+  if (!res.ok) {
+    let message = "Failed to delete user";
+    try {
+      const body = await res.json();
+      if (body?.message) message = String(body.message);
+    } catch {
+      /* ignore */
+    }
+    return { ok: false, message };
+  }
+
+  return { ok: true };
+}
+
+export type AdminAttachMediaType =
+  | "PORTFOLIO"
+  | "WORK_EXPERIENCE"
+  | "PROFILE"
+  | "NIC_FRONT"
+  | "NIC_BACK";
+
+export async function updateAdminModelProfile(
+  userId: string,
+  payload: Record<string, string | number | undefined>,
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  const res = await fetch(`/api/admin/users/${userId}/model-profile`, {
+    method: "PATCH",
+    headers: adminAuthHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    let message = "Failed to update profile";
+    try {
+      const body = await res.json();
+      if (body?.message) message = String(body.message);
+    } catch {
+      /* ignore */
+    }
+    return { ok: false, message };
+  }
+
+  return { ok: true };
+}
+
+export async function deleteModelMedia(
+  userId: string,
+  storageFileId: string,
+): Promise<
+  | { ok: true; registrationMedia: AdminModelRegistrationMedia }
+  | { ok: false; message: string }
+> {
+  const res = await fetch(`/api/admin/users/${userId}/media/${storageFileId}`, {
+    method: "DELETE",
+    headers: adminAuthHeaders(),
+  });
+
+  if (!res.ok) {
+    let message = "Failed to delete photo";
+    try {
+      const body = await res.json();
+      if (body?.message) message = String(body.message);
+    } catch {
+      /* ignore */
+    }
+    return { ok: false, message };
+  }
+
+  const data = await res.json();
+  return { ok: true, registrationMedia: data.registrationMedia };
+}
+
+export async function attachAdminModelMedia(
+  userId: string,
+  payload: { token: string; type: AdminAttachMediaType; workExperienceId?: string },
+): Promise<
+  | { ok: true; registrationMedia: AdminModelRegistrationMedia }
+  | { ok: false; message: string }
+> {
+  const res = await fetch(`/api/admin/users/${userId}/media`, {
+    method: "POST",
+    headers: adminAuthHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    let message = "Failed to upload photo";
+    try {
+      const body = await res.json();
+      if (body?.message) message = String(body.message);
+    } catch {
+      /* ignore */
+    }
+    return { ok: false, message };
+  }
+
+  const data = await res.json();
+  return { ok: true, registrationMedia: data.registrationMedia };
+}
+
+export async function createAdminWorkExperience(
+  userId: string,
+  payload: { title: string; imageTokens: string[] },
+): Promise<
+  | { ok: true; registrationMedia: AdminModelRegistrationMedia }
+  | { ok: false; message: string }
+> {
+  const res = await fetch(`/api/admin/users/${userId}/work-experience`, {
+    method: "POST",
+    headers: adminAuthHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    let message = "Failed to add work experience";
+    try {
+      const body = await res.json();
+      if (body?.message) message = String(body.message);
+    } catch {
+      /* ignore */
+    }
+    return { ok: false, message };
+  }
+
+  const data = await res.json();
+  return { ok: true, registrationMedia: data.registrationMedia };
+}
+
+export async function updateAdminWorkExperienceTitle(
+  userId: string,
+  workExperienceId: string,
+  title: string,
+): Promise<
+  | { ok: true; registrationMedia: AdminModelRegistrationMedia }
+  | { ok: false; message: string }
+> {
+  const res = await fetch(
+    `/api/admin/users/${userId}/work-experience/${workExperienceId}`,
+    {
+      method: "PATCH",
+      headers: adminAuthHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify({ title }),
+    },
+  );
+
+  if (!res.ok) {
+    let message = "Failed to update work experience";
+    try {
+      const body = await res.json();
+      if (body?.message) message = String(body.message);
+    } catch {
+      /* ignore */
+    }
+    return { ok: false, message };
+  }
+
+  const data = await res.json();
+  return { ok: true, registrationMedia: data.registrationMedia };
+}
+
+export async function deleteAdminWorkExperience(
+  userId: string,
+  workExperienceId: string,
+): Promise<
+  | { ok: true; registrationMedia: AdminModelRegistrationMedia }
+  | { ok: false; message: string }
+> {
+  const res = await fetch(
+    `/api/admin/users/${userId}/work-experience/${workExperienceId}`,
+    { method: "DELETE", headers: adminAuthHeaders() },
+  );
+
+  if (!res.ok) {
+    let message = "Failed to delete work experience";
+    try {
+      const body = await res.json();
+      if (body?.message) message = String(body.message);
+    } catch {
+      /* ignore */
+    }
+    return { ok: false, message };
+  }
+
+  const data = await res.json();
+  return { ok: true, registrationMedia: data.registrationMedia };
+}

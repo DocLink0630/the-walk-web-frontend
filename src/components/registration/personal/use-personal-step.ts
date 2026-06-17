@@ -4,13 +4,7 @@ import type { RegistrationFormState, RegistrationStore } from "@/types/registrat
 
 export const REQUIRED_PERSONAL_FIELDS: (keyof RegistrationFormState)[] = [
   "fullName",
-  "gender",
-  "age",
-  "nic",
-  "dob",
-  "address",
   "contactNumber",
-  "whatsappNumber",
 ];
 
 export function usePersonalStep(store: RegistrationStore) {

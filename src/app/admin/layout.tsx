@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "./admin.css";
 
 export const metadata: Metadata = {
   title: "Admin — The Walk",
@@ -10,5 +11,5 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return <div className="admin-app min-h-screen">{children}</div>;
 }

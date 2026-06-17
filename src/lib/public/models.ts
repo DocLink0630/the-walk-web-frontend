@@ -127,12 +127,24 @@ export function featuredToPublicModels(featured: PublicFeaturedModel[]): PublicM
 function mapDetailToPublicModel(detail: AdminUserDetail): PublicModel {
   const profile = detail.modelProfile;
   const name = profile?.fullName?.trim() || detail.email;
-  const portfolioImages: string[] = [];
+
+  const portfolioImages: string[] =
+    detail.registrationMedia?.portfolioPhotos
+      ?.map((p) => p.url)
+      .filter(Boolean) ?? [];
+
+  const profilePhotoUrl = detail.registrationMedia?.profilePhoto?.url ?? null;
+  const imageUrl = portfolioImages[0] ?? profilePhotoUrl ?? null;
+
+  const workExperienceImages: string[] =
+    detail.registrationMedia?.workExperience
+      ?.flatMap((entry) => entry.images.map((img) => img.url))
+      .filter(Boolean) ?? [];
 
   return {
     id: detail.id,
     name,
-    imageUrl: portfolioImages[0] ?? null,
+    imageUrl,
     tier: profile?.tier,
     category: mapTierToCategory(profile?.tier),
     gender: profile?.gender,
@@ -146,6 +158,7 @@ function mapDetailToPublicModel(detail: AdminUserDetail): PublicModel {
     hairColor: profile?.hairColorEnc ?? undefined,
     bio: profile?.shortBio ?? profile?.talentsEnc ?? undefined,
     portfolioImages,
+    workExperienceImages,
   };
 }
 
@@ -164,6 +177,10 @@ function mergePublicWithDetail(
       publicModel.portfolioImages.length > 0
         ? publicModel.portfolioImages
         : detail.portfolioImages,
+    workExperienceImages:
+      detail.workExperienceImages && detail.workExperienceImages.length > 0
+        ? detail.workExperienceImages
+        : publicModel.workExperienceImages,
   };
 }
 
@@ -176,8 +193,7 @@ export async function resolveModelProfileForModal(
   model: PublicModel,
   token: string,
 ): Promise<PublicModel> {
-  if (model.height?.trim()) return model;
-
+  // Always fetch detail for authenticated users so weight/chest/rate/images are populated.
   if (!isSyntheticModelId(model.id)) {
     const detail = await fetchModelDetail(model.id, token);
     if (detail) return mergePublicWithDetail(model, mapDetailToPublicModel(detail));

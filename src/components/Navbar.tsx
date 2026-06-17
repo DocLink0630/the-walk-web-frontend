@@ -32,7 +32,7 @@ const talentDropdownLinkClass =
 export default function Navbar() {
   const navRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, user, isModel, isClient } = useAuth();
   const { bookingCart } = useBooking();
   const [showLogin, setShowLogin] = useState(false);
   const [showTalentMenu, setShowTalentMenu] = useState(false);
@@ -191,14 +191,46 @@ export default function Navbar() {
               )}
 
               {isAuthenticated ? (
-                <button
-                  type="button"
-                  onClick={logout}
-                  data-cursor="button"
-                  className={desktopLinkClass}
-                >
-                  LOGOUT
-                </button>
+                <>
+                  {isModel && (
+                    <Link
+                      href="/model/profile"
+                      data-cursor="button"
+                      title={user?.name}
+                      className="flex items-center justify-center w-8 h-8 rounded-full bg-[#0A0A0A] text-white font-ui text-[9px] tracking-widest hover:bg-[#C8A97A] transition-colors shrink-0"
+                    >
+                      {(user?.name ?? "M")
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()
+                        .slice(0, 2)}
+                    </Link>
+                  )}
+                  {isClient && !isModel && (
+                    <Link
+                      href="/client/profile"
+                      data-cursor="button"
+                      title={user?.name}
+                      className="flex items-center justify-center w-8 h-8 rounded-full bg-[#0A0A0A] text-white font-ui text-[9px] tracking-widest hover:bg-[#C8A97A] transition-colors shrink-0"
+                    >
+                      {(user?.name ?? "C")
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()
+                        .slice(0, 2)}
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    onClick={logout}
+                    data-cursor="button"
+                    className={desktopLinkClass}
+                  >
+                    LOGOUT
+                  </button>
+                </>
               ) : (
                 <button
                   type="button"
@@ -328,6 +360,40 @@ export default function Navbar() {
             </nav>
 
             <div className="shrink-0 border-t border-[#E0E0E0] bg-[#FAFAFA] px-5 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] space-y-3">
+              {isAuthenticated && isModel && (
+                <Link
+                  href="/model/profile"
+                  onClick={closeMobileMenu}
+                  className="flex min-h-[48px] w-full items-center justify-center gap-2 border border-[#C8A97A] bg-[#C8A97A]/10 font-ui text-[10px] font-light tracking-[0.25em] uppercase text-[#9A7329]"
+                >
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#C8A97A] text-white text-[8px]">
+                    {(user?.name ?? "M")
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase()
+                      .slice(0, 2)}
+                  </span>
+                  My profile
+                </Link>
+              )}
+              {isAuthenticated && isClient && !isModel && (
+                <Link
+                  href="/client/profile"
+                  onClick={closeMobileMenu}
+                  className="flex min-h-[48px] w-full items-center justify-center gap-2 border border-[#C8A97A] bg-[#C8A97A]/10 font-ui text-[10px] font-light tracking-[0.25em] uppercase text-[#9A7329]"
+                >
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#C8A97A] text-white text-[8px]">
+                    {(user?.name ?? "C")
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase()
+                      .slice(0, 2)}
+                  </span>
+                  My profile
+                </Link>
+              )}
               {isAuthenticated ? (
                 <button
                   type="button"

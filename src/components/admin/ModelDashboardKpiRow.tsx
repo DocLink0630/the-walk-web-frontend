@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { fetchAdminUsers } from "@/lib/admin/users-api";
 import type { UserRole, UserStatus } from "@/types/admin";
+import { adminCard, adminKpiLabel, adminKpiValue } from "./admin-ui";
 
 interface KpiCard {
   label: string;
@@ -12,13 +13,9 @@ interface KpiCard {
 
 function KpiTile({ label, value, loading }: KpiCard) {
   return (
-    <div className="border border-[#E0E0E0] bg-white px-4 py-4 md:px-5 shadow-sm">
-      <p className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#9A9A9A] mb-2">
-        {label}
-      </p>
-      <p className="font-display text-3xl font-light text-[#0A0A0A]">
-        {loading ? "—" : (value ?? 0).toLocaleString()}
-      </p>
+    <div className={adminCard}>
+      <p className={adminKpiLabel}>{label}</p>
+      <p className={adminKpiValue}>{loading ? "—" : (value ?? 0).toLocaleString()}</p>
     </div>
   );
 }
@@ -67,10 +64,10 @@ export default function ModelDashboardKpiRow() {
   }, []);
 
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-4 mb-10">
-      <KpiTile label="Pending model review" value={pendingReview} loading={loading} />
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <KpiTile label="Pending review" value={pendingReview} loading={loading} />
       <KpiTile label="Rejected" value={rejected} loading={loading} />
-      <KpiTile label="Active models" value={active} loading={loading} />
+      <KpiTile label="Active" value={active} loading={loading} />
       <KpiTile label="Total models" value={total} loading={loading} />
     </div>
   );

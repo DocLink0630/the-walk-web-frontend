@@ -58,11 +58,11 @@ function SuccessPanel({ store }: { store: ClientRegistrationStore }) {
         ))}
       </div>
       <Link
-        href="/inquiry"
+        href="/models"
         data-cursor="button"
         className="font-ui text-[11px] tracking-[0.15em] uppercase text-[#0A0A0A] border border-[#0A0A0A] px-8 py-3 hover:bg-[#0A0A0A] hover:text-white transition-colors"
       >
-        Go to booking inquiry
+        Browse models
       </Link>
       <button
         type="button"

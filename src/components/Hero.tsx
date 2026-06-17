@@ -28,9 +28,9 @@ export interface HeroProps {
 
 const CTA_STYLES = {
   primary:
-    "font-ui text-[9px] md:text-[10px] font-light tracking-[0.25em] md:tracking-[0.3em] uppercase px-6 md:px-8 py-3 md:py-4 bg-[#C8A97A] text-white border border-[#C8A97A] hover:bg-transparent hover:text-white transition-colors duration-300 text-center",
+    "font-ui text-xs md:text-sm font-medium tracking-[0.2em] md:tracking-[0.25em] uppercase px-8 md:px-10 py-4 md:py-5 bg-[#C8A97A] text-[#0A0A0A] border-2 border-[#C8A97A] shadow-[0_4px_24px_rgba(0,0,0,0.35)] hover:bg-[#D4B88A] hover:border-[#D4B88A] transition-colors duration-300 text-center min-w-[200px]",
   secondary:
-    "font-ui text-[9px] md:text-[10px] font-light tracking-[0.25em] md:tracking-[0.3em] uppercase px-6 md:px-8 py-3 md:py-4 bg-transparent text-white border border-white/40 hover:border-white transition-colors duration-300 text-center",
+    "font-ui text-xs md:text-sm font-medium tracking-[0.2em] md:tracking-[0.25em] uppercase px-8 md:px-10 py-4 md:py-5 bg-white/10 text-white border-2 border-white backdrop-blur-sm shadow-[0_4px_24px_rgba(0,0,0,0.35)] hover:bg-white hover:text-[#0A0A0A] transition-colors duration-300 text-center min-w-[200px]",
 };
 
 function resolveMediaSrc(src: string | StaticImageData): string {

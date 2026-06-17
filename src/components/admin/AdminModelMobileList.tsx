@@ -1,9 +1,14 @@
 "use client";
 
 import type { AdminUser, UserStatus } from "@/types/admin";
-
-const inputCls =
-  "w-full border border-[#E0E0E0] px-3 py-2 font-ui text-[10px] tracking-[0.1em] outline-none focus:border-[#C8A97A] bg-white";
+import {
+  adminBtnAccent,
+  adminBtnPrimary,
+  adminInput,
+  adminLabel,
+  adminMobileCard,
+  adminStatusBadge,
+} from "./admin-ui";
 
 interface AdminModelMobileListProps {
   users: AdminUser[];
@@ -29,56 +34,46 @@ export default function AdminModelMobileList({
   formatDate,
 }: AdminModelMobileListProps) {
   return (
-    <div className="md:hidden space-y-3">
+    <div className="space-y-3">
       {users.map((user) => (
-        <article
-          key={user.id}
-          className="border border-[#E0E0E0] bg-white p-4 space-y-3"
-        >
-          <div>
+        <article key={user.id} className={adminMobileCard}>
+          <div className="space-y-1">
+            <p className="text-base font-semibold text-gray-900">
+              {user.displayName ?? user.email}
+            </p>
             {user.displayName && (
-              <p className="font-display text-[15px] font-light text-[#0A0A0A] mb-1">
-                {user.displayName}
-              </p>
+              <p className="text-sm text-gray-600 break-all">{user.email}</p>
             )}
-            <p className="font-ui text-[10px] tracking-[0.05em] text-[#0A0A0A] break-all">
-              {user.email}
-            </p>
-            <p className="font-ui text-[9px] tracking-[0.1em] uppercase text-[#9A9A9A] mt-1">
-              Joined {formatDate(user.createdAt)}
-            </p>
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className={adminStatusBadge}>{statusLabels[user.status]}</span>
+              <span className="text-xs text-gray-400">Joined {formatDate(user.createdAt)}</span>
+            </div>
           </div>
 
-          <div>
-            <p className="font-ui text-[8px] tracking-[0.2em] uppercase text-[#9A9A9A] mb-1">
-              Status
-            </p>
-            <p className="font-ui text-[9px] tracking-[0.1em] uppercase text-[#4A4A4A]">
-              {statusLabels[user.status]}
-            </p>
-          </div>
-
-          <div className="space-y-2 pt-1">
+          <div className="flex flex-col gap-2 pt-1">
             {onReview && (
               <button
                 type="button"
                 onClick={() => onReview(user)}
-                className="w-full font-ui text-[8px] tracking-[0.15em] uppercase px-3 py-2.5 border border-[#C8A97A] text-[#0A0A0A] hover:bg-[#C8A97A] hover:text-white transition-colors"
+                className={adminBtnAccent + " w-full"}
               >
                 Review profile
               </button>
             )}
-            <select
-              value={pendingStatus[user.id] ?? user.status}
-              onChange={(e) => onStatusChange(user.id, e.target.value as UserStatus)}
-              className={inputCls}
-            >
-              {allStatuses.map((s) => (
-                <option key={s} value={s}>
-                  {statusLabels[s]}
-                </option>
-              ))}
-            </select>
+            <div>
+              <label className={adminLabel}>Change status</label>
+              <select
+                value={pendingStatus[user.id] ?? user.status}
+                onChange={(e) => onStatusChange(user.id, e.target.value as UserStatus)}
+                className={adminInput}
+              >
+                {allStatuses.map((s) => (
+                  <option key={s} value={s}>
+                    {statusLabels[s]}
+                  </option>
+                ))}
+              </select>
+            </div>
             <button
               type="button"
               disabled={
@@ -86,9 +81,9 @@ export default function AdminModelMobileList({
                 (pendingStatus[user.id] ?? user.status) === user.status
               }
               onClick={() => onUpdate(user)}
-              className="w-full font-ui text-[8px] tracking-[0.15em] uppercase px-3 py-2.5 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] disabled:opacity-40 transition-colors"
+              className={adminBtnPrimary + " w-full"}
             >
-              {updatingId === user.id ? "Updating…" : "Update status"}
+              {updatingId === user.id ? "Saving…" : "Save status"}
             </button>
           </div>
         </article>

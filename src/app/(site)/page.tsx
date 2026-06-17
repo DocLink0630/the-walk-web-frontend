@@ -21,8 +21,8 @@ export default function Home() {
           poster: "/images/hero.webp",
         }}
         ctas={[
-          { label: "Discover Talent", href: "/models", variant: "primary" },
-          { label: "Book Talent", href: "/register/client", variant: "secondary" },
+          { label: "Explore Talent", href: "/models", variant: "primary" },
+          { label: "Join Academy", href: "/academy", variant: "secondary" },
         ]}
       />
       <TalentSection/>

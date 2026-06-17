@@ -3,10 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuthStore } from "@/stores/adminAuthStore";
-import { CTA_PRIMARY_FILLED } from "@/config/cta-styles";
-
-const inputCls =
-  "w-full border border-[#E0E0E0] px-4 py-3 font-ui text-[11px] tracking-[0.1em] outline-none transition-colors focus:border-[#C8A97A] bg-transparent";
+import {
+  adminAlertErr,
+  adminBtnPrimary,
+  adminInput,
+  adminLabel,
+  adminPageTitle,
+} from "./admin-ui";
 
 export default function AdminLoginForm() {
   const router = useRouter();
@@ -43,59 +46,42 @@ export default function AdminLoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <h1 className="font-display text-3xl font-light text-[#0A0A0A] mb-1">
-          Admin Sign In
-        </h1>
-        <p className="font-ui text-[10px] tracking-[0.15em] text-[#9A9A9A] uppercase">
-          The Walk — internal dashboard
-        </p>
+        <h1 className={adminPageTitle + " mb-1"}>Sign in</h1>
+        <p className="text-sm text-gray-500">The Walk admin dashboard</p>
       </div>
 
-      <div className="space-y-1">
-        <label className="block font-ui text-[9px] tracking-[0.25em] uppercase text-[#4A4A4A]">
-          Email
-        </label>
+      <div>
+        <label className={adminLabel}>Email</label>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
-          className={inputCls}
+          className={adminInput}
           placeholder="admin@thewalk.com"
         />
       </div>
 
-      <div className="space-y-1">
-        <label className="block font-ui text-[9px] tracking-[0.25em] uppercase text-[#4A4A4A]">
-          Password
-        </label>
+      <div>
+        <label className={adminLabel}>Password</label>
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
           autoComplete="current-password"
-          className={inputCls}
+          className={adminInput}
           placeholder="••••••••"
         />
       </div>
 
-      {error && (
-        <div className="border border-red-300 bg-red-50 px-4 py-3">
-          <p className="font-ui text-[10px] tracking-[0.05em] text-red-700">{error}</p>
-        </div>
-      )}
+      {error && <div className={adminAlertErr}>{error}</div>}
 
-      <button
-        type="submit"
-        disabled={isLoading}
-        data-cursor="button"
-        className={CTA_PRIMARY_FILLED + " w-full text-center disabled:opacity-60"}
-      >
-        {isLoading ? "Signing in…" : "Sign In"}
+      <button type="submit" disabled={isLoading} className={adminBtnPrimary + " w-full"}>
+        {isLoading ? "Signing in…" : "Sign in"}
       </button>
     </form>
   );

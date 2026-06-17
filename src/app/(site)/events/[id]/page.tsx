@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import EventDetailPageContent from "@/components/events/EventDetailPageContent";
-import { getEventById, getEventIds } from "@/lib/events/events-data";
+import {
+  getEventIds,
+  getMergedEventById,
+} from "@/lib/events/events-data";
 
 interface EventDetailPageProps {
   params: Promise<{ id: string }>;
 }
+
+export const dynamicParams = true;
 
 export function generateStaticParams() {
   return getEventIds().map((id) => ({ id }));
@@ -13,7 +18,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: EventDetailPageProps): Promise<Metadata> {
   const { id } = await params;
-  const event = getEventById(id);
+  const event = await getMergedEventById(id);
 
   if (!event) {
     return { title: "Event Not Found — The Walk" };
@@ -27,7 +32,7 @@ export async function generateMetadata({ params }: EventDetailPageProps): Promis
 
 export default async function EventDetailPage({ params }: EventDetailPageProps) {
   const { id } = await params;
-  const event = getEventById(id);
+  const event = await getMergedEventById(id);
 
   if (!event) {
     notFound();

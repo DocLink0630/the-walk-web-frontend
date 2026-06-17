@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -11,6 +12,7 @@ interface LoginModalProps {
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const { login } = useAuth();
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -20,11 +22,16 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    const success = await login(email, password);
-    if (success) {
+    const result = await login(email, password);
+    if (result.ok) {
       setEmail("");
       setPassword("");
       onClose();
+      if (result.isModel) {
+        router.push("/model/profile");
+      } else {
+        router.push("/models");
+      }
     } else {
       setError("Invalid email or password.");
     }

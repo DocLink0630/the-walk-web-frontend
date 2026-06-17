@@ -9,11 +9,31 @@ import {
 import type { AdminUser, UserStatus } from "@/types/admin";
 import AdminModelMobileList from "./AdminModelMobileList";
 import ModelReviewPanel from "./ModelReviewPanel";
+import {
+  adminAlertErr,
+  adminAlertOk,
+  adminBtnAccent,
+  adminBtnPrimary,
+  adminBtnSecondary,
+  adminInput,
+  adminLabel,
+  adminTableWrap,
+  adminTd,
+  adminTh,
+} from "./admin-ui";
 
 const MODEL_ROLES = ["MODEL"] as const;
 
-const inputCls =
-  "border border-[#E0E0E0] px-3 py-2 font-ui text-[10px] tracking-[0.1em] outline-none focus:border-[#C8A97A] bg-white";
+const MODEL_LIST_TABS = [
+  { id: "current" as const, label: "Current models", status: "ACTIVE" as UserStatus },
+  {
+    id: "pending" as const,
+    label: "Pending review",
+    status: "PENDING_ADMIN_REVIEW" as UserStatus,
+  },
+];
+
+type ModelListTab = (typeof MODEL_LIST_TABS)[number]["id"];
 
 function formatDate(iso: string) {
   try {
@@ -41,13 +61,26 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
 
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
-  const [statusFilter, setStatusFilter] = useState<UserStatus | "">(
-    "PENDING_ADMIN_REVIEW",
-  );
+  const [activeTab, setActiveTab] = useState<ModelListTab>("current");
+  const statusFilter =
+    MODEL_LIST_TABS.find((tab) => tab.id === activeTab)?.status ?? "ACTIVE";
 
   const [pendingStatus, setPendingStatus] = useState<Record<string, UserStatus>>({});
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [reviewUser, setReviewUser] = useState<AdminUser | null>(null);
+  const [pendingReviewCount, setPendingReviewCount] = useState(0);
+
+  const loadPendingReviewCount = useCallback(async () => {
+    const result = await fetchAdminUsers({
+      page: 1,
+      limit: 1,
+      status: "PENDING_ADMIN_REVIEW",
+      roles: [...MODEL_ROLES],
+    });
+    if (result.ok) {
+      setPendingReviewCount(result.data.meta.total);
+    }
+  }, []);
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -77,8 +110,18 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
   }, [page, search, statusFilter]);
 
   useEffect(() => {
-    loadUsers();
+    void loadUsers();
   }, [loadUsers]);
+
+  useEffect(() => {
+    void loadPendingReviewCount();
+  }, [loadPendingReviewCount]);
+
+  async function refreshAfterChange() {
+    await loadUsers();
+    await loadPendingReviewCount();
+    onUsersChanged?.();
+  }
 
   async function handleUpdate(user: AdminUser) {
     const next = pendingStatus[user.id];
@@ -94,93 +137,72 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
       return;
     }
 
-    setBanner({ type: "ok", text: `Updated ${user.email} to ${MODEL_STATUS_LABELS[next]}` });
-    await loadUsers();
-    onUsersChanged?.();
+    setBanner({ type: "ok", text: `Updated ${user.displayName ?? user.email} to ${MODEL_STATUS_LABELS[next]}` });
+    await refreshAfterChange();
   }
 
-  const headers = ["Name", "Email", "Status", "Joined", "Action"];
+  function applySearch() {
+    setPage(1);
+    setSearch(searchInput.trim());
+  }
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:items-end">
-        <div className="sm:col-span-1 lg:col-span-1">
-          <label className="block font-ui text-[9px] tracking-[0.25em] uppercase text-[#4A4A4A] mb-1">
-            Search email
-          </label>
+      <div className="flex flex-wrap gap-1 rounded-lg border border-gray-200 bg-gray-50 p-1 w-fit">
+        {MODEL_LIST_TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => {
+              setPage(1);
+              setActiveTab(tab.id);
+            }}
+            className={[
+              "inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition",
+              activeTab === tab.id
+                ? "bg-white text-gray-900 shadow-sm"
+                : "text-gray-600 hover:text-gray-900",
+            ].join(" ")}
+          >
+            {tab.label}
+            {tab.id === "pending" && pendingReviewCount > 0 && (
+              <span
+                className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-amber-500 text-white text-[11px] font-semibold leading-none"
+                aria-label={`${pendingReviewCount} pending review`}
+              >
+                {pendingReviewCount > 99 ? "99+" : pendingReviewCount}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]">
+        <div>
+          <label className={adminLabel}>Search</label>
           <div className="flex flex-col gap-2 sm:flex-row">
             <input
               type="search"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  setPage(1);
-                  setSearch(searchInput.trim());
-                }
+                if (e.key === "Enter") applySearch();
               }}
-              placeholder="model@example.com"
-              className={inputCls + " w-full flex-1"}
+              placeholder="Email or name"
+              className={adminInput + " flex-1"}
             />
-            <button
-              type="button"
-              onClick={() => {
-                setPage(1);
-                setSearch(searchInput.trim());
-              }}
-              className="font-ui text-[9px] tracking-[0.2em] uppercase px-4 py-2 border border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-colors shrink-0"
-            >
+            <button type="button" onClick={applySearch} className={adminBtnSecondary + " shrink-0"}>
               Search
             </button>
           </div>
         </div>
-
-        <div>
-          <label className="block font-ui text-[9px] tracking-[0.25em] uppercase text-[#4A4A4A] mb-1">
-            Status
-          </label>
-          <select
-            value={statusFilter}
-            onChange={(e) => {
-              setPage(1);
-              setStatusFilter(e.target.value as UserStatus | "");
-            }}
-            className={inputCls + " w-full"}
-          >
-            <option value="">All statuses</option>
-            {MODEL_QUEUE_STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {MODEL_STATUS_LABELS[s]}
-              </option>
-            ))}
-          </select>
-        </div>
       </div>
 
       {banner && (
-        <div
-          className={
-            banner.type === "ok"
-              ? "border border-[#C8A97A] bg-[#C8A97A]/10 px-4 py-3"
-              : "border border-red-300 bg-red-50 px-4 py-3"
-          }
-        >
-          <p
-            className={
-              "font-ui text-[10px] tracking-[0.05em] " +
-              (banner.type === "ok" ? "text-[#0A0A0A]" : "text-red-700")
-            }
-          >
-            {banner.text}
-          </p>
-        </div>
+        <div className={banner.type === "ok" ? adminAlertOk : adminAlertErr}>{banner.text}</div>
       )}
 
-      {error && (
-        <div className="border border-red-300 bg-red-50 px-4 py-3">
-          <p className="font-ui text-[10px] text-red-700">{error}</p>
-        </div>
-      )}
+      {error && <div className={adminAlertErr}>{error}</div>}
 
       {!loading && users.length > 0 && (
         <AdminModelMobileList
@@ -199,34 +221,27 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
       )}
 
       {!loading && users.length === 0 && (
-        <div className="md:hidden border border-[#E0E0E0] bg-white px-4 py-10 text-center">
-          <p className="font-ui text-[10px] text-[#9A9A9A] leading-relaxed">
-            No models found
-            {statusFilter === "PENDING_ADMIN_REVIEW" && (
-              <span className="block mt-2 text-[#4A4A4A]">
-                New registrations appear here as Pending review. Try &ldquo;All statuses&rdquo; to
-                browse the full roster.
-              </span>
-            )}
+        <div className="md:hidden rounded-xl border border-gray-200 bg-white px-4 py-10 text-center">
+          <p className="text-sm text-gray-500">
+            {activeTab === "current"
+              ? "No active models found."
+              : "No models pending review."}
           </p>
         </div>
       )}
 
       {loading && (
-        <div className="md:hidden border border-[#E0E0E0] bg-white px-4 py-10 text-center">
-          <p className="font-ui text-[10px] text-[#9A9A9A]">Loading models…</p>
+        <div className="md:hidden rounded-xl border border-gray-200 bg-white px-4 py-10 text-center">
+          <p className="text-sm text-gray-500">Loading…</p>
         </div>
       )}
 
-      <div className="hidden md:block border border-[#E0E0E0] bg-white overflow-x-auto">
-        <table className="w-full min-w-[720px]">
+      <div className={adminTableWrap}>
+        <table className="w-full min-w-[640px]">
           <thead>
-            <tr className="border-b border-[#E0E0E0] bg-[#FAFAFA]">
-              {headers.map((h) => (
-                <th
-                  key={h}
-                  className="text-left font-ui text-[9px] tracking-[0.2em] uppercase text-[#9A9A9A] px-4 py-3"
-                >
+            <tr>
+              {["Name", "Email", "Status", "Joined", ""].map((h) => (
+                <th key={h || "actions"} className={adminTh}>
                   {h}
                 </th>
               ))}
@@ -235,43 +250,35 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center font-ui text-[10px] text-[#9A9A9A]">
-                  Loading models…
+                <td colSpan={5} className={`${adminTd} text-center text-gray-500`}>
+                  Loading…
                 </td>
               </tr>
             ) : users.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center font-ui text-[10px] text-[#9A9A9A] max-w-lg mx-auto leading-relaxed">
-                  No models found
-                  {statusFilter === "PENDING_ADMIN_REVIEW" && (
-                    <span className="block mt-2 text-[#4A4A4A]">
-                      New registrations appear here as Pending review. Change the filter to &ldquo;All
-                      statuses&rdquo; to see the full roster.
-                    </span>
-                  )}
+                <td colSpan={5} className={`${adminTd} text-center text-gray-500`}>
+                  {activeTab === "current"
+                    ? "No active models found."
+                    : "No models pending review."}
                 </td>
               </tr>
             ) : (
               users.map((user) => (
-                <tr key={user.id} className="border-b border-[#F0F0F0] last:border-0">
-                  <td className="px-4 py-3 font-ui text-[10px] tracking-[0.05em] text-[#0A0A0A]">
-                    {user.displayName ?? "—"}
+                <tr key={user.id} className="hover:bg-gray-50/80">
+                  <td className={adminTd}>{user.displayName ?? "—"}</td>
+                  <td className={`${adminTd} text-gray-600`}>{user.email}</td>
+                  <td className={adminTd}>
+                    <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700">
+                      {MODEL_STATUS_LABELS[user.status]}
+                    </span>
                   </td>
-                  <td className="px-4 py-3 font-ui text-[10px] tracking-[0.05em] text-[#0A0A0A]">
-                    {user.email}
-                  </td>
-                  <td className="px-4 py-3 font-ui text-[9px] tracking-[0.1em] uppercase text-[#4A4A4A]">
-                    {MODEL_STATUS_LABELS[user.status]}
-                  </td>
-                  <td className="px-4 py-3 font-ui text-[10px] text-[#9A9A9A]">
-                    {formatDate(user.createdAt)}
-                  </td>
-                  <td className="px-4 py-3">
+                  <td className={`${adminTd} text-gray-500`}>{formatDate(user.createdAt)}</td>
+                  <td className={adminTd}>
                     <div className="flex flex-wrap items-center gap-2">
                       <button
                         type="button"
                         onClick={() => setReviewUser(user)}
-                        className="font-ui text-[8px] tracking-[0.15em] uppercase px-3 py-2 border border-[#C8A97A] text-[#0A0A0A] hover:bg-[#C8A97A] hover:text-white transition-colors whitespace-nowrap"
+                        className={adminBtnAccent + " !px-3 !py-1.5 text-xs"}
                       >
                         Review
                       </button>
@@ -283,7 +290,7 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
                             [user.id]: e.target.value as UserStatus,
                           }))
                         }
-                        className={inputCls + " min-w-[140px]"}
+                        className={adminInput + " !py-1.5 text-xs min-w-[130px]"}
                       >
                         {MODEL_QUEUE_STATUSES.map((s) => (
                           <option key={s} value={s}>
@@ -298,9 +305,9 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
                           (pendingStatus[user.id] ?? user.status) === user.status
                         }
                         onClick={() => handleUpdate(user)}
-                        className="font-ui text-[8px] tracking-[0.15em] uppercase px-3 py-2 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] disabled:opacity-40 transition-colors whitespace-nowrap"
+                        className={adminBtnPrimary + " !px-3 !py-1.5 text-xs"}
                       >
-                        {updatingId === user.id ? "…" : "Update"}
+                        {updatingId === user.id ? "Saving…" : "Save"}
                       </button>
                     </div>
                   </td>
@@ -312,23 +319,23 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3 pt-1">
           <button
             type="button"
             disabled={page <= 1 || loading}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="font-ui text-[9px] tracking-[0.2em] uppercase px-4 py-2 border border-[#E0E0E0] disabled:opacity-40 hover:border-[#C8A97A] transition-colors"
+            className={adminBtnSecondary + " !py-2 text-xs"}
           >
             Previous
           </button>
-          <span className="font-ui text-[9px] tracking-[0.15em] text-[#9A9A9A]">
+          <span className="text-sm text-gray-500">
             Page {page} of {totalPages}
           </span>
           <button
             type="button"
             disabled={page >= totalPages || loading}
             onClick={() => setPage((p) => p + 1)}
-            className="font-ui text-[9px] tracking-[0.2em] uppercase px-4 py-2 border border-[#E0E0E0] disabled:opacity-40 hover:border-[#C8A97A] transition-colors"
+            className={adminBtnSecondary + " !py-2 text-xs"}
           >
             Next
           </button>
@@ -340,8 +347,7 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
           user={reviewUser}
           onClose={() => setReviewUser(null)}
           onUpdated={() => {
-            void loadUsers();
-            onUsersChanged?.();
+            void refreshAfterChange();
           }}
         />
       )}

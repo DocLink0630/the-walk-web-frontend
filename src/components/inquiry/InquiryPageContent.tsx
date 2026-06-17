@@ -4,19 +4,63 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { CTA_PRIMARY_FILLED } from "@/config/cta-styles";
-import { CONTACT_EMAIL } from "@/data/contact";
 import { useAuth } from "@/context/AuthContext";
 import { useBooking } from "@/context/BookingContext";
+import { submitInquiry } from "@/lib/client/inquiries-api";
+
+function isValidPhone(phone: string): boolean {
+  const digits = phone.replace(/\D/g, "");
+  return digits.length >= 7 && digits.length <= 15;
+}
 
 export default function InquiryPageContent() {
   const { bookingCart, removeFromCart, clearCart } = useBooking();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isClient, isLoading } = useAuth();
+  const [phone, setPhone] = useState("");
   const [eventDate, setEventDate] = useState("");
   const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
+
+    if (!phone.trim()) {
+      setError("Phone number is required.");
+      return;
+    }
+    if (!isValidPhone(phone)) {
+      setError("Enter a valid phone number (7–15 digits).");
+      return;
+    }
+    if (bookingCart.length === 0) {
+      setError("Add at least one talent to your inquiry cart.");
+      return;
+    }
+
+    setSubmitting(true);
+    const result = await submitInquiry({
+      phone: phone.trim(),
+      eventDate: eventDate || undefined,
+      message: message.trim() || undefined,
+      items: bookingCart.map(({ talent }) => ({
+        modelUserId: talent.id,
+        modelName: talent.name,
+        modelType: talent.type,
+        category: talent.category,
+        priceRate: talent.priceRate,
+      })),
+    });
+    setSubmitting(false);
+
+    if (!result.ok) {
+      setError(result.message);
+      return;
+    }
+
+    clearCart();
     setSubmitted(true);
   }
 
@@ -28,14 +72,14 @@ export default function InquiryPageContent() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !isClient) {
     return (
       <div className="max-w-xl mx-auto px-4 py-12 md:py-16 text-center space-y-6">
         <p className="font-ui text-[11px] tracking-[0.2em] uppercase text-[#9A7329]">
           Booking inquiry
         </p>
         <h1 className="font-display text-3xl md:text-4xl font-light text-[#0A0A0A]">
-          Sign in to submit an inquiry
+          Sign in as a client to submit an inquiry
         </h1>
         <p className="font-ui text-sm text-[#4A4A4A] leading-relaxed">
           Create a client account to book models, beauticians, and photographers.
@@ -88,6 +132,26 @@ export default function InquiryPageContent() {
             Browse models
           </Link>
         </div>
+      ) : submitted ? (
+        <div className="border border-[#C8A97A]/40 bg-[#C8A97A]/10 px-6 py-6 space-y-3">
+          <p className="font-ui text-sm text-[#0A0A0A] font-normal">
+            Your inquiry has been submitted.
+          </p>
+          <p className="font-ui text-xs text-[#4A4A4A] leading-relaxed">
+            Our team will review your request and contact you shortly. You can track
+            status on your{" "}
+            <Link href="/client/profile" className="text-[#9A7329] underline">
+              client profile
+            </Link>
+            .
+          </p>
+          <Link
+            href="/models"
+            className="inline-block font-ui text-[11px] tracking-[0.15em] uppercase text-[#9A7329] underline underline-offset-4"
+          >
+            Browse more talent
+          </Link>
+        </div>
       ) : (
         <>
           <ul className="space-y-4">
@@ -128,7 +192,28 @@ export default function InquiryPageContent() {
 
           <form onSubmit={handleSubmit} className="space-y-6 border-t border-[#E0E0E0] pt-8">
             <div className="space-y-1.5">
-              <label htmlFor="inquiry-date" className="block font-ui text-[11px] tracking-[0.12em] uppercase text-[#0A0A0A]">
+              <label
+                htmlFor="inquiry-phone"
+                className="block font-ui text-[11px] tracking-[0.12em] uppercase text-[#0A0A0A]"
+              >
+                Phone number
+              </label>
+              <input
+                id="inquiry-phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+94 77 123 4567"
+                required
+                className="w-full border border-[#D4D4D4] bg-white px-4 py-3 font-ui text-sm text-[#0A0A0A] outline-none focus:border-[#C8A97A]"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label
+                htmlFor="inquiry-date"
+                className="block font-ui text-[11px] tracking-[0.12em] uppercase text-[#0A0A0A]"
+              >
                 Event or shoot date
               </label>
               <input
@@ -141,7 +226,10 @@ export default function InquiryPageContent() {
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="inquiry-message" className="block font-ui text-[11px] tracking-[0.12em] uppercase text-[#0A0A0A]">
+              <label
+                htmlFor="inquiry-message"
+                className="block font-ui text-[11px] tracking-[0.12em] uppercase text-[#0A0A0A]"
+              >
                 Project details
               </label>
               <textarea
@@ -154,32 +242,20 @@ export default function InquiryPageContent() {
               />
             </div>
 
-            {submitted ? (
-              <div className="border border-[#C8A97A]/40 bg-[#C8A97A]/10 px-4 py-4 space-y-2">
-                <p className="font-ui text-sm text-[#0A0A0A] font-normal">
-                  Direct inquiry submission is coming soon.
-                </p>
-                <p className="font-ui text-xs text-[#4A4A4A] leading-relaxed">
-                  Thank you for your interest. Our team will be in touch shortly. You can
-                  also reach us at{" "}
-                  <a
-                    href={`mailto:${CONTACT_EMAIL}`}
-                    className="text-[#9A7329] underline"
-                  >
-                    {CONTACT_EMAIL}
-                  </a>{" "}
-                  with your selected talent and event details.
-                </p>
-              </div>
-            ) : (
-              <button
-                type="submit"
-                data-cursor="button"
-                className={CTA_PRIMARY_FILLED + " w-full sm:w-auto px-10 py-3"}
-              >
-                Submit inquiry
-              </button>
+            {error && (
+              <p className="font-ui text-sm text-red-700 border border-red-200 bg-red-50 px-4 py-3">
+                {error}
+              </p>
             )}
+
+            <button
+              type="submit"
+              disabled={submitting}
+              data-cursor="button"
+              className={CTA_PRIMARY_FILLED + " w-full sm:w-auto px-10 py-3 disabled:opacity-50"}
+            >
+              {submitting ? "Submitting…" : "Submit inquiry"}
+            </button>
 
             <button
               type="button"
