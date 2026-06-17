@@ -3,12 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Lock, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useBooking } from "@/context/BookingContext";
 import { getFirstName } from "@/lib/public/featured-models";
 import { getClientToken } from "@/lib/client/token";
 import {
+  fetchPublicModelGallery,
   mapTierToCategory,
   mapToTalentProfile,
   resolveModelProfileForModal,
@@ -30,6 +31,22 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
   useEffect(() => {
     setResolvedModel(model);
   }, [model]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetchPublicModelGallery(model.name).then((gallery) => {
+      if (cancelled || !gallery || gallery.portfolioImages.length === 0) return;
+      setResolvedModel((prev) => ({
+        ...prev,
+        portfolioImages: gallery.portfolioImages,
+        imageUrl: gallery.imageUrl ?? prev.imageUrl,
+        height: gallery.height ?? prev.height,
+      }));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [model.name]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -182,6 +199,7 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
                 />
                 {currentSlide?.locked && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0A0A0A]/40 px-6 text-center">
+                    <Lock className="size-8 text-white/90 mb-4" strokeWidth={1.25} />
                     <p className="font-ui text-[10px] tracking-[0.2em] uppercase text-white/90 mb-4 max-w-xs leading-relaxed">
                       Full portfolio available to registered clients
                     </p>
@@ -348,40 +366,36 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
             {galleryImages.length > 0 ? (
               galleryImages.map((imgUrl, idx) => {
                 const locked = !isAuthenticated && idx > 0;
+                const slideIdx = slideImages.indexOf(imgUrl);
                 return (
                   <button
                     key={`${imgUrl}-${idx}`}
                     type="button"
                     onClick={() => {
-                      if (locked) return;
-                      const slideIdx = slideImages.indexOf(imgUrl);
                       if (slideIdx >= 0) setSlideIndex(slideIdx);
                     }}
                     className={[
                       "relative shrink-0 w-24 h-32 border overflow-hidden",
-                      slideIndex === slideImages.indexOf(imgUrl) && slideImages.indexOf(imgUrl) >= 0
+                      slideIndex === slideIdx && slideIdx >= 0
                         ? "border-[#C8A97A]"
                         : "border-[#E0E0E0]",
-                      locked ? "cursor-default" : "cursor-pointer",
+                      "cursor-pointer",
                     ].join(" ")}
                   >
                     <Image
                       src={imgUrl}
                       alt={`${displayName} ${galleryLabel.toLowerCase()} ${idx + 1}`}
                       fill
-                      className={["object-cover", locked ? "blur-sm" : ""].join(" ")}
+                      className={["object-cover", locked ? "blur-md scale-105" : ""].join(" ")}
                       sizes="96px"
                       unoptimized
                     />
                     {locked && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-[#0A0A0A]/30">
-                        <Link
-                          href="/?login=1"
-                          className="font-ui text-[7px] tracking-[0.15em] uppercase text-white text-center px-2"
-                          onClick={(e) => e.stopPropagation()}
-                        >
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-[#0A0A0A]/50">
+                        <Lock className="size-4 text-white/90" strokeWidth={1.5} />
+                        <span className="font-ui text-[7px] tracking-[0.12em] uppercase text-white/90 text-center px-1">
                           Sign in
-                        </Link>
+                        </span>
                       </div>
                     )}
                   </button>

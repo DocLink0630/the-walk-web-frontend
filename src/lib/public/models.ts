@@ -65,6 +65,37 @@ function makePublicModelId(name: string, index: number): string {
   return `public-${slug}-${index}`;
 }
 
+/** Loads profile + portfolio gallery for guests (no auth). */
+export async function fetchPublicModelGallery(
+  name: string,
+): Promise<Pick<PublicModel, "portfolioImages" | "imageUrl" | "height"> | null> {
+  try {
+    const params = new URLSearchParams({ name });
+    const res = await fetch(`/api/public/models/gallery?${params.toString()}`);
+    if (!res.ok) return null;
+
+    const data = (await res.json()) as {
+      portfolioImages?: string[];
+      imageUrl?: string | null;
+      height?: string | null;
+    };
+
+    const portfolioImages = Array.isArray(data.portfolioImages)
+      ? data.portfolioImages.filter(Boolean)
+      : data.imageUrl
+        ? [data.imageUrl]
+        : [];
+
+    return {
+      portfolioImages,
+      imageUrl: portfolioImages[0] ?? data.imageUrl ?? null,
+      height: data.height?.trim() || undefined,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export function mapPublicApiModelToPublicModel(
   item: PublicApiModel,
   index: number,
