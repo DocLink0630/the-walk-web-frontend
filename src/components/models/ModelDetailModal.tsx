@@ -23,10 +23,12 @@ interface ModelDetailModalProps {
 }
 
 export default function ModelDetailModal({ model, onClose }: ModelDetailModalProps) {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, isClient, user } = useAuth();
   const { addToCart, isInCart } = useBooking();
   const [slideIndex, setSlideIndex] = useState(0);
   const [resolvedModel, setResolvedModel] = useState(model);
+
+  const canViewFullPortfolio = isClient;
 
   useEffect(() => {
     setResolvedModel(model);
@@ -35,36 +37,59 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
   useEffect(() => {
     let cancelled = false;
     void fetchPublicModelGallery(model.name).then((gallery) => {
-      if (cancelled || !gallery || gallery.portfolioImages.length === 0) return;
+      if (cancelled || !gallery) return;
+      const visibleImages =
+        canViewFullPortfolio || gallery.portfolioImages.length <= 1
+          ? gallery.portfolioImages
+          : gallery.portfolioImages.slice(0, 1);
+
       setResolvedModel((prev) => ({
         ...prev,
-        portfolioImages: gallery.portfolioImages,
-        imageUrl: gallery.imageUrl ?? prev.imageUrl,
+        ...(visibleImages.length > 0 && {
+          portfolioImages: visibleImages,
+          imageUrl: visibleImages[0] ?? prev.imageUrl,
+        }),
+        portfolioCount: gallery.portfolioCount ?? gallery.portfolioImages.length,
         height: gallery.height ?? prev.height,
       }));
     });
     return () => {
       cancelled = true;
     };
-  }, [model.name]);
+  }, [canViewFullPortfolio, model.name]);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isClient) return;
 
     const token = getClientToken();
     if (!token) return;
 
     let cancelled = false;
     void resolveModelProfileForModal(model, token).then((enriched) => {
-      if (!cancelled) setResolvedModel(enriched);
+      if (!cancelled) {
+        setResolvedModel((prev) => ({
+          ...enriched,
+          portfolioImages:
+            enriched.portfolioImages.length > 0
+              ? enriched.portfolioImages
+              : prev.portfolioImages.length > 0
+                ? prev.portfolioImages
+                : enriched.portfolioImages,
+          portfolioCount: Math.max(
+            enriched.portfolioImages.length,
+            prev.portfolioCount ?? 0,
+            enriched.portfolioImages.length,
+          ),
+        }));
+      }
     });
 
     return () => {
       cancelled = true;
     };
-  }, [isAuthenticated, model]);
+  }, [isClient, model]);
 
-  const displayName = isAuthenticated
+  const displayName = canViewFullPortfolio
     ? resolvedModel.name
     : getFirstName(resolvedModel.name).toUpperCase();
 
@@ -78,15 +103,17 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
     return images;
   }, [resolvedModel.imageUrl, resolvedModel.portfolioImages]);
 
-  const slideCount = Math.max(slideImages.length, 1);
+  const slideCount = canViewFullPortfolio
+    ? Math.max(slideImages.length, 1)
+    : Math.max(resolvedModel.portfolioCount ?? slideImages.length, slideImages.length, 1);
 
   const slides = useMemo(() => {
     return Array.from({ length: slideCount }, (_, i) => ({
       index: i,
       image: slideImages[i] ?? null,
-      locked: !isAuthenticated && i > 0,
+      locked: !canViewFullPortfolio && i > 0,
     }));
-  }, [isAuthenticated, slideCount, slideImages]);
+  }, [canViewFullPortfolio, slideCount, slideImages]);
 
   const galleryImages = useMemo(() => {
     const portfolio = resolvedModel.portfolioImages.filter(Boolean);
@@ -96,6 +123,16 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
 
   const galleryLabel =
     resolvedModel.portfolioImages.filter(Boolean).length > 0 ? "Portfolio" : "Work";
+
+  const previewImage = galleryImages[0] ?? resolvedModel.imageUrl ?? null;
+
+  const portfolioSlotCount = canViewFullPortfolio
+    ? Math.max(galleryImages.length, previewImage ? 1 : 0)
+    : Math.max(
+        resolvedModel.portfolioCount ?? 0,
+        galleryImages.length,
+        previewImage ? 1 : 0,
+      );
 
   useEffect(() => {
     setSlideIndex(0);
@@ -183,38 +220,48 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
 
         <div className="flex-1 flex flex-col lg:flex-row min-h-0">
           <div className="relative lg:w-[55%] bg-[#0A0A0A] min-h-[320px] lg:min-h-0 flex items-center justify-center">
-            {hasImage ? (
+            {hasImage || currentSlide?.locked ? (
               <div className="relative w-full h-full min-h-[320px] lg:min-h-[480px]">
-                <Image
-                  src={currentSlide!.image!}
-                  alt={displayName}
-                  fill
-                  className={[
-                    "object-contain object-center transition-all duration-500",
-                    currentSlide?.locked ? "blur-md" : "",
-                  ].join(" ")}
-                  sizes="(max-width: 1024px) 100vw, 55vw"
-                  unoptimized
-                  priority
-                />
+                {hasImage && !currentSlide?.locked && (
+                  <Image
+                    src={currentSlide!.image!}
+                    alt={displayName}
+                    fill
+                    className="object-contain object-center transition-all duration-500"
+                    sizes="(max-width: 1024px) 100vw, 55vw"
+                    unoptimized
+                    priority
+                  />
+                )}
+                {currentSlide?.locked && previewImage && (
+                  <Image
+                    src={previewImage}
+                    alt=""
+                    fill
+                    className="object-contain object-center blur-xl scale-105 opacity-60"
+                    sizes="(max-width: 1024px) 100vw, 55vw"
+                    unoptimized
+                    aria-hidden
+                  />
+                )}
                 {currentSlide?.locked && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0A0A0A]/40 px-6 text-center">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0A0A0A]/80 px-6 text-center">
                     <Lock className="size-8 text-white/90 mb-4" strokeWidth={1.25} />
                     <p className="font-ui text-[10px] tracking-[0.2em] uppercase text-white/90 mb-4 max-w-xs leading-relaxed">
                       Full portfolio available to registered clients
                     </p>
                     <div className="flex flex-col sm:flex-row gap-2">
                       <Link
-                        href="/?login=1"
+                        href="/register/client"
                         className="font-ui text-[9px] tracking-[0.2em] uppercase px-6 py-2.5 bg-white text-[#0A0A0A] hover:bg-[#C8A97A] transition-colors"
                       >
-                        Sign in
+                        Register as client
                       </Link>
                       <Link
-                        href="/register/client"
+                        href="/?login=1"
                         className="font-ui text-[9px] tracking-[0.2em] uppercase px-6 py-2.5 border border-white/60 text-white hover:border-[#C8A97A] hover:text-[#C8A97A] transition-colors"
                       >
-                        Register
+                        Sign in
                       </Link>
                     </div>
                   </div>
@@ -228,7 +275,7 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
               </div>
             )}
 
-            {hasImage && slideCount > 1 && (
+            {slideCount > 1 && (
               <>
                 <button
                   type="button"
@@ -270,9 +317,9 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
                 Profile
               </p>
 
-              {!isAuthenticated && (
+              {!canViewFullPortfolio && (
                 <p className="font-ui text-[10px] text-[#6B6B6B] leading-relaxed mb-5 pb-5 border-b border-[#E8E8E8]">
-                  Sign in to view the complete profile, measurements, and portfolio.
+                  Sign in as a client to view the complete profile, measurements, and portfolio.
                 </p>
               )}
 
@@ -284,50 +331,50 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
               />
               <ModelDetailField
                 label="Weight"
-                value={isAuthenticated ? resolvedModel.weight ?? null : null}
-                locked={!isAuthenticated}
+                value={canViewFullPortfolio ? resolvedModel.weight ?? null : null}
+                locked={!canViewFullPortfolio}
                 placeholder="Members only"
               />
               <ModelDetailField
                 label="Chest"
-                value={isAuthenticated ? resolvedModel.chest ?? null : null}
-                locked={!isAuthenticated}
+                value={canViewFullPortfolio ? resolvedModel.chest ?? null : null}
+                locked={!canViewFullPortfolio}
                 placeholder="Members only"
               />
               <ModelDetailField
                 label="Rate"
-                value={isAuthenticated ? resolvedModel.rate ?? "On request" : null}
-                locked={!isAuthenticated}
+                value={canViewFullPortfolio ? resolvedModel.rate ?? "On request" : null}
+                locked={!canViewFullPortfolio}
                 placeholder="Members only"
               />
               <ModelDetailField
                 label="Tier"
-                value={isAuthenticated ? tierLabel ?? null : null}
-                locked={!isAuthenticated}
+                value={canViewFullPortfolio ? tierLabel ?? null : null}
+                locked={!canViewFullPortfolio}
                 placeholder="Members only"
               />
               <ModelDetailField
                 label="Eye colour"
-                value={isAuthenticated ? resolvedModel.eyeColor ?? null : null}
-                locked={!isAuthenticated}
+                value={canViewFullPortfolio ? resolvedModel.eyeColor ?? null : null}
+                locked={!canViewFullPortfolio}
                 placeholder="Members only"
               />
               <ModelDetailField
                 label="Hair colour"
-                value={isAuthenticated ? resolvedModel.hairColor ?? null : null}
-                locked={!isAuthenticated}
+                value={canViewFullPortfolio ? resolvedModel.hairColor ?? null : null}
+                locked={!canViewFullPortfolio}
                 placeholder="Members only"
               />
               <ModelDetailField
                 label="Bio"
-                value={isAuthenticated ? resolvedModel.bio ?? null : null}
-                locked={!isAuthenticated}
+                value={canViewFullPortfolio ? resolvedModel.bio ?? null : null}
+                locked={!canViewFullPortfolio}
                 placeholder="Members only"
               />
             </div>
 
             <div className="shrink-0 border-t border-[#E0E0E0] px-5 py-4 md:px-8 space-y-2">
-              {isAuthenticated ? (
+              {isClient ? (
                 <>
                   <button
                     type="button"
@@ -348,7 +395,7 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
                 </>
               ) : (
                 <Link
-                  href="/?login=1"
+                  href="/register/client"
                   className="block w-full text-center font-ui text-[10px] tracking-[0.2em] uppercase px-6 py-3 border border-[#0A0A0A] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-colors"
                 >
                   Sign in to inquiry
@@ -363,35 +410,41 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
             {galleryLabel}
           </p>
           <div className="flex gap-3 overflow-x-auto pb-1">
-            {galleryImages.length > 0 ? (
-              galleryImages.map((imgUrl, idx) => {
-                const locked = !isAuthenticated && idx > 0;
-                const slideIdx = slideImages.indexOf(imgUrl);
+            {portfolioSlotCount > 0 ? (
+              Array.from({ length: portfolioSlotCount }, (_, idx) => {
+                const locked = !canViewFullPortfolio && idx > 0;
+                const imageUrl = canViewFullPortfolio
+                  ? galleryImages[idx] ?? null
+                  : previewImage;
+
                 return (
                   <button
-                    key={`${imgUrl}-${idx}`}
+                    key={`portfolio-slot-${idx}`}
                     type="button"
-                    onClick={() => {
-                      if (slideIdx >= 0) setSlideIndex(slideIdx);
-                    }}
+                    onClick={() => setSlideIndex(idx)}
                     className={[
                       "relative shrink-0 w-24 h-32 border overflow-hidden",
-                      slideIndex === slideIdx && slideIdx >= 0
-                        ? "border-[#C8A97A]"
-                        : "border-[#E0E0E0]",
+                      slideIndex === idx ? "border-[#C8A97A]" : "border-[#E0E0E0]",
                       "cursor-pointer",
                     ].join(" ")}
                   >
-                    <Image
-                      src={imgUrl}
-                      alt={`${displayName} ${galleryLabel.toLowerCase()} ${idx + 1}`}
-                      fill
-                      className={["object-cover", locked ? "blur-md scale-105" : ""].join(" ")}
-                      sizes="96px"
-                      unoptimized
-                    />
+                    {imageUrl ? (
+                      <Image
+                        src={imageUrl}
+                        alt={`${displayName} ${galleryLabel.toLowerCase()} ${idx + 1}`}
+                        fill
+                        className={[
+                          "object-cover",
+                          locked ? "blur-md scale-105" : "",
+                        ].join(" ")}
+                        sizes="96px"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-[#1A1A1A]" />
+                    )}
                     {locked && (
-                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-[#0A0A0A]/50">
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-[#0A0A0A]/60">
                         <Lock className="size-4 text-white/90" strokeWidth={1.5} />
                         <span className="font-ui text-[7px] tracking-[0.12em] uppercase text-white/90 text-center px-1">
                           Sign in
