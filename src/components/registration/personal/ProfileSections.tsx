@@ -138,23 +138,38 @@ export function ContactSection({ store, idPrefix, err }: SectionProps) {
   );
 }
 
-export function MeasurementsSection({ store, idPrefix }: Pick<SectionProps, "store" | "idPrefix">) {
+export function MeasurementsSection({
+  store,
+  idPrefix,
+  fields = "full",
+}: Pick<SectionProps, "store" | "idPrefix"> & {
+  fields?: "full" | "student";
+}) {
+  const allFields = [
+    { key: "height" as const, label: "Height (cm)", placeholder: "165" },
+    { key: "weight" as const, label: "Weight (kg)", placeholder: "55" },
+    { key: "chest" as const, label: "Chest (in)", placeholder: "34" },
+    { key: "shoulder" as const, label: "Shoulder (in)", placeholder: "15" },
+    { key: "waist" as const, label: "Waist (in)", placeholder: "27" },
+    { key: "shoeSize" as const, label: "Shoe size (UK)", placeholder: "6" },
+  ] as const;
+
+  const measurementFields =
+    fields === "student"
+      ? allFields.filter((field) => field.key === "height")
+      : allFields;
+
   return (
     <section className="space-y-4">
       <h3 className={formSectionTitle}>
         Physical measurements <span className={formSectionHint}>(optional)</span>
       </h3>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-        {(
-          [
-            { key: "height" as const, label: "Height (cm)", placeholder: "165" },
-            { key: "weight" as const, label: "Weight (kg)", placeholder: "55" },
-            { key: "chest" as const, label: "Chest (in)", placeholder: "34" },
-            { key: "shoulder" as const, label: "Shoulder (in)", placeholder: "15" },
-            { key: "waist" as const, label: "Waist (in)", placeholder: "27" },
-            { key: "shoeSize" as const, label: "Shoe size (UK)", placeholder: "6" },
-          ] as const
-        ).map(({ key, label, placeholder }) => (
+      <div
+        className={
+          fields === "student" ? "max-w-xs" : "grid grid-cols-2 gap-4 sm:grid-cols-3"
+        }
+      >
+        {measurementFields.map(({ key, label, placeholder }) => (
           <Field key={key} label={label} htmlFor={`${idPrefix}-${key}`}>
             <input
               id={`${idPrefix}-${key}`}
@@ -171,34 +186,40 @@ export function MeasurementsSection({ store, idPrefix }: Pick<SectionProps, "sto
   );
 }
 
-export function AppearanceSection({ store, idPrefix }: Pick<SectionProps, "store" | "idPrefix">) {
+export function AppearanceSection({
+  store,
+  idPrefix,
+  showColorFields = true,
+}: Pick<SectionProps, "store" | "idPrefix"> & { showColorFields?: boolean }) {
   return (
     <section className="space-y-4">
       <h3 className={formSectionTitle}>
         Appearance & traits <span className={formSectionHint}>(optional)</span>
       </h3>
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <Field label="Eye color" htmlFor={`${idPrefix}-eyeColor`}>
-          <input
-            id={`${idPrefix}-eyeColor`}
-            type="text"
-            value={store.eyeColor}
-            onChange={(e) => store.set({ eyeColor: e.target.value })}
-            placeholder="Brown"
-            className={formInput}
-          />
-        </Field>
-        <Field label="Hair color" htmlFor={`${idPrefix}-hairColor`}>
-          <input
-            id={`${idPrefix}-hairColor`}
-            type="text"
-            value={store.hairColor}
-            onChange={(e) => store.set({ hairColor: e.target.value })}
-            placeholder="Black"
-            className={formInput}
-          />
-        </Field>
-      </div>
+      {showColorFields && (
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <Field label="Eye color" htmlFor={`${idPrefix}-eyeColor`}>
+            <input
+              id={`${idPrefix}-eyeColor`}
+              type="text"
+              value={store.eyeColor}
+              onChange={(e) => store.set({ eyeColor: e.target.value })}
+              placeholder="Brown"
+              className={formInput}
+            />
+          </Field>
+          <Field label="Hair color" htmlFor={`${idPrefix}-hairColor`}>
+            <input
+              id={`${idPrefix}-hairColor`}
+              type="text"
+              value={store.hairColor}
+              onChange={(e) => store.set({ hairColor: e.target.value })}
+              placeholder="Black"
+              className={formInput}
+            />
+          </Field>
+        </div>
+      )}
       <Field label="Talents" htmlFor={`${idPrefix}-talents`}>
         <textarea
           id={`${idPrefix}-talents`}

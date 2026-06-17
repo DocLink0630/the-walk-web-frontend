@@ -29,7 +29,6 @@ export function buildStudentProfilePayload(
   if (state.chest.trim()) payload.chestEnc = state.chest.trim();
   if (state.shoulder.trim()) payload.shoulderEnc = state.shoulder.trim();
   if (state.waist.trim()) payload.waistEnc = state.waist.trim();
-  if (state.shoeSize.trim()) payload.shoeSizeEnc = state.shoeSize.trim();
   if (state.eyeColor.trim()) payload.eyeColorEnc = state.eyeColor.trim();
   if (state.hairColor.trim()) payload.hairColorEnc = state.hairColor.trim();
   if (state.talents.trim()) payload.talentsEnc = state.talents.trim();

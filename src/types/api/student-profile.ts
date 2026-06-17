@@ -2,7 +2,14 @@
 
 import type { AssignableModelTier } from "./model-profile";
 
-export type StudentSource = "WALK_IN" | "ONLINE" | "REFERRAL" | "OTHER";
+export type StudentSource =
+  | "WALK_IN"
+  | "ONLINE"
+  | "TIKTOK"
+  | "INSTAGRAM"
+  | "FACEBOOK"
+  | "REFERRAL"
+  | "OTHER";
 
 /** Student registration tier — same assignable set as model profiles */
 export type ModelTier = AssignableModelTier;

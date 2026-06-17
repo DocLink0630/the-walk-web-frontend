@@ -67,10 +67,10 @@ export default function BrandStorySection({
   }, [eyebrow, heading, paragraphs, ctas, image, imageAlt]);
 
   return (
-    <section ref={sectionRef} id={id} className="bg-white py-[160px]">
-      <div className="max-w-[1440px] mx-auto px-[80px]">
-        <div className="grid grid-cols-12 gap-12 items-center">
-          <div ref={contentRef} className="col-span-5 col-start-1">
+    <section ref={sectionRef} id={id} className="bg-white py-16 md:py-24 lg:py-[160px] overflow-hidden">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-[80px]">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+          <div ref={contentRef} className="lg:col-span-5 lg:col-start-1 min-w-0">
             <BrandStoryContent
               eyebrow={eyebrow}
               heading={heading}
@@ -81,7 +81,7 @@ export default function BrandStorySection({
 
           <div
             ref={imageRef}
-            className="col-span-7 col-start-6 flex items-center justify-center"
+            className="lg:col-span-7 lg:col-start-6 flex items-center justify-center min-w-0"
           >
             <Image
               src={image}

@@ -96,7 +96,7 @@ export default function CustomCursor() {
   return (
     <div
       ref={cursorRef}
-      className="fixed top-0 left-0 w-[28px] h-[28px] pointer-events-none z-[9999] flex items-center justify-center mix-blend-difference"
+      className="fixed top-0 left-0 w-[28px] h-[28px] pointer-events-none z-[9999] hidden md:flex items-center justify-center mix-blend-difference"
       style={{
         border: "1px solid #FFFFFF",
         borderRadius: "50%",
