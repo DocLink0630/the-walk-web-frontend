@@ -43,7 +43,7 @@ export default function TalentSection({
   id = "talent",
   eyebrow = "REPRESENTED MODELS",
   heading = "Signature Models",
-  ctaLabel = "VIEW FULL ROSTER",
+  ctaLabel = "VIEW ALL MODELS",
   ctaHref = "/models",
 }: TalentSectionProps) {
   const { isAuthenticated } = useAuth();

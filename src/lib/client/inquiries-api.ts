@@ -47,6 +47,13 @@ export async function fetchOwnInquiries(
 export async function submitInquiry(
   payload: CreateInquiryPayload,
 ): Promise<{ ok: true } | { ok: false; message: string }> {
+  if (!getClientToken()) {
+    return {
+      ok: false,
+      message: "Your session has expired. Please sign in again to submit an inquiry.",
+    };
+  }
+
   const res = await fetch("/api/inquiries", {
     method: "POST",
     headers: authHeaders({ "Content-Type": "application/json" }),
