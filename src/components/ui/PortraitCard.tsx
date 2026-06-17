@@ -53,16 +53,28 @@ const PortraitCard = forwardRef<HTMLDivElement, PortraitCardProps>(
               </span>
             </div>
           )}
-        </div>
-        <div className="mt-3 md:mt-4">
-          <h3 className="font-ui text-[9px] md:text-[10px] lg:text-[11px] font-light tracking-[0.2em] md:tracking-[0.25em] uppercase text-[#0A0A0A]">
-            {title}
-          </h3>
-          {subtitle && (
-            <p className="font-ui text-[8px] md:text-[9px] font-light tracking-[0.25em] md:tracking-[0.3em] uppercase text-[#9A9A9A] mt-1">
-              {subtitle}
-            </p>
-          )}
+          <div
+            className={`absolute inset-x-0 bottom-0 px-4 pb-4 pt-16 ${
+              image
+                ? "bg-gradient-to-t from-black via-black/70 to-transparent"
+                : ""
+            }`}
+          >
+            <h3
+              className={`font-ui text-[22px] md:text-[26px] font-bold tracking-[0.06em] uppercase leading-[1.1] ${
+                image
+                  ? "text-white [text-shadow:0_2px_16px_rgba(0,0,0,1),0_1px_3px_rgba(0,0,0,0.9)]"
+                  : "text-[#0A0A0A]"
+              }`}
+            >
+              {title}
+            </h3>
+            {subtitle && (
+              <p className="font-ui text-[10px] md:text-[11px] font-semibold tracking-[0.14em] uppercase text-[#E8D5B5] mt-1.5 [text-shadow:0_1px_8px_rgba(0,0,0,0.9)]">
+                {subtitle}
+              </p>
+            )}
+          </div>
         </div>
       </div>
     );

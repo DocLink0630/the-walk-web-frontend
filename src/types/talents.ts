@@ -1,4 +1,4 @@
-export type ModelCategory = "Super Model" | "Experienced" | "Freshers";
+export type ModelCategory = "Super Model" | "Experienced" | "Freshers" | "Influencer";
 export type TalentType = "model" | "beautician" | "photographer";
 export type SkinTone = "Fair" | "Medium" | "Olive" | "Tan" | "Brown" | "Dark";
 export type HairColor = "Blonde" | "Brown" | "Black" | "Red" | "Grey" | "Other";

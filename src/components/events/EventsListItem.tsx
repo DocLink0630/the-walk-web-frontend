@@ -109,7 +109,7 @@ export default function EventsListItem({
           {event.description}
         </p>
 
-        <p className="font-ui text-[9px] tracking-[0.28em] uppercase text-[#C8A97A] mb-6 md:mb-8">
+        <p className="font-ui text-[11px] md:text-[12px] font-semibold tracking-[0.18em] uppercase text-[#0A0A0A] mb-6 md:mb-8">
           {event.highlight}
         </p>
 

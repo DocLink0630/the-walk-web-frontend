@@ -16,7 +16,7 @@ export default function EventDetailDescriptionSection({
             <p className="font-ui text-[9px] tracking-[0.35em] uppercase text-[#C8A97A] mb-6">
               Event Highlights
             </p>
-            <p className="font-ui text-[11px] tracking-[0.15em] uppercase text-[#0A0A0A] leading-[1.8]">
+            <p className="font-ui text-[11px] md:text-[12px] font-semibold tracking-[0.18em] uppercase text-[#0A0A0A] leading-[1.8]">
               {event.highlight}
             </p>
           </div>

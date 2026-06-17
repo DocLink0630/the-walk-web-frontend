@@ -14,7 +14,7 @@ export default function RegistrationStepItem({
         <span className="font-ui text-[10px] text-[#C8A97A]">{number}</span>
       </div>
       <div>
-        <h4 className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#0A0A0A] mb-2">
+        <h4 className="font-ui text-[11px] md:text-[12px] font-semibold tracking-[0.18em] uppercase text-[#0A0A0A] mb-2">
           {title}
         </h4>
         <p className="font-display text-[16px] text-[#6A6A6A] leading-[1.7]">

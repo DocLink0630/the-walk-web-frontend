@@ -96,19 +96,19 @@ export default function AcademyHeroSection({
           <div className="max-w-[900px]">
             <p
               ref={subheadingRef}
-              className="font-ui text-[9px] md:text-[10px] font-light tracking-[0.35em] uppercase text-[#C8A97A] mb-4 md:mb-6"
+              className="font-ui text-[11px] md:text-[12px] font-medium tracking-[0.3em] uppercase text-[#C8A97A] mb-4 md:mb-6"
             >
               {hero.eyebrow}
             </p>
             <h1
               ref={headingRef}
-              className="font-display text-[60px] md:text-[90px] lg:text-[120px] font-light tracking-[0.35em] text-white leading-[0.9] mb-5 md:mb-7"
+              className="font-display text-[60px] md:text-[90px] lg:text-[120px] font-light tracking-[0.35em] text-white leading-[1.05] mb-5 md:mb-7 pb-1"
             >
               {hero.heading}
             </h1>
             <p
               ref={descriptionRef}
-              className="font-display text-[16px] md:text-[20px] lg:text-[22px] font-light text-white/90 leading-[1.6] max-w-[640px]"
+              className="font-display text-[18px] md:text-[22px] lg:text-[26px] font-normal text-white/95 leading-[1.6] max-w-[640px]"
             >
               {hero.description}
             </p>
@@ -116,7 +116,7 @@ export default function AcademyHeroSection({
               <Link
                 href={applyHref}
                 data-cursor="button"
-                className="inline-block font-ui text-[9px] md:text-[10px] tracking-[0.3em] uppercase px-10 md:px-12 py-4 md:py-5 bg-[#C8A97A] text-white hover:bg-white hover:text-[#0A0A0A] transition-colors duration-300"
+                className="inline-block font-ui text-[11px] md:text-[12px] font-medium tracking-[0.25em] uppercase px-10 md:px-12 py-4 md:py-5 bg-[#C8A97A] text-white hover:bg-white hover:text-[#0A0A0A] transition-colors duration-300"
               >
                 {applyLabel}
               </Link>

@@ -21,7 +21,7 @@ export async function submitAdminModelWithApproval(
     if (!state.tier) {
       return {
         ok: false,
-        message: "Please select an assignable tier (Fresher, Experienced, or Super model).",
+        message: "Please select an assignable tier (Fresher, Experienced, Supermodel, or Influencer).",
       };
     }
 

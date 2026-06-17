@@ -18,10 +18,10 @@ const FounderProfile = forwardRef<HTMLDivElement, FounderProfileProps> (
                     sizes="(max-width: 1024px) 100vw, 40vw"
                 />
                 <div className="mt-6">
-                    <h3 className="font-ui text-[11px] font-light tracking-[0.25em] uppercase text-[#0a0a0a] mb-2">
+                    <h3 className="font-ui text-[16px] md:text-[18px] font-medium tracking-[0.12em] uppercase text-[#0A0A0A] mb-2">
                         {name}
                     </h3>
-                    <p className="font-ui text-[9px] font-light tracking-[0.3em] uppercase text-[#C8A97A]">
+                    <p className="font-ui text-[12px] md:text-[13px] font-semibold tracking-[0.18em] uppercase text-[#9A7329]">
                         {title}
                     </p>
                 </div>

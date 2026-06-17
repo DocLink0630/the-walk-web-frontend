@@ -78,29 +78,26 @@ export default function ModelsMasonryGrid({
                     <span className="font-ui text-[9px] text-white">✓</span>
                   </div>
                 )}
-                {measurementLine && isAuthenticated && (
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                    <p className="font-ui text-[8px] tracking-[0.25em] uppercase text-white/70">
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/70 to-transparent px-4 pb-4 pt-16">
+                  <h3 className="font-ui text-[22px] md:text-[26px] font-bold tracking-[0.06em] uppercase text-white leading-[1.1] [text-shadow:0_2px_16px_rgba(0,0,0,1),0_1px_3px_rgba(0,0,0,0.9)]">
+                    {displayName}
+                  </h3>
+                  {model.category && (
+                    <p className="font-ui text-[10px] md:text-[11px] font-semibold tracking-[0.14em] uppercase text-[#E8D5B5] mt-1.5 [text-shadow:0_1px_8px_rgba(0,0,0,0.9)]">
+                      {model.category}
+                    </p>
+                  )}
+                  {isAuthenticated && model.rate && (
+                    <p className="font-ui text-[13px] md:text-[14px] font-semibold text-white mt-1.5 [text-shadow:0_1px_8px_rgba(0,0,0,0.9)]">
+                      {model.rate}
+                    </p>
+                  )}
+                  {measurementLine && isAuthenticated && (
+                    <p className="font-ui text-[10px] font-semibold tracking-[0.12em] uppercase text-white/80 mt-1.5 [text-shadow:0_1px_8px_rgba(0,0,0,0.9)]">
                       {measurementLine}
                     </p>
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-3 bg-white border-l-2 border-[#C8A97A] pl-3 py-1">
-                <h3 className="font-ui text-[10px] tracking-[0.25em] uppercase text-[#0A0A0A]">
-                  {displayName}
-                </h3>
-                {model.category && (
-                  <p className="font-ui text-[8px] tracking-[0.3em] uppercase text-[#C8A97A] mt-1">
-                    {model.category}
-                  </p>
-                )}
-                {isAuthenticated && model.rate && (
-                  <p className="font-display text-[13px] text-[#9A9A9A] mt-1">
-                    {model.rate}
-                  </p>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           </div>

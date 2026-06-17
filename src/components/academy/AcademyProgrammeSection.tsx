@@ -80,7 +80,7 @@ export default function AcademyProgrammeSection({
                 data-academy-delay={index * 0.08}
                 className={`p-6 md:p-10 lg:p-12 ${index % 2 === 0 ? "bg-white" : "bg-[#FAFAF9]"} border-t md:border-t-0 first:border-t-0`}
               >
-                <div className="inline-flex items-center justify-center font-ui text-[8px] tracking-[0.3em] uppercase px-3 md:px-4 py-1.5 md:py-2 border border-[#0A0A0A] text-[#0A0A0A] mb-5 md:mb-6">
+                <div className="inline-flex items-center justify-center font-ui text-[11px] md:text-[12px] font-semibold tracking-[0.18em] uppercase px-3 md:px-4 py-1.5 md:py-2 border-2 border-[#0A0A0A] text-[#0A0A0A] mb-5 md:mb-6">
                   {month.number}
                 </div>
                 <h4 className="font-display text-[28px] md:text-[32px] lg:text-[36px] font-light text-[#0A0A0A] leading-[1.05] mb-6 md:mb-8">

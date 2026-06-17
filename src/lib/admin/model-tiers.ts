@@ -7,6 +7,7 @@ export const ADMIN_ASSIGNABLE_TIERS: {
   { value: "FRESHER", label: "Fresher" },
   { value: "EXPERIENCED", label: "Experienced" },
   { value: "SUPERMODEL", label: "Supermodel" },
+  { value: "INFLUENCER", label: "Influencer" },
 ];
 
 export function formatModelTier(tier?: string | null): string {
