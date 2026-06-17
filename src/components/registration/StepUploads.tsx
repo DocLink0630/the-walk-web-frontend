@@ -305,7 +305,11 @@ export default function StepUploads({
 
       {store.error && (
         <div className="border border-red-300 bg-red-50 px-4 py-3">
-          <p className="font-ui text-sm text-red-700 leading-relaxed">{store.error}</p>
+          {store.error.split("\n").map((line, i) => (
+            <p key={i} className="font-ui text-sm text-red-700 leading-relaxed">
+              {line}
+            </p>
+          ))}
         </div>
       )}
 
