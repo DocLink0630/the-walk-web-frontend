@@ -68,6 +68,19 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
   const [pendingStatus, setPendingStatus] = useState<Record<string, UserStatus>>({});
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [reviewUser, setReviewUser] = useState<AdminUser | null>(null);
+  const [pendingReviewCount, setPendingReviewCount] = useState(0);
+
+  const loadPendingReviewCount = useCallback(async () => {
+    const result = await fetchAdminUsers({
+      page: 1,
+      limit: 1,
+      status: "PENDING_ADMIN_REVIEW",
+      roles: [...STUDENT_ROLES],
+    });
+    if (result.ok) {
+      setPendingReviewCount(result.data.meta.total);
+    }
+  }, []);
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -100,6 +113,16 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
     void loadUsers();
   }, [loadUsers]);
 
+  useEffect(() => {
+    void loadPendingReviewCount();
+  }, [loadPendingReviewCount]);
+
+  async function refreshAfterChange() {
+    await loadUsers();
+    await loadPendingReviewCount();
+    onUsersChanged?.();
+  }
+
   async function handleUpdate(user: AdminUser) {
     const next = pendingStatus[user.id];
     if (!next || next === user.status) return;
@@ -118,8 +141,7 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
       type: "ok",
       text: `Updated ${user.displayName ?? user.email} to ${STUDENT_STATUS_LABELS[next]}`,
     });
-    await loadUsers();
-    onUsersChanged?.();
+    await refreshAfterChange();
   }
 
   function applySearch() {
@@ -139,13 +161,21 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
               setActiveTab(tab.id);
             }}
             className={[
-              "rounded-md px-4 py-2 text-sm font-medium transition",
+              "inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition",
               activeTab === tab.id
                 ? "bg-white text-gray-900 shadow-sm"
                 : "text-gray-600 hover:text-gray-900",
             ].join(" ")}
           >
             {tab.label}
+            {tab.id === "pending" && pendingReviewCount > 0 && (
+              <span
+                className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-amber-500 text-white text-[11px] font-semibold leading-none"
+                aria-label={`${pendingReviewCount} pending review`}
+              >
+                {pendingReviewCount > 99 ? "99+" : pendingReviewCount}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -320,8 +350,7 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
           user={reviewUser}
           onClose={() => setReviewUser(null)}
           onUpdated={() => {
-            void loadUsers();
-            onUsersChanged?.();
+            void refreshAfterChange();
           }}
         />
       )}

@@ -2,7 +2,7 @@
 
 export type ModelSource = "WALK_IN" | "ONLINE" | "REFERRAL" | "OTHER";
 
-export type AssignableModelTier = "FRESHER" | "EXPERIENCED" | "SUPERMODEL";
+export type AssignableModelTier = "FRESHER" | "EXPERIENCED" | "SUPERMODEL" | "INFLUENCER";
 
 /** walk-web-backend ModelTier enum */
 export type ModelTier = "PENDING" | AssignableModelTier;

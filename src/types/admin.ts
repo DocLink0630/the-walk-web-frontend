@@ -22,7 +22,8 @@ export type ModelTier =
   | "PENDING"
   | "FRESHER"
   | "EXPERIENCED"
-  | "SUPERMODEL";
+  | "SUPERMODEL"
+  | "INFLUENCER";
 
 /** Admin-assigned tiers (excludes PENDING) */
 export type AssignableModelTier = Exclude<ModelTier, "PENDING">;

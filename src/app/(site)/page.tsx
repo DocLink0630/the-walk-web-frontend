@@ -17,7 +17,7 @@ export default function Home() {
         sideLabel="Model · Beautician · Photographer"
         background={{
           type: "video",
-          src: "/videos/background.mp4",
+          src: "/videos/about.mp4",
           poster: "/images/hero.webp",
         }}
         ctas={[

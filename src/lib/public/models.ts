@@ -31,6 +31,8 @@ export function mapTierToCategory(tier?: ModelTier | null): ModelCategory | unde
       return "Experienced";
     case "FRESHER":
       return "Freshers";
+    case "INFLUENCER":
+      return "Influencer";
     default:
       return undefined;
   }

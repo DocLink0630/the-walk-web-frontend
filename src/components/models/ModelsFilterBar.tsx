@@ -8,6 +8,7 @@ const CATEGORIES: ModelFilterCategory[] = [
   "Super Model",
   "Experienced",
   "Freshers",
+  "Influencer",
 ];
 
 interface ModelsFilterBarProps {
