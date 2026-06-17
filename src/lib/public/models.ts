@@ -68,7 +68,7 @@ function makePublicModelId(name: string, index: number): string {
 /** Loads profile + portfolio gallery for guests (no auth). */
 export async function fetchPublicModelGallery(
   name: string,
-): Promise<Pick<PublicModel, "portfolioImages" | "imageUrl" | "height"> | null> {
+): Promise<Pick<PublicModel, "portfolioImages" | "portfolioCount" | "imageUrl" | "height"> | null> {
   try {
     const params = new URLSearchParams({ name });
     const res = await fetch(`/api/public/models/gallery?${params.toString()}`);
@@ -76,6 +76,7 @@ export async function fetchPublicModelGallery(
 
     const data = (await res.json()) as {
       portfolioImages?: string[];
+      portfolioCount?: number;
       imageUrl?: string | null;
       height?: string | null;
     };
@@ -88,6 +89,7 @@ export async function fetchPublicModelGallery(
 
     return {
       portfolioImages,
+      portfolioCount: data.portfolioCount ?? portfolioImages.length,
       imageUrl: portfolioImages[0] ?? data.imageUrl ?? null,
       height: data.height?.trim() || undefined,
     };
@@ -112,6 +114,7 @@ export function mapPublicApiModelToPublicModel(
     imageUrl: portfolioImages[0] ?? item.imageUrl,
     height: item.height?.trim() || undefined,
     portfolioImages,
+    portfolioCount: item.portfolioCount ?? portfolioImages.length,
   };
 }
 
@@ -160,6 +163,7 @@ export function featuredModelToPublicModel(
     imageUrl: portfolioImages[0] ?? model.imageUrl,
     height: model.height?.trim() || undefined,
     portfolioImages,
+    portfolioCount: model.portfolioCount ?? portfolioImages.length,
     isFeaturedOnly: true,
   };
 }

@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useAuth } from "@/context/AuthContext";
 import ModelDetailModal from "@/components/models/ModelDetailModal";
+import NavLinkWithStatus from "@/components/ui/NavLinkWithStatus";
 import {
   attachScrollTriggerResync,
   refreshScrollTriggers,
@@ -203,12 +203,12 @@ export default function TalentSection({
               <p className="font-ui text-sm text-[#4A4A4A] mb-4">
                 New signature faces will be featured here soon.
               </p>
-              <Link
+              <NavLinkWithStatus
                 href={ctaHref}
-                className="font-ui text-[10px] tracking-[0.2em] uppercase text-[#9A7329] underline underline-offset-4"
+                className="inline-flex items-center gap-2 font-ui text-[10px] tracking-[0.2em] uppercase text-[#9A7329] underline underline-offset-4"
               >
                 Browse roster
-              </Link>
+              </NavLinkWithStatus>
             </div>
           )}
 
@@ -246,13 +246,13 @@ export default function TalentSection({
               </div>
 
               <div className="flex justify-center mt-12 md:mt-16 lg:mt-20">
-                <Link
+                <NavLinkWithStatus
                   href={ctaHref}
                   data-cursor="button"
-                  className="inline-block text-center font-ui text-[9px] md:text-[10px] lg:text-[11px] font-light tracking-[0.25em] uppercase px-8 md:px-10 py-3 md:py-4 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] transition-colors duration-300"
+                  className="inline-flex items-center justify-center gap-2 text-center font-ui text-[9px] md:text-[10px] lg:text-[11px] font-light tracking-[0.25em] uppercase px-8 md:px-10 py-3 md:py-4 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] transition-colors duration-300"
                 >
                   {ctaLabel}
-                </Link>
+                </NavLinkWithStatus>
               </div>
             </>
           )}

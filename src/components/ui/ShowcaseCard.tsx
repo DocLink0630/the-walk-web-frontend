@@ -1,5 +1,5 @@
 import Image, { StaticImageData } from "next/image";
-import Link from "next/link";
+import NavLinkWithStatus from "@/components/ui/NavLinkWithStatus";
 
 const IMAGE_SIZE = {
   large: "aspect-[4/5] md:aspect-[3/4] max-h-[360px] md:max-h-[400px] lg:max-h-[420px]",
@@ -72,14 +72,14 @@ export default function ShowcaseCard({
         <p className="font-display text-[15px] md:text-[16px] font-normal text-white/90 leading-[1.6] mb-4 md:mb-5 max-w-[380px] md:opacity-0 md:translate-y-3 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-400 [text-shadow:0_1px_10px_rgba(0,0,0,0.8)]">
           {description}
         </p>
-        <Link
+        <NavLinkWithStatus
           href={href}
           data-cursor="button"
           className="inline-block font-ui text-[10px] md:text-[11px] font-bold tracking-[0.2em] uppercase text-white border-b-2 border-white/60 pb-[2px] hover:border-[#C8A97A] hover:text-[#C8A97A] transition-colors duration-300 md:opacity-0 md:translate-y-2 md:group-hover:opacity-100 md:group-hover:translate-y-0"
           style={{ transitionDelay: "60ms" }}
         >
           {ctaLabel}
-        </Link>
+        </NavLinkWithStatus>
       </div>
     </article>
   );
