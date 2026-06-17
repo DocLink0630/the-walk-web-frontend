@@ -10,9 +10,9 @@ export default function About() {
         eyebrow="The Walk Agency"
         tagline="Connecting Sri Lanka's creative talent with the clients who need them."
         background={{
-          type: "video",
-          src: "/videos/about.mp4",
-          poster: "/images/hero.webp",
+          type: "image",
+          src: "/images/about.jpeg",
+          alt: "The Walk Agency",
         }}
         showScrollIndicator={false}
       />
