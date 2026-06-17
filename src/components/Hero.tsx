@@ -23,8 +23,20 @@ export interface HeroProps {
   sideLabel?: string;
   ctas?: HeroCta[];
   showScrollIndicator?: boolean;
+  overlay?: "default" | "dark";
   className?: string;
 }
+
+const HERO_OVERLAYS = {
+  default: {
+    main: "linear-gradient(105deg, rgba(10,10,10,0.88) 0%, rgba(10,10,10,0.65) 45%, rgba(10,10,10,0.25) 75%, rgba(10,10,10,0.15) 100%)",
+    bottom: "linear-gradient(to top, rgba(10,10,10,0.7) 0%, transparent 100%)",
+  },
+  dark: {
+    main: "linear-gradient(105deg, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.82) 40%, rgba(10,10,10,0.6) 70%, rgba(10,10,10,0.4) 100%)",
+    bottom: "linear-gradient(to top, rgba(10,10,10,0.85) 0%, transparent 100%)",
+  },
+} as const;
 
 const CTA_STYLES = {
   primary:
@@ -132,6 +144,7 @@ export default function Hero({
   sideLabel,
   ctas = [],
   showScrollIndicator = true,
+  overlay = "default",
   className = "",
 }: HeroProps) {
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -203,6 +216,8 @@ export default function Hero({
     };
   }, [heading, eyebrow, tagline, sideLabel, ctas]);
 
+  const overlayStyle = HERO_OVERLAYS[overlay];
+
   return (
     <section
       className={`relative h-screen w-full overflow-hidden bg-[#0A0A0A] ${className}`}
@@ -212,18 +227,12 @@ export default function Hero({
       <div
         ref={overlayRef}
         className="absolute inset-0 z-10"
-        style={{
-          background:
-            "linear-gradient(105deg, rgba(10,10,10,0.88) 0%, rgba(10,10,10,0.65) 45%, rgba(10,10,10,0.25) 75%, rgba(10,10,10,0.15) 100%)",
-        }}
+        style={{ background: overlayStyle.main }}
       />
 
       <div
         className="absolute bottom-0 left-0 right-0 h-[30%] z-10"
-        style={{
-          background:
-            "linear-gradient(to top, rgba(10,10,10,0.7) 0%, transparent 100%)",
-        }}
+        style={{ background: overlayStyle.bottom }}
       />
 
       <div className="absolute inset-0 z-20 flex items-center">

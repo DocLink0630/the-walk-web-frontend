@@ -24,7 +24,7 @@ const NAV_LINKS = [
 ] as const;
 
 const desktopLinkClass =
-  "font-ui text-[10px] font-light tracking-[0.25em] uppercase hover:text-[#C8A97A] transition-colors duration-300";
+  "font-ui text-[10px] font-light tracking-[0.25em] uppercase text-[#0A0A0A] hover:text-[#C8A97A] transition-colors duration-300";
 
 const talentDropdownLinkClass =
   "block font-ui text-[10px] font-light tracking-[0.25em] uppercase px-7 py-4 hover:bg-[#F9F9F9] hover:text-[#C8A97A] transition-colors duration-300 border-b border-[#F0F0F0] last:border-0";
@@ -105,7 +105,7 @@ export default function Navbar() {
     <>
       <nav
         ref={navRef}
-        className="fixed top-0 left-0 right-0 z-[100] bg-white/95 backdrop-blur-md border-b border-[#E0E0E0]"
+        className="fixed top-0 left-0 right-0 z-[100] bg-white border-b border-[#E0E0E0]"
       >
         <div
           ref={headerRef}
