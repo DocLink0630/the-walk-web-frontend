@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "Beauticians — The Walk",
   description: "The Walk beauticians directory is coming soon.",
 };
-
+// beauticians page
 export default function BeauticiansPage() {
   return (
     <UnderConstructionPage
