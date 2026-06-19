@@ -31,7 +31,7 @@ export default function ModelsMasonryGrid({
   }
 
   return (
-    <div className="columns-1 md:columns-3 lg:columns-4 gap-4 md:gap-6 space-y-4 md:space-y-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
       {models.map((model, index) => {
         const displayName = isAuthenticated
           ? model.name
@@ -47,7 +47,7 @@ export default function ModelsMasonryGrid({
             ref={(el) => {
               cardRefs.current[index] = el;
             }}
-            className="group cursor-pointer break-inside-avoid mb-4 md:mb-6"
+            className="group cursor-pointer overflow-hidden"
             onClick={() => onSelect(model)}
             style={{ perspective: "1000px" }}
             data-cursor="view"

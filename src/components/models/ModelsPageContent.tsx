@@ -23,9 +23,9 @@ gsap.registerPlugin(ScrollTrigger);
 
 function GridSkeleton() {
   return (
-    <div className="columns-1 md:columns-3 lg:columns-4 gap-4 md:gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
       {Array.from({ length: 8 }, (_, i) => (
-        <div key={i} className="break-inside-avoid mb-6">
+        <div key={i}>
           <div className="aspect-[3/4] bg-[#F0F0F0] border border-[#E8E8E8] animate-pulse" />
           <div className="mt-3 h-3 w-2/3 bg-[#F0F0F0] animate-pulse" />
         </div>
@@ -93,17 +93,19 @@ export default function ModelsPageContent() {
 
       const trigger = ScrollTrigger.create({
         trigger: card,
-        start: "top 85%",
+        start: "top 90%",
+        once: true,
         onEnter: () => {
           gsap.from(cardInner, {
-            clipPath: "inset(100% 0 0 0)",
-            duration: 1.1,
-            ease: "power4.out",
+            y: 24,
+            opacity: 0,
+            duration: 0.8,
+            ease: "power3.out",
           });
           gsap.from(cardImage, {
-            scale: 1.2,
-            duration: 1.4,
-            ease: "power4.out",
+            scale: 1.05,
+            duration: 1,
+            ease: "power3.out",
           });
         },
       });
@@ -168,7 +170,7 @@ export default function ModelsPageContent() {
   }, [filteredModels]);
 
   return (
-    <div className="min-h-screen bg-white pt-[88px] md:pt-[96px] pb-28">
+    <div className="min-h-screen bg-white pt-[88px] md:pt-[96px] pb-36 md:pb-40">
       <ModelsHeroSection />
 
       <ModelsFilterBar
@@ -180,7 +182,7 @@ export default function ModelsPageContent() {
         showAdvancedFilters={!restricted}
       />
 
-      <section className="py-12 md:py-20 bg-white">
+      <section className="py-12 md:py-20 bg-white overflow-hidden">
         <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-[80px]">
           {notice && (
             <div className="mb-6 border border-[#C8A97A]/30 bg-[#C8A97A]/10 px-4 py-3">
