@@ -8,6 +8,7 @@ import { ChevronDown, Menu, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useBooking } from "@/context/BookingContext";
 import logoImage from "@/assets/images/logo.png";
+import ApplyChoiceModal from "@/components/ApplyChoiceModal";
 import LoginModal from "@/components/LoginModal";
 
 const TALENT_LINKS = [
@@ -37,6 +38,7 @@ export default function Navbar() {
   const { isAuthenticated, logout, user, isModel, isClient } = useAuth();
   const { bookingCart } = useBooking();
   const [showLogin, setShowLogin] = useState(false);
+  const [showApplyChoice, setShowApplyChoice] = useState(false);
   const [showTalentMenu, setShowTalentMenu] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileTalentOpen, setMobileTalentOpen] = useState(false);
@@ -244,13 +246,14 @@ export default function Navbar() {
                 </button>
               )}
 
-              <Link
-                href="/register"
+              <button
+                type="button"
+                onClick={() => setShowApplyChoice(true)}
                 data-cursor="button"
                 className="font-ui text-[10px] font-light tracking-[0.25em] uppercase px-6 py-2.5 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] transition-colors duration-300"
               >
                 APPLY
-              </Link>
+              </button>
             </div>
 
             <button
@@ -420,19 +423,26 @@ export default function Navbar() {
                 </button>
               )}
 
-              <Link
-                href="/register"
-                onClick={closeMobileMenu}
+              <button
+                type="button"
+                onClick={() => {
+                  closeMobileMenu();
+                  setShowApplyChoice(true);
+                }}
                 className="flex min-h-[48px] w-full items-center justify-center bg-[#0A0A0A] font-ui text-[10px] font-light tracking-[0.25em] uppercase text-white hover:bg-[#C8A97A] transition-colors duration-300"
               >
                 Apply
-              </Link>
+              </button>
             </div>
           </div>
         </>
       )}
 
       <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
+      <ApplyChoiceModal
+        isOpen={showApplyChoice}
+        onClose={() => setShowApplyChoice(false)}
+      />
     </>
   );
 }

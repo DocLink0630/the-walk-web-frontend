@@ -1,17 +1,21 @@
 import imageCompression from "browser-image-compression";
 
-const OPTIONS = {
-  maxSizeMB: 1.5,
-  maxWidthOrHeight: 1600,
-  initialQuality: 0.82,
-  fileType: "image/jpeg" as const,
-  useWebWorker: true,
-};
+const MAX_SIZE_MB = 1.2;
+const MAX_DIMENSION = 1920;
 
 export async function compressImage(file: File): Promise<File> {
-  if (file.size < 500_000) return file;
+  // Always compress — even small files may have large decoded sizes or
+  // non-JPEG formats that swell on the wire.
   try {
-    return await imageCompression(file, OPTIONS);
+    const compressed = await imageCompression(file, {
+      maxSizeMB: MAX_SIZE_MB,
+      maxWidthOrHeight: MAX_DIMENSION,
+      initialQuality: 0.8,
+      fileType: "image/jpeg",
+      useWebWorker: true,
+    });
+    // Only use the compressed result if it actually made the file smaller.
+    return compressed.size < file.size ? compressed : file;
   } catch {
     return file;
   }
