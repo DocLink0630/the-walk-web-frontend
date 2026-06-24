@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { backendApiUrl, getBackendUrl } from "@/lib/backend/url";
 
+export const maxDuration = 60; // seconds
+// Raise body size limit for image uploads (default is 4 MB in some environments)
+export const dynamic = "force-dynamic";
+
 function errorMessage(data: unknown, fallback: string): string {
   if (data && typeof data === "object" && "message" in data) {
     return String((data as { message: unknown }).message);
