@@ -1,20 +1,33 @@
-import type { RegistrationFormState, RegistrationVariant } from "@/types/registration-form";
+import type { RegistrationFormState, RegistrationVariant, RegistrationStore } from "@/types/registration-form";
 import { buildPublicModelProfilePayload } from "./build-model-profile";
 import { buildWorkExperiencePayload, validateWorkExperienceDrafts } from "./build-work-experience-payload";
+import { generateRegistrationCode } from "./generate-registration-code";
+import { postRegistrationForm } from "./post-registration-form";
 import { submitStudentRegistration } from "./submit-student-registration";
 import {
   appendRegistrationImageTokens,
   uploadRegistrationImageTokens,
 } from "./upload-registration-image-tokens";
 
+function withFreshModelCode(
+  store: RegistrationStore,
+  prefix: "STU" | "MOD",
+): RegistrationFormState {
+  const modelCode = generateRegistrationCode(prefix);
+  store.set({ modelCode });
+  return { ...store, modelCode };
+}
+
 export async function submitRegistration(
-  state: RegistrationFormState,
+  store: RegistrationStore,
   variant: RegistrationVariant,
   onUploadProgress?: (completed: number, total: number) => void,
 ): Promise<{ ok: true } | { ok: false; message: string }> {
   if (variant === "student") {
-    return submitStudentRegistration(state, onUploadProgress);
+    return submitStudentRegistration(store, onUploadProgress);
   }
+
+  const state = withFreshModelCode(store, "MOD");
 
   const workError = validateWorkExperienceDrafts(state.workExperiences);
   if (workError) {
@@ -50,43 +63,5 @@ export async function submitRegistration(
     formData.append("work_experience", JSON.stringify(workPayload.payload));
   }
 
-  try {
-    const res = await fetch("/api/register", { method: "POST", body: formData });
-    const data = (await res.json()) as {
-      message?: string | string[];
-      errors?: { field: string; constraints: Record<string, string> }[];
-    };
-
-    if (res.status === 201) return { ok: true };
-
-    if (res.status === 429) {
-      return { ok: false, message: "Too many requests. Please wait a moment and try again." };
-    }
-    if (res.status === 409) {
-      const msg = Array.isArray(data.message) ? data.message.join(" ") : data.message;
-      return {
-        ok: false,
-        message: msg ?? "An account with this email or NIC already exists.",
-      };
-    }
-
-    // Surface detailed field-level validation errors from the backend
-    if (data.errors && data.errors.length > 0) {
-      const details = data.errors
-        .map(({ field, constraints }) => {
-          const msgs = Object.values(constraints).join("; ");
-          return `${field}: ${msgs}`;
-        })
-        .join("\n");
-      return { ok: false, message: `Validation failed:\n${details}` };
-    }
-
-    const msg = Array.isArray(data.message) ? data.message.join(" ") : data.message;
-    return {
-      ok: false,
-      message: msg ?? "Registration failed. Please check your details and try again.",
-    };
-  } catch {
-    return { ok: false, message: "Unable to connect to the server. Please try again." };
-  }
+  return postRegistrationForm(formData);
 }

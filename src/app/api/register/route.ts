@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { backendApiUrl, getBackendUrl } from "@/lib/backend/url";
 
+export const maxDuration = 180;
+export const dynamic = "force-dynamic";
+
 export async function POST(request: NextRequest) {
   let targetUrl: string;
   try {
