@@ -1,18 +1,9 @@
 import { create } from "zustand";
 import type { RegistrationFormState, RegistrationStore } from "@/types/registration-form";
-
-function generateCode(prefix: "STU" | "MOD"): string {
-  const now = new Date();
-  const date =
-    String(now.getFullYear()) +
-    String(now.getMonth() + 1).padStart(2, "0") +
-    String(now.getDate()).padStart(2, "0");
-  const rand = Math.random().toString(16).slice(2, 6).toUpperCase();
-  return `${prefix}-${date}-${rand}`;
-}
+import { generateRegistrationCode } from "@/lib/registration/generate-registration-code";
 
 const defaultFormState = (prefix: "STU" | "MOD"): RegistrationFormState => ({
-  modelCode: generateCode(prefix),
+  modelCode: generateRegistrationCode(prefix),
   email: "",
   password: "",
   fullName: "",
