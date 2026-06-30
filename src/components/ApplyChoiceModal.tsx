@@ -39,6 +39,11 @@ const PATHS = [
   },
 ] as const;
 
+const SERVICE_PATHS = [
+  { href: "/register/beautician", label: "Apply as a beautician" },
+  { href: "/register/photographer", label: "Apply as a photographer" },
+] as const;
+
 export default function ApplyChoiceModal({ isOpen, onClose }: ApplyChoiceModalProps) {
   if (!isOpen) return null;
 
@@ -115,6 +120,28 @@ export default function ApplyChoiceModal({ isOpen, onClose }: ApplyChoiceModalPr
               </span>
             </Link>
           ))}
+        </div>
+
+        <div className="border-t border-[#E0E0E0] px-6 py-5 md:px-8">
+          <p className="font-ui text-[9px] tracking-[0.3em] uppercase text-[#9A7329] mb-3">
+            Service providers
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            {SERVICE_PATHS.map((path) => (
+              <Link
+                key={path.href}
+                href={path.href}
+                onClick={onClose}
+                data-cursor="button"
+                className="flex-1 flex items-center justify-between border border-[#E0E0E0] px-4 py-3 hover:border-[#0A0A0A] transition-colors duration-300"
+              >
+                <span className="font-ui text-[11px] tracking-[0.12em] uppercase text-[#0A0A0A]">
+                  {path.label}
+                </span>
+                <span className="font-ui text-[16px] text-[#9A7329]">→</span>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </div>

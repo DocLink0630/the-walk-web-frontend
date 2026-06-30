@@ -19,7 +19,15 @@ export async function submitStudentRegistration(
     return { ok: false, message: "At least one photo is required." };
   }
 
-  const imageTokensResult = await uploadRegistrationImageTokens(state, onUploadProgress);
+  const total =
+    (state.profilePhoto ? 1 : 0) +
+    (state.nicFront ? 1 : 0) +
+    (state.nicBack ? 1 : 0) +
+    state.portfolioPhotos.length;
+  let completed = 0;
+  const tick = () => onUploadProgress?.(++completed, total);
+
+  const imageTokensResult = await uploadRegistrationImageTokens(state, tick);
   if (!imageTokensResult.ok) {
     return { ok: false, message: imageTokensResult.message };
   }

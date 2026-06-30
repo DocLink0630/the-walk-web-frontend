@@ -59,6 +59,15 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
   }, [canViewFullPortfolio, model.name]);
 
   useEffect(() => {
+    void fetch("/api/public/models/view", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ modelName: model.name }),
+    }).catch(() => {/* fire-and-forget */});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     if (!isClient) return;
 
     const token = getClientToken();
