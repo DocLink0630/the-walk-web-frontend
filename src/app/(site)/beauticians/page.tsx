@@ -1,16 +1,11 @@
 import type { Metadata } from "next";
-import UnderConstructionPage from "@/components/UnderConstructionPage";
+import ServiceProvidersPageContent from "@/components/service-providers/ServiceProvidersPageContent";
 
 export const metadata: Metadata = {
   title: "Beauticians — The Walk",
-  description: "The Walk beauticians directory is coming soon.",
+  description: "Browse professional beauty artists available for runway, editorial, and events through The Walk.",
 };
-// beauticians page
+
 export default function BeauticiansPage() {
-  return (
-    <UnderConstructionPage
-      title="Beauticians"
-      description="Our beauticians directory is under construction. Soon you'll be able to browse and book beauty artists through The Walk."
-    />
-  );
+  return <ServiceProvidersPageContent type="beautician" />;
 }

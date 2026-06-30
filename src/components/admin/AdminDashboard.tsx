@@ -6,6 +6,7 @@ import AdminEventsPanel from "./AdminEventsPanel";
 import AdminGalleryPanel from "./AdminGalleryPanel";
 import InquiriesPanel from "./InquiriesPanel";
 import ModelManagementPanel from "./ModelManagementPanel";
+import ServiceProviderManagementPanel from "./ServiceProviderManagementPanel";
 import StudentManagementPanel from "./StudentManagementPanel";
 
 interface AdminDashboardProps {
@@ -24,6 +25,14 @@ export default function AdminDashboard({ section, onSectionChange }: AdminDashbo
 
   if (section === "students") {
     return <StudentManagementPanel />;
+  }
+
+  if (section === "beauticians") {
+    return <ServiceProviderManagementPanel providerType="beauticians" />;
+  }
+
+  if (section === "photographers") {
+    return <ServiceProviderManagementPanel providerType="photographers" />;
   }
 
   if (section === "events") {

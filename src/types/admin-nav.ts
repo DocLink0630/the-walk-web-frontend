@@ -2,6 +2,8 @@ export type AdminSection =
   | "dashboard"
   | "models"
   | "students"
+  | "beauticians"
+  | "photographers"
   | "events"
   | "gallery"
   | "inquiries";
@@ -27,6 +29,16 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     id: "students",
     label: "Students",
     description: "Academy applications from the website",
+  },
+  {
+    id: "beauticians",
+    label: "Beauticians",
+    description: "Beautician applications and approvals",
+  },
+  {
+    id: "photographers",
+    label: "Photographers",
+    description: "Photographer applications and approvals",
   },
   {
     id: "events",

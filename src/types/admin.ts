@@ -135,9 +135,36 @@ export interface AdminStudentProfile {
   preferredDate?: string | null;
 }
 
+export interface AdminBeauticianProfile {
+  id?: string;
+  userId?: string;
+  fullName?: string;
+  contactNumberEnc?: string | null;
+  specialties?: string[];
+  yearsOfExperience?: number | null;
+  location?: string | null;
+  rateCard?: string | null;
+  shortBio?: string | null;
+}
+
+export interface AdminPhotographerProfile {
+  id?: string;
+  userId?: string;
+  fullName?: string;
+  contactNumberEnc?: string | null;
+  specialties?: string[];
+  yearsOfExperience?: number | null;
+  equipmentOverview?: string | null;
+  location?: string | null;
+  rateCard?: string | null;
+  shortBio?: string | null;
+}
+
 export interface AdminUserDetail extends AdminUser {
   modelProfile?: AdminModelProfile;
   studentProfile?: AdminStudentProfile;
+  beauticianProfile?: AdminBeauticianProfile;
+  photographerProfile?: AdminPhotographerProfile;
   model_expectations?: AdminModelExpectations | null;
   /** Populated when backend exposes registration file URLs on user detail */
   registrationMedia?: AdminModelRegistrationMedia | null;

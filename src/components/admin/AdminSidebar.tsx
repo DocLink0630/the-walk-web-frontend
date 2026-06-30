@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { CalendarDays, GraduationCap, ImageIcon, LayoutDashboard, LogOut, MessageSquare, UserCircle } from "lucide-react";
+import { CalendarDays, Camera, GraduationCap, ImageIcon, LayoutDashboard, LogOut, MessageSquare, Scissors, UserCircle } from "lucide-react";
 import { ADMIN_NAV_ITEMS, type AdminSection } from "@/types/admin-nav";
 
 const NAV_ICONS: Record<AdminSection, typeof LayoutDashboard> = {
   dashboard: LayoutDashboard,
   models: UserCircle,
   students: GraduationCap,
+  beauticians: Scissors,
+  photographers: Camera,
   events: CalendarDays,
   gallery: ImageIcon,
   inquiries: MessageSquare,
