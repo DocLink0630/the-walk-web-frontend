@@ -137,6 +137,30 @@ export async function updateUserStatus(
   return { ok: true };
 }
 
+export async function approveServiceProvider(
+  userId: string,
+  rate: string,
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  const res = await fetch(`/api/admin/users/${userId}/approve-service`, {
+    method: "POST",
+    headers: adminAuthHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify({ rate }),
+  });
+
+  if (!res.ok) {
+    let message = "Failed to approve service provider";
+    try {
+      const body = await res.json();
+      if (body?.message) message = String(body.message);
+    } catch {
+      /* ignore */
+    }
+    return { ok: false, message };
+  }
+
+  return { ok: true };
+}
+
 function parseApiError(body: unknown, fallback: string): string {
   if (!body || typeof body !== "object") return fallback;
   const record = body as Record<string, unknown>;
