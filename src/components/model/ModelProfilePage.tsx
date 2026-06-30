@@ -12,15 +12,19 @@ interface ModelOwnProfile {
   id: string;
   email: string;
   status: string;
+  viewCount?: number;
   modelProfile?: {
     fullName?: string;
     shortBio?: string | null;
     heightEnc?: string | null;
     weightEnc?: string | null;
     chestEnc?: string | null;
+    shoulderEnc?: string | null;
     waistEnc?: string | null;
     eyeColorEnc?: string | null;
     hairColorEnc?: string | null;
+    contactNumberEnc?: string | null;
+    whatsappNumberEnc?: string | null;
     tier?: string;
     rate?: string | null;
     gender?: string;
@@ -53,9 +57,12 @@ export default function ModelProfilePage() {
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [chest, setChest] = useState("");
+  const [shoulder, setShoulder] = useState("");
   const [waist, setWaist] = useState("");
   const [eyeColor, setEyeColor] = useState("");
   const [hairColor, setHairColor] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
   const [registrationMedia, setRegistrationMedia] =
     useState<AdminModelRegistrationMedia | null>(null);
 
@@ -80,9 +87,12 @@ export default function ModelProfilePage() {
         setHeight(data.modelProfile.heightEnc ?? "");
         setWeight(data.modelProfile.weightEnc ?? "");
         setChest(data.modelProfile.chestEnc ?? "");
+        setShoulder(data.modelProfile.shoulderEnc ?? "");
         setWaist(data.modelProfile.waistEnc ?? "");
         setEyeColor(data.modelProfile.eyeColorEnc ?? "");
         setHairColor(data.modelProfile.hairColorEnc ?? "");
+        setContactNumber(data.modelProfile.contactNumberEnc ?? "");
+        setWhatsapp(data.modelProfile.whatsappNumberEnc ?? "");
       }
       setRegistrationMedia(data?.registrationMedia ?? null);
       setLoadingProfile(false);
@@ -104,9 +114,12 @@ export default function ModelProfilePage() {
       heightEnc: height,
       weightEnc: weight,
       chestEnc: chest,
+      shoulderEnc: shoulder,
       waistEnc: waist,
       eyeColorEnc: eyeColor,
       hairColorEnc: hairColor,
+      contactNumberEnc: contactNumber,
+      whatsappNumberEnc: whatsapp,
     });
 
     setSaving(false);
@@ -135,9 +148,22 @@ export default function ModelProfilePage() {
         <h1 className="font-display text-3xl font-light text-[#0A0A0A] mb-1">
           {profile?.modelProfile?.fullName ?? user?.name ?? user?.email}
         </h1>
-        <p className="font-ui text-[9px] tracking-[0.1em] text-[#9A9A9A] mb-8">
+        <p className="font-ui text-[9px] tracking-[0.1em] text-[#9A9A9A] mb-4">
           {user?.email}
         </p>
+
+        {typeof profile?.viewCount === "number" && (
+          <div className="flex items-center gap-3 mb-8">
+            <div className="border border-[#E0E0E0] bg-white px-5 py-3 inline-flex items-center gap-3">
+              <span className="font-display text-2xl font-light text-[#C8A97A]">
+                {profile.viewCount.toLocaleString()}
+              </span>
+              <span className="font-ui text-[8px] tracking-[0.25em] uppercase text-[#9A9A9A]">
+                Profile Views
+              </span>
+            </div>
+          </div>
+        )}
 
         {!isActive && (
           <div className="border border-[#C8A97A] bg-[#C8A97A]/10 px-5 py-4 mb-8">
@@ -176,9 +202,30 @@ export default function ModelProfilePage() {
                   { label: "Height", value: height, set: setHeight, placeholder: "e.g. 178cm" },
                   { label: "Weight", value: weight, set: setWeight, placeholder: "e.g. 65kg" },
                   { label: "Chest", value: chest, set: setChest, placeholder: "e.g. 90cm" },
+                  { label: "Shoulder", value: shoulder, set: setShoulder, placeholder: "e.g. 42cm" },
                   { label: "Waist", value: waist, set: setWaist, placeholder: "e.g. 70cm" },
                   { label: "Eye colour", value: eyeColor, set: setEyeColor, placeholder: "e.g. Brown" },
                   { label: "Hair colour", value: hairColor, set: setHairColor, placeholder: "e.g. Black" },
+                ].map(({ label, value, set, placeholder }) => (
+                  <div key={label} className="space-y-1">
+                    <label className="font-ui text-[8px] tracking-[0.2em] uppercase text-[#9A9A9A]">
+                      {label}
+                    </label>
+                    <input
+                      type="text"
+                      value={value}
+                      onChange={(e) => set(e.target.value)}
+                      className={inputCls}
+                      placeholder={placeholder}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { label: "Contact number", value: contactNumber, set: setContactNumber, placeholder: "e.g. +94 77 123 4567" },
+                  { label: "WhatsApp number", value: whatsapp, set: setWhatsapp, placeholder: "e.g. +94 77 123 4567" },
                 ].map(({ label, value, set, placeholder }) => (
                   <div key={label} className="space-y-1">
                     <label className="font-ui text-[8px] tracking-[0.2em] uppercase text-[#9A9A9A]">

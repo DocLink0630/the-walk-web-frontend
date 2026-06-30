@@ -40,8 +40,10 @@ export default function Navbar() {
   const [showLogin, setShowLogin] = useState(false);
   const [showApplyChoice, setShowApplyChoice] = useState(false);
   const [showTalentMenu, setShowTalentMenu] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileTalentOpen, setMobileTalentOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
 
   useEffect(() => {
@@ -99,6 +101,17 @@ export default function Navbar() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [mobileMenuOpen]);
+
+  useEffect(() => {
+    if (!showProfileMenu) return;
+    const handler = (e: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
+        setShowProfileMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showProfileMenu]);
 
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
@@ -197,19 +210,40 @@ export default function Navbar() {
               {isAuthenticated ? (
                 <>
                   {isModel && (
-                    <Link
-                      href="/model/profile"
-                      data-cursor="button"
-                      title={user?.name}
-                      className="flex items-center justify-center w-8 h-8 rounded-full bg-[#0A0A0A] text-white font-ui text-[9px] tracking-widest hover:bg-[#C8A97A] transition-colors shrink-0"
-                    >
-                      {(user?.name ?? "M")
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                        .toUpperCase()
-                        .slice(0, 2)}
-                    </Link>
+                    <div ref={profileMenuRef} className="relative">
+                      <button
+                        type="button"
+                        data-cursor="button"
+                        title={user?.name}
+                        onClick={() => setShowProfileMenu((v) => !v)}
+                        className="flex items-center justify-center w-8 h-8 rounded-full bg-[#0A0A0A] text-white font-ui text-[9px] tracking-widest hover:bg-[#C8A97A] transition-colors shrink-0"
+                      >
+                        {(user?.name ?? "M")
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()
+                          .slice(0, 2)}
+                      </button>
+                      {showProfileMenu && (
+                        <div className="absolute right-0 top-10 w-44 bg-white border border-[#E0E0E0] shadow-lg z-50 py-1">
+                          <Link
+                            href="/model/profile"
+                            onClick={() => setShowProfileMenu(false)}
+                            className="block font-ui text-[10px] tracking-[0.2em] uppercase px-5 py-3.5 hover:bg-[#F9F9F9] hover:text-[#C8A97A] transition-colors border-b border-[#F0F0F0]"
+                          >
+                            My Profile
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => { setShowProfileMenu(false); logout(); }}
+                            className="w-full text-left font-ui text-[10px] tracking-[0.2em] uppercase px-5 py-3.5 hover:bg-[#F9F9F9] hover:text-[#C8A97A] transition-colors"
+                          >
+                            Logout
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   )}
                   {isClient && !isModel && (
                     <Link
@@ -226,14 +260,16 @@ export default function Navbar() {
                         .slice(0, 2)}
                     </Link>
                   )}
-                  <button
-                    type="button"
-                    onClick={logout}
-                    data-cursor="button"
-                    className={desktopLinkClass}
-                  >
-                    LOGOUT
-                  </button>
+                  {!isModel && (
+                    <button
+                      type="button"
+                      onClick={logout}
+                      data-cursor="button"
+                      className={desktopLinkClass}
+                    >
+                      LOGOUT
+                    </button>
+                  )}
                 </>
               ) : (
                 <button
