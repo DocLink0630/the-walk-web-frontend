@@ -22,7 +22,7 @@ export default function Home() {
         }}
         ctas={[
           { label: "Explore Talent", href: "/models", variant: "primary" },
-          { label: "Join Academy", href: "/academy", variant: "secondary" },
+          { label: "Apply Now", action: "open-apply", variant: "secondary" },
         ]}
       />
       <TalentSection/>

@@ -35,7 +35,7 @@ const talentDropdownLinkClass =
 export default function Navbar() {
   const navRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
-  const { isAuthenticated, logout, user, isModel, isClient } = useAuth();
+  const { isAuthenticated, logout, user, isModel, isClient, isInfluencer } = useAuth();
   const { bookingCart } = useBooking();
   const [showLogin, setShowLogin] = useState(false);
   const [showApplyChoice, setShowApplyChoice] = useState(false);
@@ -47,12 +47,26 @@ export default function Navbar() {
   const [headerHeight, setHeaderHeight] = useState(0);
 
   useEffect(() => {
+    const openApply = () => setShowApplyChoice(true);
+    window.addEventListener("walk:open-apply", openApply);
+    return () => window.removeEventListener("walk:open-apply", openApply);
+  }, []);
+
+  useEffect(() => {
     if (isAuthenticated || typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     if (params.get("login") === "1") {
       setShowLogin(true);
     }
   }, [isAuthenticated]);
+
+  const profileHref = isModel
+    ? "/model/profile"
+    : isInfluencer
+      ? "/influencer/profile"
+      : null;
+  const hasProfileMenu = isModel || isInfluencer;
+  const profileInitial = isModel ? "M" : isInfluencer ? "I" : "U";
 
   useEffect(() => {
     const nav = navRef.current;
@@ -209,7 +223,7 @@ export default function Navbar() {
 
               {isAuthenticated ? (
                 <>
-                  {isModel && (
+                  {hasProfileMenu && profileHref && (
                     <div ref={profileMenuRef} className="relative">
                       <button
                         type="button"
@@ -218,7 +232,7 @@ export default function Navbar() {
                         onClick={() => setShowProfileMenu((v) => !v)}
                         className="flex items-center justify-center w-8 h-8 rounded-full bg-[#0A0A0A] text-white font-ui text-[9px] tracking-widest hover:bg-[#C8A97A] transition-colors shrink-0"
                       >
-                        {(user?.name ?? "M")
+                        {(user?.name ?? profileInitial)
                           .split(" ")
                           .map((n) => n[0])
                           .join("")
@@ -228,7 +242,7 @@ export default function Navbar() {
                       {showProfileMenu && (
                         <div className="absolute right-0 top-10 w-44 bg-white border border-[#E0E0E0] shadow-lg z-50 py-1">
                           <Link
-                            href="/model/profile"
+                            href={profileHref}
                             onClick={() => setShowProfileMenu(false)}
                             className="block font-ui text-[10px] tracking-[0.2em] uppercase px-5 py-3.5 hover:bg-[#F9F9F9] hover:text-[#C8A97A] transition-colors border-b border-[#F0F0F0]"
                           >
@@ -245,7 +259,7 @@ export default function Navbar() {
                       )}
                     </div>
                   )}
-                  {isClient && !isModel && (
+                  {isClient && !hasProfileMenu && (
                     <Link
                       href="/client/profile"
                       data-cursor="button"
@@ -260,7 +274,7 @@ export default function Navbar() {
                         .slice(0, 2)}
                     </Link>
                   )}
-                  {!isModel && (
+                  {!hasProfileMenu && (
                     <button
                       type="button"
                       onClick={logout}
@@ -401,14 +415,14 @@ export default function Navbar() {
             </nav>
 
             <div className="shrink-0 border-t border-[#E0E0E0] bg-[#FAFAFA] px-5 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] space-y-3">
-              {isAuthenticated && isModel && (
+              {isAuthenticated && hasProfileMenu && profileHref && (
                 <Link
-                  href="/model/profile"
+                  href={profileHref}
                   onClick={closeMobileMenu}
                   className="flex min-h-[48px] w-full items-center justify-center gap-2 border border-[#C8A97A] bg-[#C8A97A]/10 font-ui text-[10px] font-light tracking-[0.25em] uppercase text-[#9A7329]"
                 >
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#C8A97A] text-white text-[8px]">
-                    {(user?.name ?? "M")
+                    {(user?.name ?? profileInitial)
                       .split(" ")
                       .map((n) => n[0])
                       .join("")
@@ -418,7 +432,7 @@ export default function Navbar() {
                   My profile
                 </Link>
               )}
-              {isAuthenticated && isClient && !isModel && (
+              {isAuthenticated && isClient && !hasProfileMenu && (
                 <Link
                   href="/client/profile"
                   onClick={closeMobileMenu}

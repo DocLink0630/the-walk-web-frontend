@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 interface RegistrationPathBannerProps {
-  variant: "model" | "student" | "beautician" | "photographer";
+  variant: "model" | "student" | "beautician" | "photographer" | "influencer";
 }
 
 const CONFIG = {
@@ -22,6 +22,11 @@ const CONFIG = {
   },
   photographer: {
     label: "The Walk · Photographer application",
+    className: "bg-[#0A0A0A] text-white",
+    linkClass: "text-[#C8A97A] hover:text-white",
+  },
+  influencer: {
+    label: "The Walk · Influencer application",
     className: "bg-[#0A0A0A] text-white",
     linkClass: "text-[#C8A97A] hover:text-white",
   },

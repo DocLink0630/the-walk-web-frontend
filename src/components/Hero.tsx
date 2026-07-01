@@ -7,7 +7,9 @@ import gsap from "gsap";
 
 export interface HeroCta {
   label: string;
-  href: string;
+  href?: string;
+  /** Opens the global apply-choice modal (dispatches walk:open-apply). */
+  action?: "open-apply";
   variant?: "primary" | "secondary";
 }
 
@@ -268,19 +270,37 @@ export default function Hero({
                 ref={ctaRef}
                 className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-5"
               >
-                {ctas.map((cta) => (
-                  <Link
-                    key={cta.href}
-                    href={cta.href}
-                    data-cursor="button"
-                    className={
-                      CTA_STYLES[cta.variant ?? "primary"] ??
-                      CTA_STYLES.primary
-                    }
-                  >
-                    {cta.label}
-                  </Link>
-                ))}
+                {ctas.map((cta) => {
+                  const className =
+                    CTA_STYLES[cta.variant ?? "primary"] ?? CTA_STYLES.primary;
+
+                  if (cta.action === "open-apply") {
+                    return (
+                      <button
+                        key={cta.label}
+                        type="button"
+                        data-cursor="button"
+                        onClick={() =>
+                          window.dispatchEvent(new CustomEvent("walk:open-apply"))
+                        }
+                        className={className}
+                      >
+                        {cta.label}
+                      </button>
+                    );
+                  }
+
+                  return (
+                    <Link
+                      key={cta.href ?? cta.label}
+                      href={cta.href ?? "#"}
+                      data-cursor="button"
+                      className={className}
+                    >
+                      {cta.label}
+                    </Link>
+                  );
+                })}
               </div>
             )}
           </div>
