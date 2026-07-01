@@ -109,7 +109,8 @@ export function mapPublicApiModelToPublicModel(
         ? [item.imageUrl]
         : [];
   return {
-    id: makePublicModelId(item.name, index),
+    id: item.userId ?? makePublicModelId(item.name, index),
+    userId: item.userId ?? null,
     name: item.name,
     imageUrl: portfolioImages[0] ?? item.imageUrl,
     height: item.height?.trim() || undefined,
@@ -191,6 +192,7 @@ function mapDetailToPublicModel(detail: AdminUserDetail): PublicModel {
 
   return {
     id: detail.id,
+    userId: detail.id,
     name,
     imageUrl,
     tier: profile?.tier,
@@ -516,7 +518,7 @@ export function mapToTalentProfile(model: PublicModel): TalentProfile {
         : [];
 
   return {
-    id: model.id,
+    id: model.userId ?? model.id,
     name: model.name,
     type: "model",
     category: model.category,
