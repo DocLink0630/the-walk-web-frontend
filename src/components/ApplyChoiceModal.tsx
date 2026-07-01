@@ -55,8 +55,7 @@ const APPLY_PATHS = [
     title: "Influencer",
     description: "Connect with brands through your social channels.",
     cta: "Apply as influencer",
-    image:
-      "https://images.unsplash.com/photo-1611433670212-3d45aa60e881?w=480&h=600&fit=crop&crop=face&q=80",
+    image: "/images/influencer-apply.jpg",
     accent: "border-l-[#C8A97A]",
   },
 ] as const;
