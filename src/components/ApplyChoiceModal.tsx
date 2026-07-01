@@ -2,12 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { X } from "lucide-react";
+import { ArrowRight, X } from "lucide-react";
+import { disciplines } from "@/data/discipline";
 
 interface ApplyChoiceModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
+const [modelsCard, academyCard, photographersCard, beauticiansCard] = disciplines;
 
 const APPLY_PATHS = [
   {
@@ -16,65 +19,52 @@ const APPLY_PATHS = [
     title: "Model",
     description: "Join our roster for runway, editorial, and commercial bookings.",
     cta: "Apply as model",
-    image: "/images/Gallery/DSC09407.webp",
-    cardClass:
-      "border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white group-hover:border-[#0A0A0A]",
-    eyebrowClass: "text-[#9A7329] group-hover:text-[#C8A97A]",
-    ctaClass:
-      "bg-[#0A0A0A] text-white group-hover:bg-white group-hover:text-[#0A0A0A]",
+    image: modelsCard.image,
+    accent: "border-l-[#0A0A0A]",
   },
   {
     href: "/register",
     eyebrow: "The Walk Academy",
     title: "Student",
-    description: "Apply for professional modelling training and industry placement.",
+    description: "Professional modelling training and industry placement.",
     cta: "Apply as student",
-    image: "/images/abothero.jpeg",
-    cardClass:
-      "border-[#C8A97A] hover:bg-[#C8A97A]/10 group-hover:border-[#9A7329]",
-    eyebrowClass: "text-[#9A7329]",
-    ctaClass: "bg-[#C8A97A] text-[#0A0A0A] hover:bg-[#9A7329] hover:text-white",
+    image: academyCard.image,
+    accent: "border-l-[#C8A97A]",
   },
   {
     href: "/register/beautician",
     eyebrow: "Service provider",
     title: "Beautician",
-    description: "List your beauty services for fashion, editorial, and event bookings.",
+    description: "Beauty services for fashion, editorial, and events.",
     cta: "Apply as beautician",
-    image: "/images/Gallery/DSC09407.webp",
-    cardClass:
-      "border-[#E0E0E0] hover:border-[#0A0A0A] hover:bg-[#FAFAFA]",
-    eyebrowClass: "text-[#9A7329]",
-    ctaClass: "bg-[#0A0A0A] text-white hover:bg-[#C8A97A]",
+    image: beauticiansCard.image,
+    accent: "border-l-[#9A7329]",
   },
   {
     href: "/register/photographer",
     eyebrow: "Service provider",
     title: "Photographer",
-    description: "Showcase your portfolio for fashion, commercial, and editorial shoots.",
+    description: "Fashion, commercial, and editorial photography.",
     cta: "Apply as photographer",
-    image: "/images/Gallery/DSC09407.webp",
-    cardClass:
-      "border-[#E0E0E0] hover:border-[#0A0A0A] hover:bg-[#FAFAFA]",
-    eyebrowClass: "text-[#9A7329]",
-    ctaClass: "bg-[#0A0A0A] text-white hover:bg-[#C8A97A]",
+    image: photographersCard.image,
+    accent: "border-l-[#6B6B6B]",
   },
   {
     href: "/register/influencer",
     eyebrow: "Brand partnerships",
     title: "Influencer",
-    description: "Connect with brands — share your social channels and content categories.",
+    description: "Connect with brands through your social channels.",
     cta: "Apply as influencer",
-    image: "/images/abothero.jpeg",
-    cardClass:
-      "border-[#E0E0E0] hover:border-[#0A0A0A] hover:bg-[#FAFAFA] sm:col-span-2 lg:col-span-1",
-    eyebrowClass: "text-[#9A7329]",
-    ctaClass: "bg-[#0A0A0A] text-white hover:bg-[#C8A97A]",
+    image:
+      "https://images.unsplash.com/photo-1611433670212-3d45aa60e881?w=480&h=600&fit=crop&crop=face&q=80",
+    accent: "border-l-[#C8A97A]",
   },
 ] as const;
 
 export default function ApplyChoiceModal({ isOpen, onClose }: ApplyChoiceModalProps) {
   if (!isOpen) return null;
+
+  const [featured, ...rest] = APPLY_PATHS;
 
   return (
     <div
@@ -90,7 +80,7 @@ export default function ApplyChoiceModal({ isOpen, onClose }: ApplyChoiceModalPr
         aria-label="Close apply options"
       />
 
-      <div className="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto bg-white border border-[#E0E0E0] shadow-[0_8px_40px_rgba(0,0,0,0.15)]">
+      <div className="relative w-full max-w-4xl max-h-[92vh] overflow-y-auto bg-white border border-[#E0E0E0] shadow-[0_8px_40px_rgba(0,0,0,0.15)]">
         <div className="flex items-start justify-between gap-4 border-b border-[#E0E0E0] px-6 py-5 md:px-8 sticky top-0 bg-white z-10">
           <div>
             <h2
@@ -99,8 +89,8 @@ export default function ApplyChoiceModal({ isOpen, onClose }: ApplyChoiceModalPr
             >
               How would you like to apply?
             </h2>
-            <p className="mt-2 font-ui text-sm text-[#4A4A4A] leading-relaxed max-w-2xl">
-              Choose your path — agency, academy, service provider, or influencer partnerships.
+            <p className="mt-2 font-ui text-sm text-[#4A4A4A] leading-relaxed">
+              Pick the path that fits you each application is reviewed separately.
             </p>
           </div>
           <button
@@ -113,42 +103,79 @@ export default function ApplyChoiceModal({ isOpen, onClose }: ApplyChoiceModalPr
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-6 md:p-8">
-          {APPLY_PATHS.map((path) => (
-            <Link
-              key={path.href}
-              href={path.href}
-              onClick={onClose}
-              data-cursor="button"
-              className={`group flex flex-col border-2 p-5 transition-colors duration-300 ${path.cardClass}`}
-            >
-              <div className="relative w-full aspect-[16/9] mb-4 overflow-hidden bg-[#F5F5F5]">
-                <Image
-                  src={path.image}
-                  alt=""
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  sizes="(max-width: 640px) 100vw, 320px"
-                />
-              </div>
-              <p
-                className={`font-ui text-[9px] tracking-[0.3em] uppercase mb-2 ${path.eyebrowClass}`}
-              >
-                {path.eyebrow}
+        <div className="p-6 md:p-8 space-y-6">
+          {/* Featured — Model */}
+          <Link
+            href={featured.href}
+            onClick={onClose}
+            data-cursor="button"
+            className={`group relative flex flex-col sm:flex-row overflow-hidden border border-[#E0E0E0] hover:border-[#0A0A0A] transition-colors duration-300 border-l-4 ${featured.accent}`}
+          >
+            <div className="relative w-full sm:w-[42%] aspect-[16/10] sm:aspect-auto sm:min-h-[220px] shrink-0 bg-[#F5F5F5]">
+              <Image
+                src={featured.image}
+                alt=""
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                sizes="(max-width: 640px) 100vw, 360px"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-black/50 sm:from-black/30 to-transparent" />
+            </div>
+            <div className="flex flex-col justify-center p-6 sm:p-8 flex-1 bg-[#FAFAFA] group-hover:bg-[#0A0A0A] group-hover:text-white transition-colors duration-300">
+              <p className="font-ui text-[9px] tracking-[0.3em] uppercase text-[#9A7329] group-hover:text-[#C8A97A] mb-2">
+                {featured.eyebrow}
               </p>
-              <h3 className="font-display text-xl font-light text-[#0A0A0A] group-hover:text-inherit mb-2">
-                {path.title}
+              <h3 className="font-display text-2xl md:text-3xl font-light mb-2">
+                {featured.title}
               </h3>
-              <p className="font-ui text-xs text-[#4A4A4A] group-hover:text-inherit leading-relaxed flex-1 mb-5">
-                {path.description}
+              <p className="font-ui text-sm text-[#4A4A4A] group-hover:text-white/80 leading-relaxed mb-5 max-w-md">
+                {featured.description}
               </p>
-              <span
-                className={`inline-flex self-start font-ui text-[10px] tracking-[0.2em] uppercase px-5 py-2.5 transition-colors duration-300 ${path.ctaClass}`}
-              >
-                {path.cta}
+              <span className="inline-flex items-center gap-2 self-start font-ui text-[10px] tracking-[0.2em] uppercase px-5 py-2.5 bg-[#0A0A0A] text-white group-hover:bg-white group-hover:text-[#0A0A0A] transition-colors">
+                {featured.cta}
+                <ArrowRight className="w-3.5 h-3.5" />
               </span>
-            </Link>
-          ))}
+            </div>
+          </Link>
+
+          {/* Remaining four — 2×2 compact tiles */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {rest.map((path) => (
+              <Link
+                key={path.href}
+                href={path.href}
+                onClick={onClose}
+                data-cursor="button"
+                className={`group flex overflow-hidden border border-[#E0E0E0] hover:border-[#0A0A0A] transition-colors duration-300 border-l-4 ${path.accent}`}
+              >
+                <div className="relative w-24 sm:w-28 shrink-0 self-stretch min-h-[108px] bg-[#F5F5F5]">
+                  <Image
+                    src={path.image}
+                    alt=""
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    sizes="112px"
+                  />
+                </div>
+                <div className="flex flex-1 flex-col justify-center min-w-0 py-4 pl-4 pr-3">
+                  <p className="font-ui text-[8px] tracking-[0.25em] uppercase text-[#9A7329] mb-1 truncate">
+                    {path.eyebrow}
+                  </p>
+                  <h3 className="font-display text-lg font-light text-[#0A0A0A] mb-0.5">
+                    {path.title}
+                  </h3>
+                  <p className="font-ui text-[11px] text-[#6B6B6B] leading-snug line-clamp-2 mb-2">
+                    {path.description}
+                  </p>
+                  <span className="font-ui text-[9px] tracking-[0.15em] uppercase text-[#0A0A0A] group-hover:text-[#C8A97A] transition-colors inline-flex items-center gap-1">
+                    {path.cta}
+                    <ArrowRight className="w-3 h-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </div>
