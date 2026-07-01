@@ -29,6 +29,8 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       onClose();
       if (result.isModel) {
         router.push("/model/profile");
+      } else if (result.isInfluencer) {
+        router.push("/influencer/profile");
       } else {
         router.push("/models");
       }
@@ -78,13 +80,24 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           </button>
         </form>
         <p className="mt-6 font-ui text-[10px] text-[#6B6B6B] text-center leading-relaxed">
-          Booking talent?{" "}
+          New here?{" "}
+          <button
+            type="button"
+            onClick={() => {
+              onClose();
+              window.dispatchEvent(new CustomEvent("walk:open-apply"));
+            }}
+            className="text-[#9A7329] underline underline-offset-2"
+          >
+            Apply to join
+          </button>
+          {" · "}
           <Link
             href="/register/client"
             onClick={onClose}
             className="text-[#9A7329] underline underline-offset-2"
           >
-            Register as a client
+            Register as client
           </Link>
         </p>
       </div>

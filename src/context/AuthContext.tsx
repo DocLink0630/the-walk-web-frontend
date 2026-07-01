@@ -32,11 +32,18 @@ interface AuthContextType {
   login: (
     email: string,
     password: string,
-  ) => Promise<{ ok: boolean; message?: string; isModel?: boolean; isClient?: boolean }>;
+  ) => Promise<{
+    ok: boolean;
+    message?: string;
+    isModel?: boolean;
+    isClient?: boolean;
+    isInfluencer?: boolean;
+  }>;
   logout: () => void;
   isAuthenticated: boolean;
   isClient: boolean;
   isModel: boolean;
+  isInfluencer: boolean;
   isLoading: boolean;
 }
 
@@ -87,6 +94,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             roles?: UserRole[];
             status?: ClientSession["status"];
             clientProfile?: { fullName?: string };
+            modelProfile?: { fullName?: string };
+            influencerProfile?: { fullName?: string };
           };
           applySession(buildClientSession(data));
           setIsLoading(false);
@@ -108,7 +117,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (
     email: string,
     password: string,
-  ): Promise<{ ok: boolean; message?: string; isModel?: boolean; isClient?: boolean }> => {
+  ): Promise<{
+    ok: boolean;
+    message?: string;
+    isModel?: boolean;
+    isClient?: boolean;
+    isInfluencer?: boolean;
+  }> => {
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
@@ -125,6 +140,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           roles?: UserRole[];
           status?: ClientSession["status"];
           clientProfile?: { fullName?: string };
+          modelProfile?: { fullName?: string };
+          influencerProfile?: { fullName?: string };
         };
       };
 
@@ -146,7 +163,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       applySession(buildClientSession(data.user));
       const userIsModel = data.user.roles?.includes("MODEL") ?? false;
       const userIsClient = data.user.roles?.includes("CORPORATE_CLIENT") ?? false;
-      return { ok: true, isModel: userIsModel, isClient: userIsClient };
+      const userIsInfluencer = data.user.roles?.includes("INFLUENCER") ?? false;
+      return {
+        ok: true,
+        isModel: userIsModel,
+        isClient: userIsClient,
+        isInfluencer: userIsInfluencer,
+      };
     } catch {
       return { ok: false, message: "Unable to sign in. Please try again." };
     }
@@ -162,6 +185,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     !!user?.roles?.includes("CORPORATE_CLIENT") || user?.type === "client";
 
   const isModel = !!user?.roles?.includes("MODEL");
+  const isInfluencer = !!user?.roles?.includes("INFLUENCER");
 
   return (
     <AuthContext.Provider
@@ -172,6 +196,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!user && !!getClientToken(),
         isClient,
         isModel,
+        isInfluencer,
         isLoading,
       }}
     >

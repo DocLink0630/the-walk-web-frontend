@@ -35,11 +35,19 @@ export function buildClientSession(user: {
   roles?: UserRole[];
   status?: UserStatus;
   clientProfile?: { fullName?: string };
+  modelProfile?: { fullName?: string };
+  influencerProfile?: { fullName?: string };
 }): ClientSession {
+  const name =
+    user.clientProfile?.fullName ??
+    user.modelProfile?.fullName ??
+    user.influencerProfile?.fullName ??
+    user.email.split("@")[0];
+
   return {
     id: user.id,
     email: user.email,
-    name: user.clientProfile?.fullName ?? user.email.split("@")[0],
+    name,
     roles: user.roles ?? ["CORPORATE_CLIENT"],
     status: user.status ?? "ACTIVE",
   };

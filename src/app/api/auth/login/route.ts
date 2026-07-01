@@ -8,6 +8,8 @@ interface LoginUser {
   roles?: string[];
   status?: string;
   clientProfile?: { fullName?: string };
+  modelProfile?: { fullName?: string };
+  influencerProfile?: { fullName?: string };
 }
 
 interface LoginResponse {
@@ -30,6 +32,8 @@ function loginUserFromSession(
       roles: s.roles,
       status: s.status,
       clientProfile: s.clientProfile,
+      modelProfile: s.modelProfile,
+      influencerProfile: s.influencerProfile,
     };
   }
   return fallback ?? null;

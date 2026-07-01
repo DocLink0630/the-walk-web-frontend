@@ -9,13 +9,12 @@ interface ApplyChoiceModalProps {
   onClose: () => void;
 }
 
-const PATHS = [
+const APPLY_PATHS = [
   {
     href: "/register/model",
     eyebrow: "The Walk Agency",
-    title: "Join the Agency",
-    description:
-      "Apply to join our model roster for runway, editorial, and commercial bookings across Sri Lanka.",
+    title: "Model",
+    description: "Join our roster for runway, editorial, and commercial bookings.",
     cta: "Apply as model",
     image: "/images/Gallery/DSC09407.webp",
     cardClass:
@@ -27,9 +26,8 @@ const PATHS = [
   {
     href: "/register",
     eyebrow: "The Walk Academy",
-    title: "Join the Academy",
-    description:
-      "Apply for professional modelling training — runway technique, portfolio development, and industry placement.",
+    title: "Student",
+    description: "Apply for professional modelling training and industry placement.",
     cta: "Apply as student",
     image: "/images/abothero.jpeg",
     cardClass:
@@ -37,11 +35,42 @@ const PATHS = [
     eyebrowClass: "text-[#9A7329]",
     ctaClass: "bg-[#C8A97A] text-[#0A0A0A] hover:bg-[#9A7329] hover:text-white",
   },
-] as const;
-
-const SERVICE_PATHS = [
-  { href: "/register/beautician", label: "Apply as a beautician" },
-  { href: "/register/photographer", label: "Apply as a photographer" },
+  {
+    href: "/register/beautician",
+    eyebrow: "Service provider",
+    title: "Beautician",
+    description: "List your beauty services for fashion, editorial, and event bookings.",
+    cta: "Apply as beautician",
+    image: "/images/Gallery/DSC09407.webp",
+    cardClass:
+      "border-[#E0E0E0] hover:border-[#0A0A0A] hover:bg-[#FAFAFA]",
+    eyebrowClass: "text-[#9A7329]",
+    ctaClass: "bg-[#0A0A0A] text-white hover:bg-[#C8A97A]",
+  },
+  {
+    href: "/register/photographer",
+    eyebrow: "Service provider",
+    title: "Photographer",
+    description: "Showcase your portfolio for fashion, commercial, and editorial shoots.",
+    cta: "Apply as photographer",
+    image: "/images/Gallery/DSC09407.webp",
+    cardClass:
+      "border-[#E0E0E0] hover:border-[#0A0A0A] hover:bg-[#FAFAFA]",
+    eyebrowClass: "text-[#9A7329]",
+    ctaClass: "bg-[#0A0A0A] text-white hover:bg-[#C8A97A]",
+  },
+  {
+    href: "/register/influencer",
+    eyebrow: "Brand partnerships",
+    title: "Influencer",
+    description: "Connect with brands — share your social channels and content categories.",
+    cta: "Apply as influencer",
+    image: "/images/abothero.jpeg",
+    cardClass:
+      "border-[#E0E0E0] hover:border-[#0A0A0A] hover:bg-[#FAFAFA] sm:col-span-2 lg:col-span-1",
+    eyebrowClass: "text-[#9A7329]",
+    ctaClass: "bg-[#0A0A0A] text-white hover:bg-[#C8A97A]",
+  },
 ] as const;
 
 export default function ApplyChoiceModal({ isOpen, onClose }: ApplyChoiceModalProps) {
@@ -61,8 +90,8 @@ export default function ApplyChoiceModal({ isOpen, onClose }: ApplyChoiceModalPr
         aria-label="Close apply options"
       />
 
-      <div className="relative w-full max-w-3xl bg-white border border-[#E0E0E0] shadow-[0_8px_40px_rgba(0,0,0,0.15)]">
-        <div className="flex items-start justify-between gap-4 border-b border-[#E0E0E0] px-6 py-5 md:px-8">
+      <div className="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto bg-white border border-[#E0E0E0] shadow-[0_8px_40px_rgba(0,0,0,0.15)]">
+        <div className="flex items-start justify-between gap-4 border-b border-[#E0E0E0] px-6 py-5 md:px-8 sticky top-0 bg-white z-10">
           <div>
             <h2
               id="apply-choice-title"
@@ -70,8 +99,8 @@ export default function ApplyChoiceModal({ isOpen, onClose }: ApplyChoiceModalPr
             >
               How would you like to apply?
             </h2>
-            <p className="mt-2 font-ui text-sm text-[#4A4A4A] leading-relaxed max-w-lg">
-              Choose whether you want to join our agency roster or apply for academy training.
+            <p className="mt-2 font-ui text-sm text-[#4A4A4A] leading-relaxed max-w-2xl">
+              Choose your path — agency, academy, service provider, or influencer partnerships.
             </p>
           </div>
           <button
@@ -84,14 +113,14 @@ export default function ApplyChoiceModal({ isOpen, onClose }: ApplyChoiceModalPr
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-6 md:p-8">
-          {PATHS.map((path) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-6 md:p-8">
+          {APPLY_PATHS.map((path) => (
             <Link
               key={path.href}
               href={path.href}
               onClick={onClose}
               data-cursor="button"
-              className={`group flex flex-col border-2 p-5 md:p-6 transition-colors duration-300 ${path.cardClass}`}
+              className={`group flex flex-col border-2 p-5 transition-colors duration-300 ${path.cardClass}`}
             >
               <div className="relative w-full aspect-[16/9] mb-4 overflow-hidden bg-[#F5F5F5]">
                 <Image
@@ -99,7 +128,7 @@ export default function ApplyChoiceModal({ isOpen, onClose }: ApplyChoiceModalPr
                   alt=""
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  sizes="(max-width: 640px) 100vw, 400px"
+                  sizes="(max-width: 640px) 100vw, 320px"
                 />
               </div>
               <p
@@ -107,7 +136,7 @@ export default function ApplyChoiceModal({ isOpen, onClose }: ApplyChoiceModalPr
               >
                 {path.eyebrow}
               </p>
-              <h3 className="font-display text-xl md:text-2xl font-light text-[#0A0A0A] group-hover:text-inherit mb-2">
+              <h3 className="font-display text-xl font-light text-[#0A0A0A] group-hover:text-inherit mb-2">
                 {path.title}
               </h3>
               <p className="font-ui text-xs text-[#4A4A4A] group-hover:text-inherit leading-relaxed flex-1 mb-5">
@@ -120,28 +149,6 @@ export default function ApplyChoiceModal({ isOpen, onClose }: ApplyChoiceModalPr
               </span>
             </Link>
           ))}
-        </div>
-
-        <div className="border-t border-[#E0E0E0] px-6 py-5 md:px-8">
-          <p className="font-ui text-[9px] tracking-[0.3em] uppercase text-[#9A7329] mb-3">
-            Service providers
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3">
-            {SERVICE_PATHS.map((path) => (
-              <Link
-                key={path.href}
-                href={path.href}
-                onClick={onClose}
-                data-cursor="button"
-                className="flex-1 flex items-center justify-between border border-[#E0E0E0] px-4 py-3 hover:border-[#0A0A0A] transition-colors duration-300"
-              >
-                <span className="font-ui text-[11px] tracking-[0.12em] uppercase text-[#0A0A0A]">
-                  {path.label}
-                </span>
-                <span className="font-ui text-[16px] text-[#9A7329]">→</span>
-              </Link>
-            ))}
-          </div>
         </div>
       </div>
     </div>
