@@ -11,6 +11,8 @@ export interface PublicFeaturedModel {
 
 /** GET /v1/public/models — no auth required */
 export interface PublicApiModel {
+  /** Real user UUID returned by the backend — use this for cart/inquiry */
+  userId?: string | null;
   name: string;
   height?: string | null;
   imageUrl: string | null;
@@ -30,6 +32,8 @@ export interface PublicModelsPageResponse {
 
 export interface PublicModel {
   id: string;
+  /** Real backend user UUID — always use this when available for inquiry cart */
+  userId?: string | null;
   name: string;
   imageUrl: string | null;
   tier?: ModelTier;
