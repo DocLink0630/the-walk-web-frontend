@@ -1,11 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { fetchAdminUsers, deleteAdminUser } from "@/lib/admin/users-api";
+import { deleteAdminUser, fetchAdminUsers } from "@/lib/admin/users-api";
 import { useAdminPendingRegistrations } from "@/hooks/useAdminPendingRegistrations";
 import type { AdminUser, UserStatus } from "@/types/admin";
-import type { AdminSection } from "@/types/admin-nav";
-import ServiceProviderReviewPanel from "./ServiceProviderReviewPanel";
+import InfluencerReviewPanel from "./InfluencerReviewPanel";
 import {
   adminAlertErr,
   adminBtnPrimary,
@@ -17,26 +16,25 @@ import {
 } from "./admin-ui";
 
 const TABS = [
-  { id: "active" as const, label: "Active providers", status: "ACTIVE" as UserStatus },
+  { id: "active" as const, label: "Active influencers", status: "ACTIVE" as UserStatus },
   { id: "pending" as const, label: "Pending review", status: "PENDING_ADMIN_REVIEW" as UserStatus },
   { id: "rejected" as const, label: "Rejected", status: "REJECTED" as UserStatus },
 ];
 
 function formatDate(iso: string) {
   try {
-    return new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
-  } catch { return iso; }
+    return new Date(iso).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return iso;
+  }
 }
 
-interface Props {
-  providerType: Extract<AdminSection, "beauticians" | "photographers">;
-}
-
-export default function ServiceProviderQueueTable({ providerType }: Props) {
+export default function InfluencerQueueTable() {
   const { refreshCounts } = useAdminPendingRegistrations();
-  const role = providerType === "beauticians" ? "BEAUTICIAN" : "PHOTOGRAPHER";
-  const typeLabel = providerType === "beauticians" ? "Beautician" : "Photographer";
-
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -59,15 +57,20 @@ export default function ServiceProviderQueueTable({ providerType }: Props) {
       limit: 20,
       search: search || undefined,
       status: currentTab.status,
-      roles: [role as "BEAUTICIAN" | "PHOTOGRAPHER"],
+      roles: ["INFLUENCER"],
     });
     setLoading(false);
-    if (!result.ok) { setError(result.message); return; }
+    if (!result.ok) {
+      setError(result.message);
+      return;
+    }
     setUsers(result.data.data);
     setTotalPages(result.data.meta.totalPages);
-  }, [page, search, currentTab.status, role]);
+  }, [page, search, currentTab.status]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -90,14 +93,18 @@ export default function ServiceProviderQueueTable({ providerType }: Props) {
     ) {
       return;
     }
+
     setDeletingId(user.id);
+    setBanner(null);
     const result = await deleteAdminUser(user.id);
     setDeletingId(null);
+
     if (!result.ok) {
       setBanner({ type: "err", text: result.message });
       return;
     }
-    setBanner({ type: "ok", text: "Account deleted." });
+
+    setBanner({ type: "ok", text: "Influencer account deleted." });
     if (selectedUser?.id === user.id) setSelectedUser(null);
     void refreshCounts();
     void load();
@@ -105,7 +112,6 @@ export default function ServiceProviderQueueTable({ providerType }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* Tabs */}
       <div className="flex gap-1 border-b border-gray-200">
         {TABS.map((t) => (
           <button
@@ -123,26 +129,31 @@ export default function ServiceProviderQueueTable({ providerType }: Props) {
         ))}
       </div>
 
-      {/* Search */}
       <form onSubmit={handleSearch} className="flex gap-2 max-w-sm">
         <input
           type="search"
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
-          placeholder={`Search ${typeLabel.toLowerCase()}s…`}
+          placeholder="Search by name or email…"
           className={adminInput + " flex-1"}
         />
-        <button type="submit" className={adminBtnSecondary}>Search</button>
+        <button type="submit" className={adminBtnSecondary}>
+          Search
+        </button>
       </form>
 
-      {banner && <p className={banner.type === "ok" ? "text-sm text-green-700" : adminAlertErr}>{banner.text}</p>}
+      {banner && (
+        <p className={banner.type === "ok" ? "text-sm text-green-700" : adminAlertErr}>
+          {banner.text}
+        </p>
+      )}
 
       {loading ? (
         <p className="text-sm text-gray-500 py-8 text-center">Loading…</p>
       ) : error ? (
         <p className={adminAlertErr}>{error}</p>
       ) : users.length === 0 ? (
-        <p className="text-sm text-gray-500 py-8 text-center">No {typeLabel.toLowerCase()}s found.</p>
+        <p className="text-sm text-gray-500 py-8 text-center">No influencers found.</p>
       ) : (
         <div className={adminTableWrap}>
           <table className="min-w-full divide-y divide-gray-200 text-sm">
@@ -164,12 +175,17 @@ export default function ServiceProviderQueueTable({ providerType }: Props) {
                     </div>
                   </td>
                   <td className={adminTd}>
-                    <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${
-                      u.status === "ACTIVE" ? "bg-green-100 text-green-800"
-                        : u.status === "PENDING_ADMIN_REVIEW" ? "bg-yellow-100 text-yellow-800"
-                        : u.status === "REJECTED" ? "bg-red-100 text-red-800"
-                        : "bg-gray-100 text-gray-700"
-                    }`}>
+                    <span
+                      className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${
+                        u.status === "ACTIVE"
+                          ? "bg-green-100 text-green-800"
+                          : u.status === "PENDING_ADMIN_REVIEW"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : u.status === "REJECTED"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-gray-100 text-gray-700"
+                      }`}
+                    >
                       {u.status}
                     </span>
                   </td>
@@ -200,19 +216,33 @@ export default function ServiceProviderQueueTable({ providerType }: Props) {
         </div>
       )}
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center gap-2 text-sm">
-          <button type="button" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} className={adminBtnSecondary + " disabled:opacity-40"}>Prev</button>
-          <span className="text-gray-500">Page {page} of {totalPages}</span>
-          <button type="button" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages} className={adminBtnSecondary + " disabled:opacity-40"}>Next</button>
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1}
+            className={adminBtnSecondary + " disabled:opacity-40"}
+          >
+            Prev
+          </button>
+          <span className="text-gray-500">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page >= totalPages}
+            className={adminBtnSecondary + " disabled:opacity-40"}
+          >
+            Next
+          </button>
         </div>
       )}
 
       {selectedUser && (
-        <ServiceProviderReviewPanel
+        <InfluencerReviewPanel
           user={selectedUser}
-          providerType={providerType}
           onClose={() => setSelectedUser(null)}
           onUpdated={() => {
             void refreshCounts();

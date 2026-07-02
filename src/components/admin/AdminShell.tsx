@@ -6,6 +6,7 @@ import { Menu, X } from "lucide-react";
 import { useAdminAuthStore } from "@/stores/adminAuthStore";
 import { ADMIN_NAV_ITEMS, type AdminSection } from "@/types/admin-nav";
 import AdminSidebar from "./AdminSidebar";
+import AdminToastContainer from "./AdminToastContainer";
 import { adminPageTitle } from "./admin-ui";
 
 interface AdminShellProps {
@@ -34,6 +35,7 @@ export default function AdminShell({
 
   return (
     <div className="flex min-h-screen min-h-dvh bg-gray-100">
+      <AdminToastContainer />
       {sidebarOpen && (
         <button
           type="button"

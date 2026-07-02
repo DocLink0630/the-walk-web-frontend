@@ -6,6 +6,7 @@ import { X, ShoppingBag, Check } from "lucide-react";
 import { useBooking } from "@/context/BookingContext";
 import type { PublicServiceProvider, ServiceProviderType } from "@/types/public-service-provider";
 import type { TalentProfile } from "@/types/talents";
+import ReviewsList from "@/components/reviews/ReviewsList";
 
 interface ServiceProvidersPageContentProps {
   type: ServiceProviderType;
@@ -182,6 +183,13 @@ function ServiceProviderDetailModal({ provider, type, onClose }: DetailModalProp
             >
               {inCart ? <><Check className="w-3.5 h-3.5" /> Added to inquiry</> : <><ShoppingBag className="w-3.5 h-3.5" /> Add to inquiry</>}
             </button>
+
+            <div>
+              <p className="font-ui text-[8px] tracking-[0.2em] uppercase text-[#9A9A9A] mb-3">
+                Client reviews
+              </p>
+              <ReviewsList talentUserId={provider.userId} />
+            </div>
           </div>
         </div>
       </div>

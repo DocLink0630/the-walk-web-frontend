@@ -1,0 +1,22 @@
+import { NextRequest, NextResponse } from "next/server";
+import { backendFetch, getBackendUrl } from "@/lib/backend/fetch";
+
+export async function GET(request: NextRequest) {
+  try {
+    getBackendUrl();
+  } catch {
+    return NextResponse.json({ message: "BACKEND_URL is not configured" }, { status: 500 });
+  }
+
+  const { searchParams } = request.nextUrl;
+
+  const { status, data } = await backendFetch("/v1/public/influencers", {
+    searchParams: {
+      page: searchParams.get("page") ?? "1",
+      limit: searchParams.get("limit") ?? "100",
+      search: searchParams.get("search") ?? undefined,
+    },
+  });
+
+  return NextResponse.json(data ?? {}, { status });
+}

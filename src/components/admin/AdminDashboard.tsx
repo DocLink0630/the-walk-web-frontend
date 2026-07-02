@@ -5,6 +5,8 @@ import AdminDashboardPanel from "./AdminDashboardPanel";
 import AdminEventsPanel from "./AdminEventsPanel";
 import AdminGalleryPanel from "./AdminGalleryPanel";
 import InquiriesPanel from "./InquiriesPanel";
+import InfluencerManagementPanel from "./InfluencerManagementPanel";
+import ReviewsPanel from "./ReviewsPanel";
 import ModelManagementPanel from "./ModelManagementPanel";
 import ServiceProviderManagementPanel from "./ServiceProviderManagementPanel";
 import StudentManagementPanel from "./StudentManagementPanel";
@@ -35,12 +37,20 @@ export default function AdminDashboard({ section, onSectionChange }: AdminDashbo
     return <ServiceProviderManagementPanel providerType="photographers" />;
   }
 
+  if (section === "influencers") {
+    return <InfluencerManagementPanel />;
+  }
+
   if (section === "events") {
     return <AdminEventsPanel />;
   }
 
   if (section === "gallery") {
     return <AdminGalleryPanel />;
+  }
+
+  if (section === "reviews") {
+    return <ReviewsPanel />;
   }
 
   return <InquiriesPanel />;

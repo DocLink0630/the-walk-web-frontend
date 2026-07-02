@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { CalendarDays, Camera, GraduationCap, ImageIcon, LayoutDashboard, LogOut, MessageSquare, Scissors, UserCircle } from "lucide-react";
+import { CalendarDays, Camera, GraduationCap, ImageIcon, LayoutDashboard, LogOut, MessageSquare, Scissors, Share2, Star, UserCircle } from "lucide-react";
+import { countForSection } from "@/lib/admin/pending-registrations-api";
+import { useAdminPendingRegistrations } from "@/hooks/useAdminPendingRegistrations";
 import { ADMIN_NAV_ITEMS, type AdminSection } from "@/types/admin-nav";
 
 const NAV_ICONS: Record<AdminSection, typeof LayoutDashboard> = {
@@ -10,9 +12,11 @@ const NAV_ICONS: Record<AdminSection, typeof LayoutDashboard> = {
   students: GraduationCap,
   beauticians: Scissors,
   photographers: Camera,
+  influencers: Share2,
   events: CalendarDays,
   gallery: ImageIcon,
   inquiries: MessageSquare,
+  reviews: Star,
 };
 
 interface AdminSidebarProps {
@@ -30,6 +34,8 @@ export default function AdminSidebar({
   onLogout,
   onNavigate,
 }: AdminSidebarProps) {
+  const { counts } = useAdminPendingRegistrations();
+
   return (
     <div className="flex h-full flex-col bg-white border-r border-gray-200 shadow-sm">
       <div className="border-b border-gray-200 px-5 py-5">
@@ -47,6 +53,7 @@ export default function AdminSidebar({
         {ADMIN_NAV_ITEMS.map((item) => {
           const Icon = NAV_ICONS[item.id];
           const active = activeSection === item.id;
+          const pendingCount = countForSection(counts, item.id);
 
           return (
             <button
@@ -63,7 +70,16 @@ export default function AdminSidebar({
               }`}
             >
               <Icon className="size-[18px] shrink-0" strokeWidth={1.75} />
-              {item.label}
+              <span className="flex-1 text-left">{item.label}</span>
+              {pendingCount > 0 && (
+                <span
+                  className={`min-w-[1.25rem] rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none text-center ${
+                    active ? "bg-amber-400 text-gray-900" : "bg-amber-100 text-amber-800"
+                  }`}
+                >
+                  {pendingCount > 99 ? "99+" : pendingCount}
+                </span>
+              )}
             </button>
           );
         })}

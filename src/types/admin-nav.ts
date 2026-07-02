@@ -4,9 +4,11 @@ export type AdminSection =
   | "students"
   | "beauticians"
   | "photographers"
+  | "influencers"
   | "events"
   | "gallery"
-  | "inquiries";
+  | "inquiries"
+  | "reviews";
 
 export interface AdminNavItem {
   id: AdminSection;
@@ -41,6 +43,11 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     description: "Photographer applications and approvals",
   },
   {
+    id: "influencers",
+    label: "Influencers",
+    description: "Influencer applications, approvals, and account management",
+  },
+  {
     id: "events",
     label: "Events",
     description: "Manage public events and visibility",
@@ -54,5 +61,10 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     id: "inquiries",
     label: "Inquiries",
     description: "Review and manage client booking requests",
+  },
+  {
+    id: "reviews",
+    label: "Reviews",
+    description: "Approve or reject client-submitted talent reviews",
   },
 ];
