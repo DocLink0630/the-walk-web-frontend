@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { fetchAdminUsers, updateUserStatus } from "@/lib/admin/users-api";
+import { fetchAdminUsers, updateUserStatus, deleteAdminUser } from "@/lib/admin/users-api";
 import {
   MODEL_QUEUE_STATUSES,
   MODEL_STATUS_LABELS,
 } from "@/lib/admin/model-user-status";
 import type { AdminUser, UserStatus } from "@/types/admin";
+import { useAdminPendingRegistrations } from "@/hooks/useAdminPendingRegistrations";
 import AdminModelMobileList from "./AdminModelMobileList";
 import ModelReviewPanel from "./ModelReviewPanel";
 import {
@@ -52,6 +53,7 @@ interface ModelQueueTableProps {
 }
 
 export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps) {
+  const { refreshCounts } = useAdminPendingRegistrations();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -69,6 +71,7 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [reviewUser, setReviewUser] = useState<AdminUser | null>(null);
   const [pendingReviewCount, setPendingReviewCount] = useState(0);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const loadPendingReviewCount = useCallback(async () => {
     const result = await fetchAdminUsers({
@@ -120,6 +123,7 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
   async function refreshAfterChange() {
     await loadUsers();
     await loadPendingReviewCount();
+    await refreshCounts();
     onUsersChanged?.();
   }
 
@@ -138,6 +142,31 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
     }
 
     setBanner({ type: "ok", text: `Updated ${user.displayName ?? user.email} to ${MODEL_STATUS_LABELS[next]}` });
+    await refreshAfterChange();
+  }
+
+  async function handleDelete(user: AdminUser) {
+    const name = user.displayName ?? user.email;
+    if (
+      !confirm(
+        `Permanently delete "${name}"?\n\nThis removes their account, Auth0 login, profile, portfolio files, and all database records. This cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+
+    setDeletingId(user.id);
+    setBanner(null);
+    const result = await deleteAdminUser(user.id);
+    setDeletingId(null);
+
+    if (!result.ok) {
+      setBanner({ type: "err", text: result.message });
+      return;
+    }
+
+    if (reviewUser?.id === user.id) setReviewUser(null);
+    setBanner({ type: "ok", text: "Model account deleted." });
     await refreshAfterChange();
   }
 
@@ -216,6 +245,8 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
           }
           onUpdate={handleUpdate}
           onReview={setReviewUser}
+          onDelete={(user) => void handleDelete(user)}
+          deletingId={deletingId}
           formatDate={formatDate}
         />
       )}
@@ -308,6 +339,14 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
                         className={adminBtnPrimary + " !px-3 !py-1.5 text-xs"}
                       >
                         {updatingId === user.id ? "Saving…" : "Save"}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={deletingId === user.id || updatingId === user.id}
+                        onClick={() => void handleDelete(user)}
+                        className="text-xs px-3 py-1 border border-red-200 text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                      >
+                        {deletingId === user.id ? "Deleting…" : "Delete"}
                       </button>
                     </div>
                   </td>

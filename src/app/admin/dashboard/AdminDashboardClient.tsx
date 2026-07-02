@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AdminShell from "@/components/admin/AdminShell";
 import AdminDashboard from "@/components/admin/AdminDashboard";
+import { AdminPendingRegistrationsProvider } from "@/hooks/useAdminPendingRegistrations";
 import { useAdminAuthStore } from "@/stores/adminAuthStore";
 import type { AdminSection } from "@/types/admin-nav";
 
@@ -52,8 +53,10 @@ export default function AdminDashboardClient() {
   }
 
   return (
-    <AdminShell activeSection={section} onSectionChange={setSection}>
-      <AdminDashboard section={section} onSectionChange={setSection} />
-    </AdminShell>
+    <AdminPendingRegistrationsProvider>
+      <AdminShell activeSection={section} onSectionChange={setSection}>
+        <AdminDashboard section={section} onSectionChange={setSection} />
+      </AdminShell>
+    </AdminPendingRegistrationsProvider>
   );
 }

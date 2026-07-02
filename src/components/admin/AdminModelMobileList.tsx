@@ -19,6 +19,8 @@ interface AdminModelMobileListProps {
   onStatusChange: (userId: string, status: UserStatus) => void;
   onUpdate: (user: AdminUser) => void;
   onReview?: (user: AdminUser) => void;
+  onDelete?: (user: AdminUser) => void;
+  deletingId?: string | null;
   formatDate: (iso: string) => string;
 }
 
@@ -31,6 +33,8 @@ export default function AdminModelMobileList({
   onStatusChange,
   onUpdate,
   onReview,
+  onDelete,
+  deletingId,
   formatDate,
 }: AdminModelMobileListProps) {
   return (
@@ -85,6 +89,16 @@ export default function AdminModelMobileList({
             >
               {updatingId === user.id ? "Saving…" : "Save status"}
             </button>
+            {onDelete && (
+              <button
+                type="button"
+                disabled={deletingId === user.id || updatingId === user.id}
+                onClick={() => onDelete(user)}
+                className="w-full text-sm px-4 py-2.5 border border-red-200 text-red-600 hover:bg-red-50 transition-colors rounded-lg disabled:opacity-50"
+              >
+                {deletingId === user.id ? "Deleting…" : "Delete permanently"}
+              </button>
+            )}
           </div>
         </article>
       ))}

@@ -10,6 +10,7 @@ import {
   patchOwnClientProfile,
 } from "@/lib/client/profile-api";
 import { INQUIRY_STATUS_COLORS, INQUIRY_STATUS_LABELS } from "@/lib/inquiry/status";
+import ReviewForm from "@/components/reviews/ReviewForm";
 import type { Inquiry } from "@/types/inquiry";
 
 function formatDate(iso: string) {
@@ -34,6 +35,8 @@ export default function ClientProfilePage() {
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [banner, setBanner] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [reviewingItemId, setReviewingItemId] = useState<string | null>(null);
+  const [submittedItemIds, setSubmittedItemIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (isLoading) return;
@@ -210,17 +213,52 @@ export default function ClientProfilePage() {
                             {inquiry.message}
                           </p>
                         )}
-                        <ul className="space-y-1">
+                        <ul className="space-y-3">
                           {inquiry.items.map((item) => (
-                            <li
-                              key={item.id}
-                              className="font-ui text-[9px] text-[#0A0A0A]"
-                            >
-                              {item.modelName}
-                              <span className="text-[#9A9A9A] capitalize">
-                                {" "}
-                                · {item.modelType}
-                              </span>
+                            <li key={item.id} className="space-y-2">
+                              <div className="font-ui text-[9px] text-[#0A0A0A] flex items-center justify-between gap-2 flex-wrap">
+                                <span>
+                                  {item.modelName}
+                                  <span className="text-[#9A9A9A] capitalize">
+                                    {" "}
+                                    · {item.modelType}
+                                  </span>
+                                </span>
+                                {inquiry.status === "CLOSED" && (
+                                  submittedItemIds.has(item.id) ? (
+                                    <span className="font-ui text-[8px] tracking-[0.1em] text-[#C8A97A]">
+                                      Review submitted ✓
+                                    </span>
+                                  ) : reviewingItemId === item.id ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => setReviewingItemId(null)}
+                                      className="font-ui text-[8px] tracking-[0.1em] uppercase text-[#737373] underline"
+                                    >
+                                      Cancel
+                                    </button>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={() => setReviewingItemId(item.id)}
+                                      className="font-ui text-[8px] tracking-[0.1em] uppercase text-[#C8A97A] underline underline-offset-2"
+                                    >
+                                      Leave a review
+                                    </button>
+                                  )
+                                )}
+                              </div>
+                              {reviewingItemId === item.id && (
+                                <div className="border border-[#EBEBEB] p-4 bg-white">
+                                  <ReviewForm
+                                    inquiryItemId={item.id}
+                                    onSubmitted={() => {
+                                      setSubmittedItemIds((prev) => new Set(prev).add(item.id));
+                                      setReviewingItemId(null);
+                                    }}
+                                  />
+                                </div>
+                              )}
                             </li>
                           ))}
                         </ul>

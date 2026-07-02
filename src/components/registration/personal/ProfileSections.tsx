@@ -225,7 +225,8 @@ export function AppearanceSection({
   store,
   idPrefix,
   showColorFields = true,
-}: Pick<SectionProps, "store" | "idPrefix"> & { showColorFields?: boolean }) {
+  showBio = true,
+}: Pick<SectionProps, "store" | "idPrefix"> & { showColorFields?: boolean; showBio?: boolean }) {
   return (
     <section className="space-y-4">
       <h3 className={formSectionTitle}>
@@ -265,19 +266,21 @@ export function AppearanceSection({
           className={formTextarea}
         />
       </Field>
-      <Field label={`Short bio (${store.shortBio.length}/300)`} htmlFor={`${idPrefix}-bio`}>
-        <textarea
-          id={`${idPrefix}-bio`}
-          value={store.shortBio}
-          onChange={(e) => {
-            if (e.target.value.length <= 300) store.set({ shortBio: e.target.value });
-          }}
-          placeholder="A brief description about yourself…"
-          rows={3}
-          maxLength={300}
-          className={formTextarea}
-        />
-      </Field>
+      {showBio && (
+        <Field label={`Short bio (${store.shortBio.length}/300)`} htmlFor={`${idPrefix}-bio`}>
+          <textarea
+            id={`${idPrefix}-bio`}
+            value={store.shortBio}
+            onChange={(e) => {
+              if (e.target.value.length <= 300) store.set({ shortBio: e.target.value });
+            }}
+            placeholder="A brief description about yourself…"
+            rows={3}
+            maxLength={300}
+            className={formTextarea}
+          />
+        </Field>
+      )}
       <div className="space-y-2">
         <p className="font-ui text-[11px] tracking-[0.15em] uppercase text-[#0A0A0A]">Skin color</p>
         <div className="flex flex-wrap gap-2">

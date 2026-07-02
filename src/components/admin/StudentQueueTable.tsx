@@ -7,6 +7,7 @@ import {
   STUDENT_STATUS_LABELS,
 } from "@/lib/admin/student-user-status";
 import type { AdminUser, UserStatus } from "@/types/admin";
+import { useAdminPendingRegistrations } from "@/hooks/useAdminPendingRegistrations";
 import AdminModelMobileList from "./AdminModelMobileList";
 import StudentReviewPanel from "./StudentReviewPanel";
 import {
@@ -52,6 +53,7 @@ interface StudentQueueTableProps {
 }
 
 export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableProps) {
+  const { refreshCounts } = useAdminPendingRegistrations();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -120,6 +122,7 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
   async function refreshAfterChange() {
     await loadUsers();
     await loadPendingReviewCount();
+    await refreshCounts();
     onUsersChanged?.();
   }
 

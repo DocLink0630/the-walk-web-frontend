@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, X } from "lucide-react";
 import { disciplines } from "@/data/discipline";
+import influencerPortrait from "@/assets/images/influencer-portrait.jpg";
 
 interface ApplyChoiceModalProps {
   isOpen: boolean;
@@ -55,7 +56,7 @@ const APPLY_PATHS = [
     title: "Influencer",
     description: "Connect with brands through your social channels.",
     cta: "Apply as influencer",
-    image: "/images/influencer-apply.jpg",
+    image: influencerPortrait,
     accent: "border-l-[#C8A97A]",
   },
 ] as const;
