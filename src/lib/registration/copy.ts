@@ -22,14 +22,14 @@ export const REGISTRATION_COPY: Record<RegistrationVariant, RegistrationCopy> = 
     accountSubtitle: "Join The Walk Academy — step 1 of 3",
     personalTitle: "Personal details",
     personalSubtitle: "Fields marked * are required",
-    uploadsTitle: "Documents & photos",
-    uploadsSubtitle: "All photos must be JPEG, PNG, or WebP — step 3 of 3",
+    uploadsTitle: "Photos",
+    uploadsSubtitle: "Upload two photos (JPEG, PNG, or WebP) — step 3 of 3",
     submitLabel: "Submit application",
     successTitle: "Application submitted",
     successMessage:
       "Thank you for applying to The Walk Academy. Our team will review your application and be in touch shortly.",
     successSteps: [
-      "Your profile and documents are under review",
+      "Your profile and photos are under review",
       "You will receive an email confirmation",
       "Our team will contact you to schedule your assessment",
     ],
