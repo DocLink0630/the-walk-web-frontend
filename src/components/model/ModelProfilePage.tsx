@@ -8,6 +8,7 @@ import type { AdminModelRegistrationMedia } from "@/types/admin";
 import { patchOwnModelProfile } from "@/lib/model/profile-api";
 import ModelProfileMediaSection from "./ModelProfileMediaSection";
 import MembershipPackagesSection from "./MembershipPackagesSection";
+import MembershipPackagesModal from "./MembershipPackagesModal";
 
 interface ModelOwnProfile {
   id: string;
@@ -142,6 +143,11 @@ export default function ModelProfilePage() {
 
   return (
     <main className="min-h-screen bg-[#FAFAFA] pt-24 pb-16 px-4">
+      {isActive && (
+        <MembershipPackagesModal
+          modelName={profile?.modelProfile?.fullName ?? user?.name ?? ""}
+        />
+      )}
       <div className="max-w-xl mx-auto">
         <p className="font-ui text-[8px] tracking-[0.35em] uppercase text-[#C8A97A] mb-2">
           Model account
