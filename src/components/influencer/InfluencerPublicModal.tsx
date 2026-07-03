@@ -61,7 +61,6 @@ function SocialRow({
   );
 }
 
-// Simple social icons as SVG since lucide-react does not ship brand icons
 function InstagramIcon({ className, size = 14 }: { className?: string; size?: number }) {
   return (
     <svg
