@@ -1,6 +1,6 @@
 "use client";
 
-import { X, Instagram, Youtube } from "lucide-react";
+import { X } from "lucide-react";
 import Image from "next/image";
 import ReviewsList from "@/components/reviews/ReviewsList";
 
@@ -61,7 +61,41 @@ function SocialRow({
   );
 }
 
-// Simple TikTok icon as SVG since lucide doesn't have one
+// Simple social icons as SVG since lucide-react does not ship brand icons
+function InstagramIcon({ className, size = 14 }: { className?: string; size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+  );
+}
+
+function YouTubeIcon({ className, size = 14 }: { className?: string; size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+    >
+      <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.8zM9.6 15.5V8.5L15.8 12l-6.2 3.5z" />
+    </svg>
+  );
+}
+
 function TikTokIcon({ className, size = 14 }: { className?: string; size?: number }) {
   return (
     <svg
@@ -138,7 +172,7 @@ export default function InfluencerPublicModal({ influencer, onClose }: Influence
               url={influencer.instagramUrl}
               label="Instagram"
               followers={influencer.instagramFollowers}
-              icon={Instagram}
+              icon={InstagramIcon}
             />
             <SocialRow
               url={influencer.tiktokUrl}
@@ -150,7 +184,7 @@ export default function InfluencerPublicModal({ influencer, onClose }: Influence
               url={influencer.youtubeUrl}
               label="YouTube"
               followers={influencer.youtubeSubscribers}
-              icon={Youtube}
+              icon={YouTubeIcon}
             />
           </div>
 
