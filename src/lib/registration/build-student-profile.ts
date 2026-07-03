@@ -31,14 +31,10 @@ export function buildStudentProfilePayload(
   if (state.waist.trim()) payload.waistEnc = state.waist.trim();
   if (state.eyeColor.trim()) payload.eyeColorEnc = state.eyeColor.trim();
   if (state.hairColor.trim()) payload.hairColorEnc = state.hairColor.trim();
-  if (state.talents.trim()) payload.talentsEnc = state.talents.trim();
-  if (state.shortBio.trim()) payload.shortBio = state.shortBio.trim();
-  if (state.skinColorOptionId) payload.skinColorOptionId = state.skinColorOptionId;
   if (state.source) payload.source = state.source as StudentSource;
   if (state.preferredBranch.trim()) {
     payload.preferredBranchRaw = state.preferredBranch.trim();
   }
-  if (state.preferredDate) payload.preferredDate = state.preferredDate;
 
   return payload;
 }

@@ -4,7 +4,6 @@ import type { RegistrationCopy } from "@/lib/registration/copy";
 import type { RegistrationStore } from "@/types/registration-form";
 import { formHeading, formSubtitle } from "./form-styles";
 import {
-  AppearanceSection,
   ContactSection,
   IdentitySection,
   MeasurementsSection,
@@ -38,7 +37,6 @@ export default function StepPersonalStudent({
       <IdentitySection {...sectionProps} />
       <ContactSection {...sectionProps} />
       <MeasurementsSection store={store} idPrefix={idPrefix} fields="student" />
-      <AppearanceSection store={store} idPrefix={idPrefix} showColorFields={false} showBio={false} />
       <StudentAcademySection store={store} idPrefix={idPrefix} />
 
       <PersonalStepActions onBack={store.prevStep} />

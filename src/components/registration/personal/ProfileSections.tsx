@@ -365,15 +365,6 @@ export function StudentAcademySection({ store, idPrefix }: Pick<SectionProps, "s
             className={formInput}
           />
         </Field>
-        <Field label="Preferred start date" htmlFor={`${idPrefix}-pref-date`}>
-          <input
-            id={`${idPrefix}-pref-date`}
-            type="date"
-            value={store.preferredDate}
-            onChange={(e) => store.set({ preferredDate: e.target.value })}
-            className={formInput}
-          />
-        </Field>
       </div>
     </section>
   );

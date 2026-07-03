@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useState } from "react";
+import { useCropImagePicker } from "@/components/shared/CroppableImageUpload";
 import type { WorkExperienceDraft } from "@/types/registration-form";
-import { ACCEPTED_IMAGE_MIME } from "@/lib/registration/accepted-image-types";
 import { formHint, formLabel, formRequiredMark } from "./form-styles";
+
 const MAX_IMAGES_PER_ENTRY = 5;
 
 function createEntry(): WorkExperienceDraft {
@@ -86,17 +87,13 @@ function WorkExperienceEntryCard({
   onUpdate: (patch: Partial<WorkExperienceDraft>) => void;
   onRemove: () => void;
 }) {
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  function addImages(files: FileList) {
-    const toAdd = Array.from(files).slice(0, MAX_IMAGES_PER_ENTRY - entry.images.length);
-    onUpdate({
-      images: [
-        ...entry.images,
-        ...toAdd.map((file) => ({ file })),
-      ],
-    });
-  }
+  const { openPicker, cropModal, hiddenInput } = useCropImagePicker((file) => {
+    if (entry.images.length < MAX_IMAGES_PER_ENTRY) {
+      onUpdate({
+        images: [...entry.images, { file }],
+      });
+    }
+  });
 
   function removeImage(imageIndex: number) {
     onUpdate({
@@ -145,34 +142,18 @@ function WorkExperienceEntryCard({
           </span>
         </p>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {entry.images.map((image, imageIndex) => {
-            const url = URL.createObjectURL(image.file);
-            return (
-              <div
-                key={`${image.file.name}-${imageIndex}`}
-                className="relative group"
-                style={{ aspectRatio: "3/4" }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={url}
-                  alt={`Work ${imageIndex + 1}`}
-                  className="w-full h-full object-cover border border-[#E0E0E0]"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeImage(imageIndex)}
-                  className="absolute top-1 right-1 w-6 h-6 bg-black/60 text-white font-ui text-[10px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                >
-                  ×
-                </button>
-              </div>
-            );
-          })}
+          {entry.images.map((image, imageIndex) => (
+            <WorkImageThumb
+              key={`${image.file.name}-${image.file.size}-${imageIndex}`}
+              file={image.file}
+              imageIndex={imageIndex}
+              onRemove={() => removeImage(imageIndex)}
+            />
+          ))}
           {entry.images.length < MAX_IMAGES_PER_ENTRY && (
             <button
               type="button"
-              onClick={() => inputRef.current?.click()}
+              onClick={openPicker}
               data-cursor="button"
               className="border border-dashed border-[#E0E0E0] hover:border-[#C8A97A] transition-colors flex flex-col items-center justify-center gap-1"
               style={{ aspectRatio: "3/4" }}
@@ -185,18 +166,47 @@ function WorkExperienceEntryCard({
           )}
         </div>
         {imagesError && <p className={formHint + " text-red-600"}>{imagesError}</p>}
-        <input
-          ref={inputRef}
-          type="file"
-          accept={ACCEPTED_IMAGE_MIME}
-          multiple
-          className="hidden"
-          onChange={(e) => {
-            if (e.target.files) addImages(e.target.files);
-            e.target.value = "";
-          }}
-        />
+        {hiddenInput}
+        {cropModal}
       </div>
+    </div>
+  );
+}
+
+function WorkImageThumb({
+  file,
+  imageIndex,
+  onRemove,
+}: {
+  file: File;
+  imageIndex: number;
+  onRemove: () => void;
+}) {
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const objectUrl = URL.createObjectURL(file);
+    setUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [file]);
+
+  return (
+    <div className="relative group" style={{ aspectRatio: "3/4" }}>
+      {url && (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          src={url}
+          alt={`Work ${imageIndex + 1}`}
+          className="w-full h-full object-cover border border-[#E0E0E0]"
+        />
+      )}
+      <button
+        type="button"
+        onClick={onRemove}
+        className="absolute top-1 right-1 w-6 h-6 bg-black/60 text-white font-ui text-[10px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+      >
+        ×
+      </button>
     </div>
   );
 }
