@@ -7,6 +7,7 @@ import { getClientToken } from "@/lib/client/token";
 import type { AdminModelRegistrationMedia } from "@/types/admin";
 import { patchOwnModelProfile } from "@/lib/model/profile-api";
 import ModelProfileMediaSection from "./ModelProfileMediaSection";
+import MembershipPackagesSection from "./MembershipPackagesSection";
 
 interface ModelOwnProfile {
   id: string;
@@ -276,6 +277,12 @@ export default function ModelProfilePage() {
               {saving ? "Saving…" : "Save changes"}
             </button>
           </form>
+        )}
+
+        {isActive && (
+          <div className="mt-12">
+            <MembershipPackagesSection />
+          </div>
         )}
 
         {!isActive && (
