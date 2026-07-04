@@ -66,7 +66,8 @@ export default function RegistrationPackagesPreview({
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+      className="fixed inset-0 z-[200] flex items-center justify-center p-4 native-cursor"
+      data-native-cursor
       onClick={close}
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
@@ -77,6 +78,7 @@ export default function RegistrationPackagesPreview({
       >
         <button
           onClick={close}
+          data-cursor="button"
           className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center text-[#9A9A9A] hover:text-[#0A0A0A] transition-colors"
           aria-label="Close"
         >
@@ -164,6 +166,7 @@ export default function RegistrationPackagesPreview({
               href="https://wa.me/94772117088"
               target="_blank"
               rel="noopener noreferrer"
+              data-cursor="link"
               className="text-[#C8A97A] hover:underline"
             >
               WhatsApp 0772117088
@@ -171,6 +174,7 @@ export default function RegistrationPackagesPreview({
           </p>
           <button
             onClick={close}
+            data-cursor="button"
             className="font-ui text-[11px] tracking-[0.15em] uppercase px-10 py-3 bg-[#0A0A0A] text-white hover:bg-[#2A2A2A] transition-colors"
           >
             Continue Registration

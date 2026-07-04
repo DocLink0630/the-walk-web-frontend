@@ -219,3 +219,16 @@
     scroll-behavior: smooth;
   }
 }
+
+/* Restore native cursor inside modals (custom cursor is invisible on white backgrounds). */
+[data-native-cursor],
+[data-native-cursor] * {
+  cursor: auto !important;
+}
+
+[data-native-cursor] button,
+[data-native-cursor] a,
+[data-native-cursor] [role="button"],
+[data-native-cursor] label[for] {
+  cursor: pointer !important;
+}
