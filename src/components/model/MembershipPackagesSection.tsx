@@ -15,6 +15,60 @@ export interface MembershipPackage {
   isActive: boolean;
 }
 
+const DEFAULT_PACKAGES: MembershipPackage[] = [
+  {
+    id: "default-trial",
+    name: "Free Trial Access",
+    price: "FREE",
+    durationMonths: 1,
+    isTrial: true,
+    isPriorityListing: false,
+    description: "Try out THE WALK platform for free. Get listed and start receiving inquiries.",
+    features: [
+      "Basic profile setup",
+      "Ability to showcase your work",
+      "Access for 1 month",
+    ],
+    sortOrder: 0,
+    isActive: true,
+  },
+  {
+    id: "default-basic",
+    name: "Basic Package",
+    price: "LKR 5,000",
+    durationMonths: 6,
+    isTrial: false,
+    isPriorityListing: false,
+    description: "Standard visibility for 6 months. Ideal for models starting out.",
+    features: [
+      "Profile listed for 6 months",
+      "Portfolio gallery (up to 10 photos)",
+      "Inquiry notifications",
+      "Client access to your profile",
+    ],
+    sortOrder: 1,
+    isActive: true,
+  },
+  {
+    id: "default-premium",
+    name: "Premium Package",
+    price: "LKR 15,000",
+    durationMonths: 12,
+    isTrial: false,
+    isPriorityListing: true,
+    description: "Priority listing for 1 year. Maximum exposure and top placement in search results.",
+    features: [
+      "Priority listing for 12 months",
+      "Featured on homepage rotation",
+      "Unlimited portfolio photos",
+      "Priority event opportunities",
+      "Dedicated support from THE WALK team",
+    ],
+    sortOrder: 2,
+    isActive: true,
+  },
+];
+
 async function fetchPackages(): Promise<MembershipPackage[]> {
   try {
     const res = await fetch("/api/membership-packages");
@@ -26,13 +80,15 @@ async function fetchPackages(): Promise<MembershipPackage[]> {
   }
 }
 
+export { DEFAULT_PACKAGES };
+
 export default function MembershipPackagesSection() {
   const [packages, setPackages] = useState<MembershipPackage[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchPackages().then((pkgs) => {
-      setPackages(pkgs);
+      setPackages(pkgs.length > 0 ? pkgs : DEFAULT_PACKAGES);
       setLoading(false);
     });
   }, []);
@@ -56,8 +112,6 @@ export default function MembershipPackagesSection() {
       </section>
     );
   }
-
-  if (packages.length === 0) return null;
 
   return (
     <section className="space-y-5">
