@@ -9,6 +9,7 @@ import RegistrationProgress from "./RegistrationProgress";
 import StepAccount from "./StepAccount";
 import StepPersonalService from "./StepPersonalService";
 import StepServiceUploads from "./StepServiceUploads";
+import RegistrationPackagesPreview from "./RegistrationPackagesPreview";
 import {
   formCard,
   formDisclaimer,
@@ -67,6 +68,7 @@ function SuccessPanel({
           </div>
         ))}
       </div>
+      <RegistrationPackagesPreview />
       <button
         type="button"
         onClick={store.reset}
@@ -120,6 +122,11 @@ export default function ServiceRegistrationWizard({
           </a>
           . Your information is handled securely.
         </p>
+      )}
+      {!store.success && (
+        <div className="mt-8">
+          <RegistrationPackagesPreview />
+        </div>
       )}
     </div>
   );
