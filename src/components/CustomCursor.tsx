@@ -20,6 +20,11 @@ export default function CustomCursor() {
     const onMouseMove = (e: MouseEvent) => {
       quickSetter.x(e.clientX);
       quickSetter.y(e.clientY);
+
+      const target = e.target;
+      const overNativeCursor =
+        target instanceof Element && Boolean(target.closest("[data-native-cursor]"));
+      cursor.style.opacity = overNativeCursor ? "0" : "1";
     };
 
     const onMouseEnter = (e: MouseEvent) => {

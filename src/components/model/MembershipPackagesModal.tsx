@@ -50,7 +50,8 @@ export default function MembershipPackagesModal({ modelName }: MembershipPackage
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4"
+      data-native-cursor
       onClick={(e) => e.target === e.currentTarget && dismiss()}
     >
       <div className="relative w-full max-w-2xl max-h-[90vh] bg-white flex flex-col overflow-hidden">
