@@ -105,11 +105,7 @@ export default function InfluencerRegistrationWizard({
           . Your information is handled securely.
         </p>
       )}
-      {!store.success && (
-        <div className="mt-8">
-          <RegistrationPackagesPreview />
-        </div>
-      )}
+      {!store.success && <RegistrationPackagesPreview />}
     </div>
   );
 }
