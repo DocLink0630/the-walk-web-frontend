@@ -8,6 +8,7 @@ import StepAccount from "./StepAccount";
 import StepPersonalModel from "./StepPersonalModel";
 import StepPersonalStudent from "./StepPersonalStudent";
 import StepUploads, { type RegistrationSubmitHandler } from "./StepUploads";
+import RegistrationPackagesPreview from "./RegistrationPackagesPreview";
 import {
   formCard,
   formDisclaimer,
@@ -71,6 +72,7 @@ function SuccessPanel({
           </div>
         ))}
       </div>
+      <RegistrationPackagesPreview />
       {onSuccess ? (
         <button
           type="button"
@@ -142,6 +144,11 @@ export default function RegistrationWizard({
           </a>
           . Your information is encrypted and handled securely.
         </p>
+      )}
+      {!store.success && variant === "model" && (
+        <div className="mt-8">
+          <RegistrationPackagesPreview />
+        </div>
       )}
     </div>
   );
