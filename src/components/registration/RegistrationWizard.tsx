@@ -72,7 +72,6 @@ function SuccessPanel({
           </div>
         ))}
       </div>
-      <RegistrationPackagesPreview />
       {onSuccess ? (
         <button
           type="button"
@@ -146,7 +145,7 @@ export default function RegistrationWizard({
         </p>
       )}
       {!store.success && variant === "model" && (
-        <RegistrationPackagesPreview />
+        <RegistrationPackagesPreview variant="model" />
       )}
     </div>
   );

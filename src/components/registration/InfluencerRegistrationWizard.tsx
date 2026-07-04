@@ -6,7 +6,6 @@ import RegistrationProgress from "./RegistrationProgress";
 import StepAccount from "./StepAccount";
 import StepInfluencerUploads from "./StepInfluencerUploads";
 import StepPersonalInfluencer from "./StepPersonalInfluencer";
-import RegistrationPackagesPreview from "./RegistrationPackagesPreview";
 import {
   formCard,
   formDisclaimer,
@@ -58,7 +57,6 @@ function SuccessPanel({ store }: { store: InfluencerRegistrationStore }) {
           </div>
         ))}
       </div>
-      <RegistrationPackagesPreview />
       <button
         type="button"
         onClick={store.reset}
@@ -105,7 +103,6 @@ export default function InfluencerRegistrationWizard({
           . Your information is handled securely.
         </p>
       )}
-      {!store.success && <RegistrationPackagesPreview />}
     </div>
   );
 }
