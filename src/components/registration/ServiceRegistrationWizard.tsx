@@ -68,7 +68,6 @@ function SuccessPanel({
           </div>
         ))}
       </div>
-      <RegistrationPackagesPreview />
       <button
         type="button"
         onClick={store.reset}
@@ -123,7 +122,7 @@ export default function ServiceRegistrationWizard({
           . Your information is handled securely.
         </p>
       )}
-      {!store.success && <RegistrationPackagesPreview />}
+      {!store.success && <RegistrationPackagesPreview variant="service" />}
     </div>
   );
 }

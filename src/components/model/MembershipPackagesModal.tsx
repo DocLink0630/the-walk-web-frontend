@@ -1,8 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { MembershipPackage } from "./MembershipPackagesSection";
-import { DEFAULT_PACKAGES } from "./MembershipPackagesSection";
+import {
+  formatPackageDuration,
+  MODEL_PACKAGES,
+  type MembershipPackage,
+} from "@/lib/membership/packages";
 
 const DISMISS_KEY = "thewalk_membership_popup_dismissed";
 
@@ -31,7 +34,7 @@ export default function MembershipPackagesModal({ modelName }: MembershipPackage
     if (dismissed) return;
 
     fetchPackages().then((pkgs) => {
-      setPackages(pkgs.length > 0 ? pkgs : DEFAULT_PACKAGES);
+      setPackages(pkgs.length > 0 ? pkgs : MODEL_PACKAGES);
       setOpen(true);
     });
   }, []);
@@ -80,7 +83,7 @@ export default function MembershipPackagesModal({ modelName }: MembershipPackage
 
         {/* Scrollable packages */}
         <div className="overflow-y-auto flex-1 p-6">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {packages.map((pkg) => (
               <PackageCard key={pkg.id} pkg={pkg} />
             ))}
@@ -124,12 +127,7 @@ export default function MembershipPackagesModal({ modelName }: MembershipPackage
 }
 
 function PackageCard({ pkg }: { pkg: MembershipPackage }) {
-  const durationLabel =
-    pkg.durationMonths === 1
-      ? "1 month"
-      : pkg.durationMonths === 12
-        ? "1 year"
-        : `${pkg.durationMonths} months`;
+  const durationLabel = formatPackageDuration(pkg.durationMonths);
 
   return (
     <div
