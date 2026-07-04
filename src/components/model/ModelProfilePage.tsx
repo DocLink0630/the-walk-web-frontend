@@ -285,11 +285,9 @@ export default function ModelProfilePage() {
           </form>
         )}
 
-        {isActive && (
-          <div className="mt-12">
-            <MembershipPackagesSection />
-          </div>
-        )}
+        <div className="mt-12">
+          <MembershipPackagesSection />
+        </div>
 
         {!isActive && (
           <div className="bg-white border border-[#E0E0E0] p-6">
