@@ -146,9 +146,7 @@ export default function RegistrationWizard({
         </p>
       )}
       {!store.success && variant === "model" && (
-        <div className="mt-8">
-          <RegistrationPackagesPreview />
-        </div>
+        <RegistrationPackagesPreview />
       )}
     </div>
   );
