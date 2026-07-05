@@ -14,6 +14,7 @@ export interface PublicApiModel {
   /** Real user UUID returned by the backend — use this for cart/inquiry */
   userId?: string | null;
   name: string;
+  tier?: ModelTier | null;
   height?: string | null;
   imageUrl: string | null;
   portfolioImages?: string[];
