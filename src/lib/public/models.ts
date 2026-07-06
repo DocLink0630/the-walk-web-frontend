@@ -112,6 +112,7 @@ export function mapPublicApiModelToPublicModel(
     id: item.userId ?? makePublicModelId(item.name, index),
     userId: item.userId ?? null,
     name: item.name,
+    category: mapTierToCategory(item.tier),
     imageUrl: portfolioImages[0] ?? item.imageUrl,
     height: item.height?.trim() || undefined,
     portfolioImages,
