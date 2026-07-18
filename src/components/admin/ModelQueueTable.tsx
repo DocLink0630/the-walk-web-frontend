@@ -26,12 +26,12 @@ import {
 const MODEL_ROLES = ["MODEL"] as const;
 
 const MODEL_LIST_TABS = [
-  { id: "current" as const, label: "Current models", status: "ACTIVE" as UserStatus },
   {
     id: "pending" as const,
     label: "Pending review",
     status: "PENDING_ADMIN_REVIEW" as UserStatus,
   },
+  { id: "current" as const, label: "Current models", status: "ACTIVE" as UserStatus },
 ];
 
 type ModelListTab = (typeof MODEL_LIST_TABS)[number]["id"];
@@ -63,9 +63,9 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
 
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
-  const [activeTab, setActiveTab] = useState<ModelListTab>("current");
+  const [activeTab, setActiveTab] = useState<ModelListTab>("pending");
   const statusFilter =
-    MODEL_LIST_TABS.find((tab) => tab.id === activeTab)?.status ?? "ACTIVE";
+    MODEL_LIST_TABS.find((tab) => tab.id === activeTab)?.status ?? "PENDING_ADMIN_REVIEW";
 
   const [pendingStatus, setPendingStatus] = useState<Record<string, UserStatus>>({});
   const [updatingId, setUpdatingId] = useState<string | null>(null);
