@@ -10,6 +10,7 @@ import {
   formInput,
   formInputError,
   formInputReadOnly,
+  formLabel,
   formSectionHint,
   formSectionTitle,
   formSelect,
