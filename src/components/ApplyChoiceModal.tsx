@@ -79,7 +79,7 @@ export default function ApplyChoiceModal({ isOpen, onClose }: ApplyChoiceModalPr
         aria-label="Close apply options"
       />
 
-      <div className="relative w-full max-w-5xl max-h-[92vh] overflow-y-auto bg-white border border-[#E0E0E0] shadow-[0_8px_40px_rgba(0,0,0,0.15)]">
+      <div className="relative w-full max-w-3xl max-h-[92vh] overflow-y-auto bg-white border border-[#E0E0E0] shadow-[0_8px_40px_rgba(0,0,0,0.15)]">
         <div className="flex items-start justify-between gap-4 border-b border-[#E0E0E0] px-6 py-5 md:px-8 sticky top-0 bg-white z-10">
           <div>
             <h2
@@ -102,40 +102,43 @@ export default function ApplyChoiceModal({ isOpen, onClose }: ApplyChoiceModalPr
           </button>
         </div>
 
-        <div className="p-6 md:p-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="p-5 md:p-7">
+          <div className="flex flex-col gap-3">
             {APPLY_PATHS.map((path) => (
               <Link
                 key={path.href}
                 href={path.href}
                 onClick={onClose}
                 data-cursor="button"
-                className={`group flex flex-col overflow-hidden border border-[#E0E0E0] hover:border-[#0A0A0A] transition-colors duration-300 border-l-4 ${path.accent} h-full`}
+                className={`group flex overflow-hidden border border-[#E0E0E0] hover:border-[#0A0A0A] transition-colors duration-300 border-l-4 ${path.accent}`}
               >
-                <div className="relative w-full aspect-[16/10] shrink-0 bg-[#F5F5F5]">
+                <div className="relative w-[108px] sm:w-[140px] md:w-[160px] shrink-0 self-stretch min-h-[132px] bg-[#F5F5F5]">
                   <Image
                     src={path.image}
                     alt=""
                     fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                    sizes="(max-width: 640px) 100vw, 320px"
+                    className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
+                    sizes="160px"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                 </div>
-                <div className="flex flex-1 flex-col p-5 bg-[#FAFAFA] group-hover:bg-[#0A0A0A] group-hover:text-white transition-colors duration-300">
-                  <p className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#9A7329] group-hover:text-[#C8A97A] mb-2">
+                <div className="flex flex-1 flex-col justify-center gap-1.5 px-4 py-4 sm:px-5 sm:py-5 bg-[#FAFAFA] group-hover:bg-[#0A0A0A] group-hover:text-white transition-colors duration-300">
+                  <p className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#9A7329] group-hover:text-[#C8A97A]">
                     {path.eyebrow}
                   </p>
-                  <h3 className="font-display text-2xl font-light mb-2">
-                    {path.title}
-                  </h3>
-                  <p className="font-ui text-sm text-[#4A4A4A] group-hover:text-white/80 leading-relaxed mb-5 flex-1">
-                    {path.description}
-                  </p>
-                  <span className="inline-flex items-center gap-2 self-start font-ui text-[10px] tracking-[0.2em] uppercase px-4 py-2.5 bg-[#0A0A0A] text-white group-hover:bg-white group-hover:text-[#0A0A0A] transition-colors">
-                    {path.cta}
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </span>
+                  <div className="flex flex-wrap items-end justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-display text-xl sm:text-2xl font-light leading-tight">
+                        {path.title}
+                      </h3>
+                      <p className="mt-1 font-ui text-sm text-[#4A4A4A] group-hover:text-white/80 leading-relaxed">
+                        {path.description}
+                      </p>
+                    </div>
+                    <span className="inline-flex items-center gap-2 shrink-0 font-ui text-[10px] tracking-[0.2em] uppercase px-3.5 py-2.5 bg-[#0A0A0A] text-white group-hover:bg-white group-hover:text-[#0A0A0A] transition-colors">
+                      {path.cta}
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
                 </div>
               </Link>
             ))}

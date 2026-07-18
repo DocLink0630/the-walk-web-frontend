@@ -48,7 +48,7 @@ export const formPanel =
   "bg-white border border-[#E8E8E8] px-6 py-8 sm:px-8 sm:py-10 shadow-[0_1px_0_rgba(0,0,0,0.04)]";
 
 export const formEyebrow =
-  "font-ui text-[11px] font-normal tracking-[0.2em] uppercase text-[#9A7329] mb-6";
+  "font-display text-3xl sm:text-4xl md:text-5xl font-light text-[#0A0A0A] tracking-[0.06em] uppercase mb-6 pb-3 border-b-2 border-[#C8A97A]";
 
 export const formDisclaimer =
   "font-ui text-xs text-[#4A4A4A] leading-relaxed text-center mt-8";
