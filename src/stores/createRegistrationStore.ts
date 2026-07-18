@@ -6,6 +6,8 @@ const defaultFormState = (prefix: "STU" | "MOD"): RegistrationFormState => ({
   modelCode: generateRegistrationCode(prefix),
   email: "",
   password: "",
+  firstName: "",
+  lastName: "",
   fullName: "",
   gender: "",
   age: "",

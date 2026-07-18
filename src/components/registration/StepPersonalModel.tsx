@@ -25,8 +25,8 @@ export default function StepPersonalModel({
   copy,
   idPrefix = "mod",
 }: StepPersonalModelProps) {
-  const { err, handleDobChange, handleNext } = useModelPersonalStep(store);
-  const sectionProps = { store, idPrefix, err, handleDobChange };
+  const { err, handleDobChange, handleNext, setNamePart } = useModelPersonalStep(store);
+  const sectionProps = { store, idPrefix, err, handleDobChange, setNamePart };
 
   return (
     <form onSubmit={handleNext} noValidate className="space-y-8">

@@ -2,9 +2,13 @@ import type { ModelProfilePayload, ModelSource } from "@/types/api/model-profile
 import type { RegistrationFormState } from "@/types/registration-form";
 
 function baseModelProfileFields(state: RegistrationFormState) {
+  const fullName =
+    state.fullName.trim() ||
+    [state.firstName.trim(), state.lastName.trim()].filter(Boolean).join(" ");
+
   const base: ModelProfilePayload = {
     modelCode: state.modelCode,
-    fullName: state.fullName.trim(),
+    fullName,
     contactNumberEnc: state.contactNumber.trim(),
     isLoginEnabled: false,
   };

@@ -18,6 +18,7 @@ import {
 } from "../form-styles";
 import { REFERRAL_SOURCE_OPTIONS, SKIN_COLOR_OPTIONS } from "./constants";
 import { Field } from "./Field";
+import { ACADEMY_CLASS_TIMES } from "@/lib/academy/class-times";
 
 type ErrFn = (field: keyof import("@/types/registration-form").RegistrationFormState) => string | null;
 
@@ -26,21 +27,41 @@ interface SectionProps {
   idPrefix: string;
   err: ErrFn;
   handleDobChange: (value: string) => void;
+  setNamePart?: (part: "firstName" | "lastName", value: string) => void;
 }
 
-export function IdentitySection({ store, idPrefix, err, handleDobChange }: SectionProps) {
+export function IdentitySection({ store, idPrefix, err, handleDobChange, setNamePart }: SectionProps) {
+  const updateName = setNamePart ?? ((part, value) => {
+    const firstName = part === "firstName" ? value : store.firstName;
+    const lastName = part === "lastName" ? value : store.lastName;
+    store.set({
+      [part]: value,
+      fullName: [firstName.trim(), lastName.trim()].filter(Boolean).join(" "),
+    });
+  });
+
   return (
     <section className="space-y-4">
       <h3 className={formSectionTitle}>Identity</h3>
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <Field label="Full name" required error={err("fullName")} htmlFor={`${idPrefix}-fullName`}>
+        <Field label="First name" required error={err("firstName")} htmlFor={`${idPrefix}-firstName`}>
           <input
-            id={`${idPrefix}-fullName`}
+            id={`${idPrefix}-firstName`}
             type="text"
-            value={store.fullName}
-            onChange={(e) => store.set({ fullName: e.target.value })}
-            placeholder="Jane Doe"
-            className={err("fullName") ? formInputError : formInput}
+            value={store.firstName}
+            onChange={(e) => updateName("firstName", e.target.value)}
+            placeholder="Jane"
+            className={err("firstName") ? formInputError : formInput}
+          />
+        </Field>
+        <Field label="Last name" required error={err("lastName")} htmlFor={`${idPrefix}-lastName`}>
+          <input
+            id={`${idPrefix}-lastName`}
+            type="text"
+            value={store.lastName}
+            onChange={(e) => updateName("lastName", e.target.value)}
+            placeholder="Doe"
+            className={err("lastName") ? formInputError : formInput}
           />
         </Field>
         <Field label="Gender" required error={err("gender")} htmlFor={`${idPrefix}-gender`}>
@@ -333,12 +354,13 @@ export function ModelReferralSection({ store, idPrefix }: Pick<SectionProps, "st
   );
 }
 
-export function StudentAcademySection({ store, idPrefix }: Pick<SectionProps, "store" | "idPrefix">) {
+export function StudentAcademySection({
+  store,
+  idPrefix,
+}: Pick<SectionProps, "store" | "idPrefix">) {
   return (
     <section className="space-y-4">
-      <h3 className={formSectionTitle}>
-        Academy preferences <span className={formSectionHint}>(optional)</span>
-      </h3>
+      <h3 className={formSectionTitle}>Academy preferences</h3>
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <Field label="How did you hear about us?" htmlFor={`${idPrefix}-source`}>
           <select
@@ -365,6 +387,28 @@ export function StudentAcademySection({ store, idPrefix }: Pick<SectionProps, "s
             className={formInput}
           />
         </Field>
+      </div>
+
+      <div className="space-y-3 pt-2">
+        <p className={formLabel}>Class times</p>
+        <p className="font-ui text-[11px] text-[#6B6B6B] -mt-1 mb-1">
+          Classes run at the following times:
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {ACADEMY_CLASS_TIMES.map((slot) => (
+            <div
+              key={slot.id}
+              className="border border-[#E0E0E0] bg-[#FAFAFA] px-4 py-4 text-center"
+            >
+              <p className="font-ui text-[8px] tracking-[0.2em] uppercase text-[#C8A97A] mb-1">
+                {slot.day}
+              </p>
+              <p className="font-display text-base font-light text-[#0A0A0A]">
+                {slot.time}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

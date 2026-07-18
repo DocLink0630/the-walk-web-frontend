@@ -30,7 +30,7 @@ export const formSectionTitle =
 export const formSectionHint = "text-[#6B6B6B] normal-case tracking-normal font-normal";
 
 export const formHeading =
-  "font-display text-2xl md:text-[2rem] font-light text-[#0A0A0A] tracking-normal leading-tight mb-2";
+  "font-display text-3xl md:text-[2.75rem] font-light text-[#0A0A0A] tracking-normal leading-[1.1] mb-2 border-b-2 border-[#C8A97A] pb-3";
 
 export const formHint =
   "font-ui text-[11px] text-[#6B6B6B] tracking-normal normal-case mt-1";

@@ -3,9 +3,14 @@ import { ageFromDateOfBirth } from "@/lib/age-from-dob";
 import type { RegistrationFormState, RegistrationStore } from "@/types/registration-form";
 
 export const REQUIRED_PERSONAL_FIELDS: (keyof RegistrationFormState)[] = [
-  "fullName",
+  "firstName",
+  "lastName",
   "contactNumber",
 ];
+
+export function composeFullName(firstName: string, lastName: string): string {
+  return [firstName.trim(), lastName.trim()].filter(Boolean).join(" ");
+}
 
 export function usePersonalStep(store: RegistrationStore) {
   const [submitted, setSubmitted] = useState(false);
@@ -28,6 +33,15 @@ export function usePersonalStep(store: RegistrationStore) {
     });
   }
 
+  function setNamePart(part: "firstName" | "lastName", value: string) {
+    const firstName = part === "firstName" ? value : store.firstName;
+    const lastName = part === "lastName" ? value : store.lastName;
+    store.set({
+      [part]: value,
+      fullName: composeFullName(firstName, lastName),
+    });
+  }
+
   function handleNext(e: React.FormEvent) {
     e.preventDefault();
     setSubmitted(true);
@@ -36,8 +50,9 @@ export function usePersonalStep(store: RegistrationStore) {
       return typeof v === "string" && !v.trim();
     });
     if (missing) return;
+    store.set({ fullName: composeFullName(store.firstName, store.lastName) });
     store.nextStep();
   }
 
-  return { submitted, err, handleDobChange, handleNext };
+  return { submitted, err, handleDobChange, handleNext, setNamePart };
 }

@@ -54,6 +54,12 @@ export interface AcademyPageContent {
     eyebrow: string;
     heading: string;
     course: AcademyCourse;
+    classTimes: {
+      eyebrow: string;
+      heading: string;
+      description: string;
+      slots: { day: string; time: string; label: string }[];
+    };
   };
   fees: {
     eyebrow: string;

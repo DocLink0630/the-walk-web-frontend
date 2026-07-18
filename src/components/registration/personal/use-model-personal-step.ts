@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { ageFromDateOfBirth } from "@/lib/age-from-dob";
-import type { RegistrationStore } from "@/types/registration-form";
-import { REQUIRED_PERSONAL_FIELDS } from "./use-personal-step";
+import type { RegistrationFormState, RegistrationStore } from "@/types/registration-form";
+import { composeFullName, REQUIRED_PERSONAL_FIELDS } from "./use-personal-step";
 
 export function useModelPersonalStep(store: RegistrationStore) {
   const [submitted, setSubmitted] = useState(false);
 
-  function err(field: (typeof REQUIRED_PERSONAL_FIELDS)[number]): string | null {
+  function err(field: keyof RegistrationFormState): string | null {
     if (!submitted) return null;
     const val = store[field];
     if (typeof val === "string" && !val.trim()) return "This field is required";
@@ -24,6 +24,15 @@ export function useModelPersonalStep(store: RegistrationStore) {
     });
   }
 
+  function setNamePart(part: "firstName" | "lastName", value: string) {
+    const firstName = part === "firstName" ? value : store.firstName;
+    const lastName = part === "lastName" ? value : store.lastName;
+    store.set({
+      [part]: value,
+      fullName: composeFullName(firstName, lastName),
+    });
+  }
+
   function handleNext(e: React.FormEvent) {
     e.preventDefault();
     setSubmitted(true);
@@ -32,8 +41,9 @@ export function useModelPersonalStep(store: RegistrationStore) {
       return typeof v === "string" && !v.trim();
     });
     if (missingPersonal) return;
+    store.set({ fullName: composeFullName(store.firstName, store.lastName) });
     store.nextStep();
   }
 
-  return { submitted, err, handleDobChange, handleNext };
+  return { submitted, err, handleDobChange, handleNext, setNamePart };
 }

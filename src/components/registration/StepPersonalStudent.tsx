@@ -24,8 +24,8 @@ export default function StepPersonalStudent({
   copy,
   idPrefix = "stu",
 }: StepPersonalStudentProps) {
-  const { err, handleDobChange, handleNext } = usePersonalStep(store);
-  const sectionProps = { store, idPrefix, err, handleDobChange };
+  const { err, handleDobChange, handleNext, setNamePart } = usePersonalStep(store);
+  const sectionProps = { store, idPrefix, err, handleDobChange, setNamePart };
 
   return (
     <form onSubmit={handleNext} noValidate className="space-y-8">

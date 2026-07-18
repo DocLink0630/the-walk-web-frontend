@@ -100,6 +100,41 @@ export default function AcademyProgrammeSection({
             ))}
           </div>
         </div>
+
+        {programme.classTimes && (
+          <div
+            data-academy-reveal
+            data-academy-start="top 85%"
+            className="mt-12 md:mt-16 lg:mt-20"
+          >
+            <div className="text-center max-w-[640px] mx-auto mb-8 md:mb-10">
+              <p className="font-ui text-[9px] tracking-[0.35em] uppercase text-[#C8A97A] mb-3">
+                {programme.classTimes.eyebrow}
+              </p>
+              <h3 className="font-display text-[32px] md:text-[44px] font-light text-[#0A0A0A] leading-[1.05] mb-3">
+                {programme.classTimes.heading}
+              </h3>
+              <p className="font-ui text-sm md:text-base text-[#4A4A4A] leading-relaxed">
+                {programme.classTimes.description}
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {programme.classTimes.slots.map((slot) => (
+                <div
+                  key={slot.label}
+                  className="border border-[#E0E0E0] bg-white px-6 py-8 text-center"
+                >
+                  <p className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#C8A97A] mb-2">
+                    {slot.day}
+                  </p>
+                  <p className="font-display text-xl md:text-2xl font-light text-[#0A0A0A]">
+                    {slot.time}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
