@@ -9,9 +9,13 @@ function resolveStudentTier(tier: RegistrationFormState["tier"]): AssignableMode
 export function buildStudentProfilePayload(
   state: RegistrationFormState,
 ): StudentProfilePayload {
+  const fullName =
+    state.fullName.trim() ||
+    [state.firstName.trim(), state.lastName.trim()].filter(Boolean).join(" ");
+
   const payload: StudentProfilePayload = {
     modelCode: state.modelCode,
-    fullName: state.fullName.trim(),
+    fullName,
     contactNumberEnc: state.contactNumber.trim(),
     tier: resolveStudentTier(state.tier),
     isLoginEnabled: false,
@@ -34,6 +38,9 @@ export function buildStudentProfilePayload(
   if (state.source) payload.source = state.source as StudentSource;
   if (state.preferredBranch.trim()) {
     payload.preferredBranchRaw = state.preferredBranch.trim();
+  }
+  if (state.preferredDate.trim()) {
+    payload.preferredDate = state.preferredDate.trim();
   }
 
   return payload;

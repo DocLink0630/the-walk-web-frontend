@@ -95,6 +95,17 @@ export const ACADEMY_PAGE: AcademyPageContent = {
       ],
       image: "/images/Gallery/DSC09790%20copy.webp",
     },
+    classTimes: {
+      eyebrow: "SCHEDULE",
+      heading: "Class times",
+      description:
+        "Choose the session that fits your week when you apply. Limited seats per class.",
+      slots: [
+        { day: "Saturday", time: "10:00am – 12:30pm", label: "Saturday 10:00am – 12:30pm" },
+        { day: "Saturday", time: "1:30pm – 4:00pm", label: "Saturday 1:30pm – 4:00pm" },
+        { day: "Sunday", time: "10:00am – 12:30pm", label: "Sunday 10:00am – 12:30pm" },
+      ],
+    },
   },
   fees: {
     eyebrow: "INVESTMENT",

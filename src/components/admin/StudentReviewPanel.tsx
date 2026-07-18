@@ -214,7 +214,7 @@ export default function StudentReviewPanel({
                   <DetailRow label="Hair color" value={profile?.hairColorEnc} />
                   <DetailRow label="Skin color" value={skinColorLabel(profile?.skinColorOptionId)} />
                   <DetailRow label="Preferred branch" value={profile?.preferredBranchRaw} />
-                  <DetailRow label="Preferred start date" value={profile?.preferredDate} />
+                  <DetailRow label="Preferred class time" value={profile?.preferredDate} />
                   <DetailRow label="Talents" value={profile?.talentsEnc} />
                   <DetailRow label="Short bio" value={profile?.shortBio} />
                 </div>

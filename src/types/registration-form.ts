@@ -17,6 +17,9 @@ export interface RegistrationFormState {
   modelCode: string;
   email: string;
   password: string;
+  firstName: string;
+  lastName: string;
+  /** Derived from firstName + lastName; kept for legacy/admin flows */
   fullName: string;
   gender: string;
   age: string;
@@ -42,6 +45,7 @@ export interface RegistrationFormState {
   rate: string;
   source: string;
   preferredBranch: string;
+  /** Preferred class time slot label */
   preferredDate: string;
   profilePhoto: File | null;
   nicFront: File | null;
