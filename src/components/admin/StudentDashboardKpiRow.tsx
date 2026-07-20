@@ -32,7 +32,6 @@ async function countFor(
 
 export default function StudentDashboardKpiRow() {
   const [pendingReview, setPendingReview] = useState<number | null>(null);
-  const [active, setActive] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,13 +39,12 @@ export default function StudentDashboardKpiRow() {
 
     async function load() {
       setLoading(true);
-      const [review, activeCount] = await Promise.all([
-        countFor({ roles: STUDENT_ROLES, status: "PENDING_ADMIN_REVIEW" }),
-        countFor({ roles: STUDENT_ROLES, status: "ACTIVE" }),
-      ]);
+      const review = await countFor({
+        roles: STUDENT_ROLES,
+        status: "PENDING_ADMIN_REVIEW",
+      });
       if (!cancelled) {
         setPendingReview(review);
-        setActive(activeCount);
         setLoading(false);
       }
     }
@@ -58,9 +56,8 @@ export default function StudentDashboardKpiRow() {
   }, []);
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:gap-4">
+    <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:max-w-xs">
       <KpiTile label="Student applications pending" value={pendingReview} loading={loading} />
-      <KpiTile label="Enrolled students" value={active} loading={loading} />
     </div>
   );
 }

@@ -39,6 +39,8 @@ export interface AdminUser {
   emailVerified?: boolean;
   /** From GET /v1/users list when profile exists */
   displayName?: string;
+  /** Decrypted student contact number from list responses */
+  contactNumber?: string;
 }
 
 export interface AdminModelProfile {
