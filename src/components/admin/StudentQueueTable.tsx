@@ -37,6 +37,10 @@ function formatDate(iso: string) {
   }
 }
 
+function formatContact(user: AdminUser) {
+  return user.contactNumber?.trim() || "—";
+}
+
 interface StudentQueueTableProps {
   onUsersChanged?: () => void;
 }
@@ -207,7 +211,7 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
                 <tr key={user.id} className="hover:bg-gray-50/80">
                   <td className={adminTd}>{user.displayName ?? "—"}</td>
                   <td className={`${adminTd} text-gray-600`}>
-                    {user.contactNumber?.trim() || "—"}
+                    {formatContact(user)}
                   </td>
                   <td className={adminTd}>
                     <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700">
