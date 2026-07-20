@@ -25,17 +25,6 @@ import {
 
 const STUDENT_ROLES = ["STUDENT"] as const;
 
-const STUDENT_LIST_TABS = [
-  { id: "current" as const, label: "Enrolled students", status: "ACTIVE" as UserStatus },
-  {
-    id: "pending" as const,
-    label: "Pending review",
-    status: "PENDING_ADMIN_REVIEW" as UserStatus,
-  },
-];
-
-type StudentListTab = (typeof STUDENT_LIST_TABS)[number]["id"];
-
 function formatDate(iso: string) {
   try {
     return new Date(iso).toLocaleDateString("en-GB", {
@@ -63,26 +52,10 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
 
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
-  const [activeTab, setActiveTab] = useState<StudentListTab>("pending");
-  const statusFilter =
-    STUDENT_LIST_TABS.find((tab) => tab.id === activeTab)?.status ?? "PENDING_ADMIN_REVIEW";
 
   const [pendingStatus, setPendingStatus] = useState<Record<string, UserStatus>>({});
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [reviewUser, setReviewUser] = useState<AdminUser | null>(null);
-  const [pendingReviewCount, setPendingReviewCount] = useState(0);
-
-  const loadPendingReviewCount = useCallback(async () => {
-    const result = await fetchAdminUsers({
-      page: 1,
-      limit: 1,
-      status: "PENDING_ADMIN_REVIEW",
-      roles: [...STUDENT_ROLES],
-    });
-    if (result.ok) {
-      setPendingReviewCount(result.data.meta.total);
-    }
-  }, []);
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -91,7 +64,7 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
       page,
       limit: 20,
       search: search || undefined,
-      status: statusFilter || undefined,
+      status: "PENDING_ADMIN_REVIEW",
       roles: [...STUDENT_ROLES],
     });
     if (!result.ok) {
@@ -109,19 +82,14 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
     }
     setPendingStatus(initial);
     setLoading(false);
-  }, [page, search, statusFilter]);
+  }, [page, search]);
 
   useEffect(() => {
     void loadUsers();
   }, [loadUsers]);
 
-  useEffect(() => {
-    void loadPendingReviewCount();
-  }, [loadPendingReviewCount]);
-
   async function refreshAfterChange() {
     await loadUsers();
-    await loadPendingReviewCount();
     await refreshCounts();
     onUsersChanged?.();
   }
@@ -154,35 +122,6 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-1 rounded-lg border border-gray-200 bg-gray-50 p-1 w-fit">
-        {STUDENT_LIST_TABS.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => {
-              setPage(1);
-              setActiveTab(tab.id);
-            }}
-            className={[
-              "inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition",
-              activeTab === tab.id
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600 hover:text-gray-900",
-            ].join(" ")}
-          >
-            {tab.label}
-            {tab.id === "pending" && pendingReviewCount > 0 && (
-              <span
-                className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-amber-500 text-white text-[11px] font-semibold leading-none"
-                aria-label={`${pendingReviewCount} pending review`}
-              >
-                {pendingReviewCount > 99 ? "99+" : pendingReviewCount}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
-
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]">
         <div>
           <label className={adminLabel}>Search</label>
@@ -194,7 +133,7 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
               onKeyDown={(e) => {
                 if (e.key === "Enter") applySearch();
               }}
-              placeholder="Email or name"
+              placeholder="Name or email"
               className={adminInput + " flex-1"}
             />
             <button type="button" onClick={applySearch} className={adminBtnSecondary + " shrink-0"}>
@@ -223,16 +162,13 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
           onUpdate={handleUpdate}
           onReview={setReviewUser}
           formatDate={formatDate}
+          secondaryField="contactNumber"
         />
       )}
 
       {!loading && users.length === 0 && (
         <div className="md:hidden rounded-xl border border-gray-200 bg-white px-4 py-10 text-center">
-          <p className="text-sm text-gray-500">
-            {activeTab === "current"
-              ? "No enrolled students found."
-              : "No student applications pending review."}
-          </p>
+          <p className="text-sm text-gray-500">No student applications pending review.</p>
         </div>
       )}
 
@@ -246,7 +182,7 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
         <table className="w-full min-w-[640px]">
           <thead>
             <tr>
-              {["Name", "Email", "Status", "Submitted", ""].map((h) => (
+              {["Name", "Contact", "Status", "Submitted", ""].map((h) => (
                 <th key={h || "actions"} className={adminTh}>
                   {h}
                 </th>
@@ -263,16 +199,16 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
             ) : users.length === 0 ? (
               <tr>
                 <td colSpan={5} className={`${adminTd} text-center text-gray-500`}>
-                  {activeTab === "current"
-                    ? "No enrolled students found."
-                    : "No student applications pending review."}
+                  No student applications pending review.
                 </td>
               </tr>
             ) : (
               users.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50/80">
                   <td className={adminTd}>{user.displayName ?? "—"}</td>
-                  <td className={`${adminTd} text-gray-600`}>{user.email}</td>
+                  <td className={`${adminTd} text-gray-600`}>
+                    {user.contactNumber?.trim() || "—"}
+                  </td>
                   <td className={adminTd}>
                     <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700">
                       {STUDENT_STATUS_LABELS[user.status]}

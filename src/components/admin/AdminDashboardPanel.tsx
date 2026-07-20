@@ -16,7 +16,7 @@ export default function AdminDashboardPanel({ onSectionChange }: AdminDashboardP
       <div>
         <h2 className={`${adminSectionTitle} text-xl sm:text-2xl mb-2`}>Overview</h2>
         <p className={adminPageDesc}>
-          Pending applications, enrolled students, and active roster at a glance.
+          Pending applications and active roster at a glance.
         </p>
       </div>
 

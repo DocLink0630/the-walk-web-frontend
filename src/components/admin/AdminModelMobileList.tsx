@@ -22,6 +22,8 @@ interface AdminModelMobileListProps {
   onDelete?: (user: AdminUser) => void;
   deletingId?: string | null;
   formatDate: (iso: string) => string;
+  /** Prefer contact number over email in the secondary line */
+  secondaryField?: "email" | "contactNumber";
 }
 
 export default function AdminModelMobileList({
@@ -36,17 +38,24 @@ export default function AdminModelMobileList({
   onDelete,
   deletingId,
   formatDate,
+  secondaryField = "email",
 }: AdminModelMobileListProps) {
   return (
     <div className="space-y-3">
-      {users.map((user) => (
+      {users.map((user) => {
+        const secondary =
+          secondaryField === "contactNumber"
+            ? user.contactNumber?.trim() || "—"
+            : user.email;
+
+        return (
         <article key={user.id} className={adminMobileCard}>
           <div className="space-y-1">
             <p className="text-base font-semibold text-gray-900">
-              {user.displayName ?? user.email}
+              {user.displayName ?? (secondaryField === "contactNumber" ? secondary : user.email)}
             </p>
             {user.displayName && (
-              <p className="text-sm text-gray-600 break-all">{user.email}</p>
+              <p className="text-sm text-gray-600 break-all">{secondary}</p>
             )}
             <div className="flex flex-wrap items-center gap-2 pt-1">
               <span className={adminStatusBadge}>{statusLabels[user.status]}</span>
@@ -101,7 +110,8 @@ export default function AdminModelMobileList({
             )}
           </div>
         </article>
-      ))}
+        );
+      })}
     </div>
   );
 }
