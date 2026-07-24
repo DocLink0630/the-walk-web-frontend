@@ -214,7 +214,7 @@ export default function ClientProfilePage() {
                       }
                       className="w-full text-left px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
                     >
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <p className="font-ui text-[10px] text-[#0A0A0A]">
                           {formatDate(inquiry.createdAt)}
                           {inquiry.eventDate ? ` · Event ${inquiry.eventDate}` : ""}
@@ -224,27 +224,30 @@ export default function ClientProfilePage() {
                           {inquiry.items.length === 1 ? "" : "s"} selected
                         </p>
                       </div>
-                      <span
-                        className={`inline-flex self-start rounded-full border px-2.5 py-0.5 font-ui text-[8px] tracking-[0.1em] uppercase ${INQUIRY_STATUS_COLORS[inquiry.status]}`}
-                      >
-                        {INQUIRY_STATUS_LABELS[inquiry.status]}
-                      </span>
+                      <div className="flex flex-wrap items-center gap-2 shrink-0">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            void handleExportInquiryPdf(inquiry.id);
+                          }}
+                          disabled={exportingInquiryId === inquiry.id}
+                          className="font-ui text-[9px] tracking-[0.15em] uppercase px-4 py-2.5 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] disabled:opacity-50 transition-colors"
+                        >
+                          {exportingInquiryId === inquiry.id
+                            ? "Preparing PDF…"
+                            : "Export talent PDF"}
+                        </button>
+                        <span
+                          className={`inline-flex rounded-full border px-2.5 py-0.5 font-ui text-[8px] tracking-[0.1em] uppercase ${INQUIRY_STATUS_COLORS[inquiry.status]}`}
+                        >
+                          {INQUIRY_STATUS_LABELS[inquiry.status]}
+                        </span>
+                      </div>
                     </button>
 
                     {expanded && (
                       <div className="border-t border-[#E0E0E0] px-4 py-3 space-y-3 bg-[#FAFAFA]">
-                        <div className="flex flex-wrap items-center gap-3">
-                          <button
-                            type="button"
-                            onClick={() => void handleExportInquiryPdf(inquiry.id)}
-                            disabled={exportingInquiryId === inquiry.id}
-                            className="font-ui text-[8px] tracking-[0.15em] uppercase px-3 py-2 border border-[#0A0A0A] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white disabled:opacity-50 transition-colors"
-                          >
-                            {exportingInquiryId === inquiry.id
-                              ? "Preparing PDF…"
-                              : "Download talent PDF"}
-                          </button>
-                        </div>
                         <p className="font-ui text-[9px] text-[#4A4A4A]">
                           <span className="text-[#9A9A9A] uppercase tracking-[0.1em]">
                             Phone:{" "}

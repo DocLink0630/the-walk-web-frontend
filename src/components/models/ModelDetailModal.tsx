@@ -3,11 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Lock, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Lock, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useBooking } from "@/context/BookingContext";
 import { getFirstName } from "@/lib/public/featured-models";
 import { getClientToken } from "@/lib/client/token";
+import { downloadModelProfilePdf } from "@/lib/pdf/download-pdf";
 import {
   fetchPublicModelGallery,
   mapTierToCategory,
@@ -28,6 +29,8 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
   const { addToCart, isInCart } = useBooking();
   const [slideIndex, setSlideIndex] = useState(0);
   const [resolvedModel, setResolvedModel] = useState(model);
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   const canViewFullPortfolio = isClient;
 
@@ -177,6 +180,21 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
   const hasImage = !!currentSlide?.image;
   const tierLabel = resolvedModel.category ?? mapTierToCategory(resolvedModel.tier);
   const inCart = isInCart(resolvedModel.id);
+  const modelUserId = resolvedModel.userId ?? resolvedModel.id;
+  const isOwnModelProfile =
+    isAuthenticated &&
+    !!user?.id &&
+    (user.id === modelUserId || user.id === resolvedModel.id);
+
+  async function handleExportOwnProfilePdf() {
+    setExportingPdf(true);
+    setExportError(null);
+    const result = await downloadModelProfilePdf();
+    setExportingPdf(false);
+    if (!result.ok) {
+      setExportError(result.message);
+    }
+  }
 
   function handleAddToCart() {
     addToCart(mapToTalentProfile(resolvedModel));
@@ -197,27 +215,46 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
       />
 
       <div
-        className="relative w-full max-w-6xl max-h-[100dvh] md:max-h-[92dvh] bg-white border border-[#E0E0E0] shadow-[0_24px_80px_rgba(0,0,0,0.25)] overflow-y-auto md:overflow-hidden flex flex-col"
+        className="relative w-full max-w-6xl max-h-[100dvh] md:max-h-[92dvh] bg-white border border-[#E0E0E0] shadow-[0_24px_80px_rgba(0,0,0,0.25)] overflow-y-auto flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <header className="shrink-0 flex items-start justify-between gap-4 border-b border-[#E0E0E0] px-5 py-4 md:px-8 md:py-5">
-          <div>
-            <p className="font-ui text-[8px] tracking-[0.35em] uppercase text-[#C8A97A] mb-1">
+        <header className="shrink-0 flex items-start justify-between gap-4 border-b border-[#E0E0E0] px-5 py-5 md:px-8 md:py-6">
+          <div className="min-w-0 flex-1 pr-2">
+            <p className="font-ui text-[8px] tracking-[0.35em] uppercase text-[#C8A97A] mb-2">
               Model profile
             </p>
-            <h2 className="font-display text-2xl md:text-3xl font-light text-[#0A0A0A] tracking-wide">
+            <h2 className="font-display text-2xl md:text-3xl font-light text-[#0A0A0A] tracking-wide leading-[1.2] break-words [overflow:visible] pt-0.5">
               {displayName}
             </h2>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="shrink-0 p-2 border border-[#E0E0E0] hover:border-[#0A0A0A] transition-colors"
-            aria-label="Close"
-          >
-            <X className="size-4" strokeWidth={1.5} />
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            {isOwnModelProfile && (
+              <button
+                type="button"
+                onClick={() => void handleExportOwnProfilePdf()}
+                disabled={exportingPdf}
+                className="inline-flex items-center gap-2 font-ui text-[9px] tracking-[0.15em] uppercase px-4 py-2.5 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] disabled:opacity-50 transition-colors"
+              >
+                <Download className="size-3.5" strokeWidth={1.75} />
+                {exportingPdf ? "PDF…" : "Export PDF"}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-2 border border-[#E0E0E0] hover:border-[#0A0A0A] transition-colors"
+              aria-label="Close"
+            >
+              <X className="size-4" strokeWidth={1.5} />
+            </button>
+          </div>
         </header>
+
+        {exportError && (
+          <div className="shrink-0 border-b border-red-200 bg-red-50 px-5 py-2 md:px-8">
+            <p className="font-ui text-[10px] text-red-700">{exportError}</p>
+          </div>
+        )}
 
         {/* Under admin review banner — shown when the logged-in model views their own profile and is not yet active */}
         {isAuthenticated && user && resolvedModel.id === user.id && user.status !== "ACTIVE" && (
@@ -321,8 +358,8 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
             )}
           </div>
 
-          <div className="lg:w-[45%] flex flex-col min-h-0 border-t lg:border-t-0 lg:border-l border-[#E0E0E0]">
-            <div className="flex-1 overflow-y-auto px-5 py-6 md:px-8">
+          <div className="lg:w-[45%] lg:min-w-[280px] flex flex-col min-h-0 min-w-0 border-t lg:border-t-0 lg:border-l border-[#E0E0E0]">
+            <div className="flex-1 overflow-y-auto px-5 py-6 md:px-6 md:pr-8">
               <p className="font-ui text-[8px] tracking-[0.3em] uppercase text-[#9A9A9A] mb-4">
                 Profile
               </p>
@@ -383,14 +420,14 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
               />
             </div>
 
-            <div className="shrink-0 border-t border-[#E0E0E0] px-5 py-4 md:px-8 space-y-2">
+            <div className="shrink-0 border-t border-[#E0E0E0] px-5 py-4 md:px-6 md:pr-8 space-y-2">
               {isClient ? (
                 <>
                   <button
                     type="button"
                     onClick={handleAddToCart}
                     disabled={inCart}
-                    className="block w-full text-center font-ui text-[10px] tracking-[0.2em] uppercase px-6 py-3 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] transition-colors disabled:opacity-60 disabled:cursor-default"
+                    className="block w-full min-w-0 box-border text-center font-ui text-[10px] tracking-[0.18em] uppercase px-4 py-3.5 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] transition-colors disabled:opacity-60 disabled:cursor-default"
                   >
                     {inCart ? "Added to inquiry" : "Add to inquiry"}
                   </button>
