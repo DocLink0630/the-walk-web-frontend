@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getClientToken } from "@/lib/client/token";
 import type { AdminModelRegistrationMedia } from "@/types/admin";
 import { patchOwnModelProfile } from "@/lib/model/profile-api";
+import { downloadModelProfilePdf } from "@/lib/pdf/download-pdf";
 import ModelProfileMediaSection from "./ModelProfileMediaSection";
 import MembershipPackagesSection from "./MembershipPackagesSection";
 import MembershipPackagesModal from "./MembershipPackagesModal";
@@ -67,6 +68,7 @@ export default function ModelProfilePage() {
   const [whatsapp, setWhatsapp] = useState("");
   const [registrationMedia, setRegistrationMedia] =
     useState<AdminModelRegistrationMedia | null>(null);
+  const [exportingPdf, setExportingPdf] = useState(false);
 
   useEffect(() => {
     if (isLoading) return;
@@ -102,6 +104,16 @@ export default function ModelProfilePage() {
   }, [isAuthenticated, isLoading, isModel, router]);
 
   const isActive = profile?.status === "ACTIVE";
+
+  async function handleExportPdf() {
+    setExportingPdf(true);
+    setBanner(null);
+    const result = await downloadModelProfilePdf();
+    setExportingPdf(false);
+    if (!result.ok) {
+      setBanner({ type: "err", text: result.message });
+    }
+  }
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -158,6 +170,15 @@ export default function ModelProfilePage() {
         <p className="font-ui text-[9px] tracking-[0.1em] text-[#9A9A9A] mb-4">
           {user?.email}
         </p>
+
+        <button
+          type="button"
+          onClick={() => void handleExportPdf()}
+          disabled={exportingPdf || loadingProfile}
+          className="mb-8 font-ui text-[9px] tracking-[0.2em] uppercase px-4 py-2.5 border border-[#0A0A0A] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white disabled:opacity-50 transition-colors"
+        >
+          {exportingPdf ? "Preparing PDF…" : "Download profile PDF"}
+        </button>
 
         {typeof profile?.viewCount === "number" && (
           <div className="flex items-center gap-3 mb-8">
