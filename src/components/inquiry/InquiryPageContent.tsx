@@ -7,21 +7,75 @@ import { CTA_PRIMARY_FILLED } from "@/config/cta-styles";
 import { useAuth } from "@/context/AuthContext";
 import { useBooking } from "@/context/BookingContext";
 import { submitInquiry } from "@/lib/client/inquiries-api";
+import {
+  downloadInquiryCartPdf,
+  downloadInquiryModelsPdf,
+} from "@/lib/pdf/download-pdf";
 
 function isValidPhone(phone: string): boolean {
   const digits = phone.replace(/\D/g, "");
   return digits.length >= 7 && digits.length <= 15;
 }
 
+function InquiryExportButton({
+  onClick,
+  disabled,
+  loading,
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+  loading?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled || loading}
+      className="shrink-0 font-ui text-[11px] tracking-[0.2em] uppercase px-5 py-2.5 bg-[#0A0A0A] text-white border border-[#C8A97A] hover:bg-[#C8A97A] hover:text-[#0A0A0A] disabled:opacity-50 transition-colors"
+    >
+      {loading ? "Exporting…" : "Export"}
+    </button>
+  );
+}
+
 export default function InquiryPageContent() {
   const { bookingCart, removeFromCart, clearCart } = useBooking();
-  const { isAuthenticated, isClient, isLoading } = useAuth();
+  const { isAuthenticated, isClient, isLoading, user } = useAuth();
   const [phone, setPhone] = useState("");
   const [eventDate, setEventDate] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submittedInquiryId, setSubmittedInquiryId] = useState<string | null>(null);
+  const [exportingPdf, setExportingPdf] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  async function handleExportPdf(inquiryId?: string | null) {
+    if (bookingCart.length === 0 && !inquiryId) {
+      setError("Add at least one talent to export a PDF.");
+      return;
+    }
+
+    setExportingPdf(true);
+    setError(null);
+
+    const result = inquiryId
+      ? await downloadInquiryModelsPdf(inquiryId)
+      : await downloadInquiryCartPdf({
+          phone,
+          eventDate,
+          message,
+          cart: bookingCart,
+          clientName: user?.name,
+          clientEmail: user?.email,
+          inquiryId: inquiryId ?? undefined,
+        });
+
+    setExportingPdf(false);
+    if (!result.ok) {
+      setError(result.message);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -60,6 +114,7 @@ export default function InquiryPageContent() {
       return;
     }
 
+    setSubmittedInquiryId(result.inquiry.id);
     clearCart();
     setSubmitted(true);
   }
@@ -105,22 +160,40 @@ export default function InquiryPageContent() {
     );
   }
 
+  const canExport = submitted ? Boolean(submittedInquiryId) : bookingCart.length > 0;
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-12 md:py-16 space-y-10">
-      <div className="space-y-2">
-        <p className="font-ui text-[11px] tracking-[0.2em] uppercase text-[#9A7329]">
-          Booking inquiry
-        </p>
-        <h1 className="font-display text-3xl md:text-4xl font-light text-[#0A0A0A]">
-          Your selected talent
-        </h1>
-        <p className="font-ui text-sm text-[#4A4A4A]">
-          Review your cart and add event details. Our team will follow up to confirm
-          availability and rates.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-2 min-w-0 flex-1">
+          <p className="font-ui text-[11px] tracking-[0.2em] uppercase text-[#9A7329]">
+            Booking inquiry
+          </p>
+          <h1 className="font-display text-3xl md:text-4xl font-light text-[#0A0A0A]">
+            Your selected talent
+          </h1>
+          <p className="font-ui text-sm text-[#4A4A4A]">
+            Review your cart and add event details. Our team will follow up to confirm
+            availability and rates.
+          </p>
+        </div>
+        {canExport ? (
+          <InquiryExportButton
+            onClick={() =>
+              void handleExportPdf(submitted ? submittedInquiryId : undefined)
+            }
+            loading={exportingPdf}
+          />
+        ) : null}
       </div>
 
-      {bookingCart.length === 0 ? (
+      {error ? (
+        <p className="font-ui text-sm text-red-700 border border-red-200 bg-red-50 px-4 py-3">
+          {error}
+        </p>
+      ) : null}
+
+      {bookingCart.length === 0 && !submitted ? (
         <div className="border border-[#E0E0E0] bg-white p-8 text-center space-y-4">
           <p className="font-ui text-sm text-[#4A4A4A]">
             Your inquiry cart is empty. Browse talent and add profiles to inquire.
@@ -133,18 +206,21 @@ export default function InquiryPageContent() {
           </Link>
         </div>
       ) : submitted ? (
-        <div className="border border-[#C8A97A]/40 bg-[#C8A97A]/10 px-6 py-6 space-y-3">
-          <p className="font-ui text-sm text-[#0A0A0A] font-normal">
-            Your inquiry has been submitted.
-          </p>
-          <p className="font-ui text-xs text-[#4A4A4A] leading-relaxed">
-            Our team will review your request and contact you shortly. You can track
-            status on your{" "}
-            <Link href="/client/profile" className="text-[#9A7329] underline">
-              client profile
-            </Link>
-            .
-          </p>
+        <div className="space-y-6">
+          <div className="border border-[#C8A97A]/40 bg-[#C8A97A]/10 px-6 py-6 space-y-3">
+            <p className="font-ui text-sm text-[#0A0A0A] font-normal">
+              Your inquiry has been submitted.
+            </p>
+            <p className="font-ui text-xs text-[#4A4A4A] leading-relaxed">
+              Our team will review your request and contact you shortly. You can track
+              status on your{" "}
+              <Link href="/client/profile" className="text-[#9A7329] underline">
+                client profile
+              </Link>
+              .
+            </p>
+          </div>
+
           <Link
             href="/models"
             className="inline-block font-ui text-[11px] tracking-[0.15em] uppercase text-[#9A7329] underline underline-offset-4"
@@ -242,17 +318,11 @@ export default function InquiryPageContent() {
               />
             </div>
 
-            {error && (
-              <p className="font-ui text-sm text-red-700 border border-red-200 bg-red-50 px-4 py-3">
-                {error}
-              </p>
-            )}
-
             <button
               type="submit"
               disabled={submitting}
               data-cursor="button"
-              className={CTA_PRIMARY_FILLED + " w-full sm:w-auto px-10 py-3 disabled:opacity-50"}
+              className={CTA_PRIMARY_FILLED + " w-full sm:w-auto px-10 py-3.5 disabled:opacity-50"}
             >
               {submitting ? "Submitting…" : "Submit inquiry"}
             </button>

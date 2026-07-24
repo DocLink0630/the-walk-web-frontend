@@ -184,10 +184,29 @@ export default function ClientProfilePage() {
           </section>
         </form>
 
-        <section className="mt-8 bg-white border border-[#E0E0E0] p-6 space-y-4">
-          <h2 className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#0A0A0A]">
-            My inquiries
-          </h2>
+        <section className="mt-8 bg-white border border-[#E0E0E0] p-6 space-y-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#0A0A0A]">
+                My inquiries
+              </h2>
+              <p className="font-ui text-[10px] text-[#6B6B6B] mt-1">
+                One PDF per inquiry — every model included.
+              </p>
+            </div>
+            {inquiries.length > 0 && (
+              <button
+                type="button"
+                onClick={() => void handleExportInquiryPdf(inquiries[0].id)}
+                disabled={exportingInquiryId !== null}
+                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 font-ui text-[10px] tracking-[0.2em] uppercase bg-[#0A0A0A] text-white border-2 border-[#C8A97A] hover:bg-[#C8A97A] hover:text-[#0A0A0A] disabled:opacity-50 transition-colors"
+              >
+                {exportingInquiryId === inquiries[0].id
+                  ? "Preparing PDF…"
+                  : `Download all ${inquiries[0].items.length} model${inquiries[0].items.length === 1 ? "" : "s"} (one PDF)`}
+              </button>
+            )}
+          </div>
 
           {inquiries.length === 0 ? (
             <div className="space-y-3">
@@ -206,45 +225,48 @@ export default function ClientProfilePage() {
               {inquiries.map((inquiry) => {
                 const expanded = expandedId === inquiry.id;
                 return (
-                  <li key={inquiry.id} className="border border-[#E0E0E0]">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setExpandedId(expanded ? null : inquiry.id)
-                      }
-                      className="w-full text-left px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="font-ui text-[10px] text-[#0A0A0A]">
-                          {formatDate(inquiry.createdAt)}
-                          {inquiry.eventDate ? ` · Event ${inquiry.eventDate}` : ""}
+                  <li key={inquiry.id} className="border border-[#E0E0E0] overflow-hidden">
+                    <div className="flex flex-col">
+                      <div className="bg-[#FFFBF5] border-b border-[#C8A97A]/50 px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
+                        <p className="font-ui text-[10px] tracking-[0.12em] uppercase text-[#9A7329]">
+                          Export talent PDF
                         </p>
-                        <p className="font-ui text-[9px] text-[#6B6B6B] mt-0.5">
-                          {inquiry.items.length} talent
-                          {inquiry.items.length === 1 ? "" : "s"} selected
-                        </p>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2 shrink-0">
                         <button
                           type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            void handleExportInquiryPdf(inquiry.id);
-                          }}
+                          onClick={() => void handleExportInquiryPdf(inquiry.id)}
                           disabled={exportingInquiryId === inquiry.id}
-                          className="font-ui text-[9px] tracking-[0.15em] uppercase px-4 py-2.5 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] disabled:opacity-50 transition-colors"
+                          className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 font-ui text-[10px] tracking-[0.2em] uppercase bg-[#0A0A0A] text-white border-2 border-[#C8A97A] shadow-sm hover:bg-[#C8A97A] hover:text-[#0A0A0A] disabled:opacity-50 transition-colors"
                         >
                           {exportingInquiryId === inquiry.id
                             ? "Preparing PDF…"
-                            : "Export talent PDF"}
+                            : `All ${inquiry.items.length} model${inquiry.items.length === 1 ? "" : "s"} (one PDF)`}
                         </button>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setExpandedId(expanded ? null : inquiry.id)
+                        }
+                        className="w-full text-left px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 hover:bg-[#FAFAFA] transition-colors"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="font-ui text-[10px] text-[#0A0A0A]">
+                            {formatDate(inquiry.createdAt)}
+                            {inquiry.eventDate ? ` · Event ${inquiry.eventDate}` : ""}
+                          </p>
+                          <p className="font-ui text-[9px] text-[#6B6B6B] mt-0.5">
+                            {inquiry.items.length} talent
+                            {inquiry.items.length === 1 ? "" : "s"} selected
+                          </p>
+                        </div>
                         <span
-                          className={`inline-flex rounded-full border px-2.5 py-0.5 font-ui text-[8px] tracking-[0.1em] uppercase ${INQUIRY_STATUS_COLORS[inquiry.status]}`}
+                          className={`inline-flex self-start rounded-full border px-2.5 py-0.5 font-ui text-[8px] tracking-[0.1em] uppercase ${INQUIRY_STATUS_COLORS[inquiry.status]}`}
                         >
                           {INQUIRY_STATUS_LABELS[inquiry.status]}
                         </span>
-                      </div>
-                    </button>
+                      </button>
+                    </div>
 
                     {expanded && (
                       <div className="border-t border-[#E0E0E0] px-4 py-3 space-y-3 bg-[#FAFAFA]">
