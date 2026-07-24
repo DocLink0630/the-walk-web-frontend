@@ -171,14 +171,23 @@ export default function ModelProfilePage() {
           {user?.email}
         </p>
 
-        <button
-          type="button"
-          onClick={() => void handleExportPdf()}
-          disabled={exportingPdf || loadingProfile}
-          className="mb-8 font-ui text-[9px] tracking-[0.2em] uppercase px-4 py-2.5 border border-[#0A0A0A] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white disabled:opacity-50 transition-colors"
-        >
-          {exportingPdf ? "Preparing PDF…" : "Download profile PDF"}
-        </button>
+        <div className="mb-8 rounded-sm border-2 border-[#C8A97A] bg-[#FFFBF5] p-5">
+          <p className="font-ui text-[9px] tracking-[0.2em] uppercase text-[#9A7329] mb-2">
+            Comp card
+          </p>
+          <p className="font-ui text-[10px] text-[#4A4A4A] leading-relaxed mb-4">
+            Download a PDF with your photos, measurements, and profile details.
+          </p>
+          <button
+            type="button"
+            onClick={() => void handleExportPdf()}
+            disabled={exportingPdf || loadingProfile}
+            className="w-full font-ui text-[10px] tracking-[0.2em] uppercase px-4 py-4 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] disabled:opacity-50 transition-colors inline-flex items-center justify-center gap-2"
+          >
+            <span aria-hidden>↓</span>
+            {exportingPdf ? "Preparing PDF…" : "Download profile PDF"}
+          </button>
+        </div>
 
         {typeof profile?.viewCount === "number" && (
           <div className="flex items-center gap-3 mb-8">
