@@ -11,6 +11,7 @@ import {
 } from "@/lib/client/profile-api";
 import { INQUIRY_STATUS_COLORS, INQUIRY_STATUS_LABELS } from "@/lib/inquiry/status";
 import ReviewForm from "@/components/reviews/ReviewForm";
+import { downloadInquiryModelsPdf } from "@/lib/pdf/download-pdf";
 import type { Inquiry } from "@/types/inquiry";
 
 function formatDate(iso: string) {
@@ -37,6 +38,7 @@ export default function ClientProfilePage() {
   const [banner, setBanner] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [reviewingItemId, setReviewingItemId] = useState<string | null>(null);
   const [submittedItemIds, setSubmittedItemIds] = useState<Set<string>>(new Set());
+  const [exportingInquiryId, setExportingInquiryId] = useState<string | null>(null);
 
   useEffect(() => {
     if (isLoading) return;
@@ -79,6 +81,16 @@ export default function ClientProfilePage() {
     );
   }
 
+  async function handleExportInquiryPdf(inquiryId: string) {
+    setExportingInquiryId(inquiryId);
+    setBanner(null);
+    const result = await downloadInquiryModelsPdf(inquiryId);
+    setExportingInquiryId(null);
+    if (!result.ok) {
+      setBanner({ type: "err", text: result.message });
+    }
+  }
+
   const inputCls =
     "w-full border border-[#E0E0E0] px-3 py-2.5 font-ui text-[10px] tracking-[0.05em] bg-white outline-none focus:border-[#C8A97A] transition-colors";
 
@@ -104,6 +116,25 @@ export default function ClientProfilePage() {
         <p className="font-ui text-[9px] tracking-[0.1em] text-[#9A9A9A] mb-8">
           {user?.email}
         </p>
+
+        {banner && (
+          <div
+            className={
+              (banner.type === "ok"
+                ? "border border-[#C8A97A] bg-[#C8A97A]/10"
+                : "border border-red-300 bg-red-50") + " px-4 py-3 mb-6"
+            }
+          >
+            <p
+              className={
+                "font-ui text-[10px] " +
+                (banner.type === "ok" ? "text-[#0A0A0A]" : "text-red-700")
+              }
+            >
+              {banner.text}
+            </p>
+          </div>
+        )}
 
         <form onSubmit={handleSave} className="space-y-6">
           <section className="bg-white border border-[#E0E0E0] p-6 space-y-5">
@@ -202,6 +233,18 @@ export default function ClientProfilePage() {
 
                     {expanded && (
                       <div className="border-t border-[#E0E0E0] px-4 py-3 space-y-3 bg-[#FAFAFA]">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => void handleExportInquiryPdf(inquiry.id)}
+                            disabled={exportingInquiryId === inquiry.id}
+                            className="font-ui text-[8px] tracking-[0.15em] uppercase px-3 py-2 border border-[#0A0A0A] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white disabled:opacity-50 transition-colors"
+                          >
+                            {exportingInquiryId === inquiry.id
+                              ? "Preparing PDF…"
+                              : "Download talent PDF"}
+                          </button>
+                        </div>
                         <p className="font-ui text-[9px] text-[#4A4A4A]">
                           <span className="text-[#9A9A9A] uppercase tracking-[0.1em]">
                             Phone:{" "}
