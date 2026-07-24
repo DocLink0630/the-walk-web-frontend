@@ -1,5 +1,6 @@
 import type {
   CreateInquiryPayload,
+  Inquiry,
   PaginatedInquiriesResponse,
 } from "@/types/inquiry";
 import { getClientToken } from "./token";
@@ -46,7 +47,7 @@ export async function fetchOwnInquiries(
 
 export async function submitInquiry(
   payload: CreateInquiryPayload,
-): Promise<{ ok: true } | { ok: false; message: string }> {
+): Promise<{ ok: true; inquiry: Inquiry } | { ok: false; message: string }> {
   if (!getClientToken()) {
     return {
       ok: false,
@@ -64,5 +65,6 @@ export async function submitInquiry(
     return { ok: false, message: await parseError(res, "Failed to submit inquiry") };
   }
 
-  return { ok: true };
+  const inquiry = (await res.json()) as Inquiry;
+  return { ok: true, inquiry };
 }

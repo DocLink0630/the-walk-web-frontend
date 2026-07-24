@@ -70,8 +70,9 @@ export async function generateInquiryModelsPdf(
   );
 
   const shortId = data.inquiry.id.slice(0, 8);
+  const count = talents.length;
   return {
     buffer: Buffer.from(buffer),
-    filename: `inquiry-${shortId}-talent.pdf`,
+    filename: `inquiry-${shortId}-${count}-model${count === 1 ? "" : "s"}.pdf`,
   };
 }

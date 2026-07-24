@@ -122,8 +122,8 @@ export function InquiryModelsDocument({ data }: { data: InquiryModelsPdfData }) 
         ) : null}
 
         <Text style={styles.sectionTitle}>Selected talent ({talents.length})</Text>
-        {talents.map((talent) => (
-          <Text key={talent.modelName + talent.modelType}>
+        {talents.map((talent, listIndex) => (
+          <Text key={`${talent.modelUserId ?? talent.modelName}-${listIndex}`}>
             · {talent.fullName} ({talent.modelType}
             {talent.category ? ` · ${talent.category}` : ""})
           </Text>
@@ -182,6 +182,23 @@ export function InquiryModelsDocument({ data }: { data: InquiryModelsPdfData }) 
               </View>
             </>
           ) : null}
+
+          {talent.workExperience.map((entry, workIndex) =>
+            entry.images.length > 0 ? (
+              <View key={`work-${workIndex}-${entry.title}`}>
+                <Text style={styles.sectionTitle}>{entry.title}</Text>
+                <View style={styles.imageGrid}>
+                  {entry.images.map((src, imageIndex) => (
+                    <Image
+                      key={`${entry.title}-${imageIndex}`}
+                      src={src}
+                      style={styles.portfolioImage}
+                    />
+                  ))}
+                </View>
+              </View>
+            ) : null,
+          )}
         </Page>
       ))}
     </Document>
