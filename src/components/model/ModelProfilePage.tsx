@@ -161,33 +161,44 @@ export default function ModelProfilePage() {
         />
       )}
       <div className="max-w-xl mx-auto">
-        <p className="font-ui text-[8px] tracking-[0.35em] uppercase text-[#C8A97A] mb-2">
-          Model account
-        </p>
-        <h1 className="font-display text-3xl font-light text-[#0A0A0A] mb-1">
-          {profile?.modelProfile?.fullName ?? user?.name ?? user?.email}
-        </h1>
-        <p className="font-ui text-[9px] tracking-[0.1em] text-[#9A9A9A] mb-4">
-          {user?.email}
-        </p>
-
-        <div className="mb-8 rounded-sm border-2 border-[#C8A97A] bg-[#FFFBF5] p-5">
-          <p className="font-ui text-[9px] tracking-[0.2em] uppercase text-[#9A7329] mb-2">
-            Comp card
-          </p>
-          <p className="font-ui text-[10px] text-[#4A4A4A] leading-relaxed mb-4">
-            Download a PDF with your photos, measurements, and profile details.
-          </p>
+        <div className="flex items-start justify-between gap-4 mb-6">
+          <div className="min-w-0 flex-1">
+            <p className="font-ui text-[8px] tracking-[0.35em] uppercase text-[#C8A97A] mb-2">
+              Model account
+            </p>
+            <h1 className="font-display text-3xl font-light text-[#0A0A0A] mb-1">
+              {profile?.modelProfile?.fullName ?? user?.name ?? user?.email}
+            </h1>
+            <p className="font-ui text-[9px] tracking-[0.1em] text-[#9A9A9A]">
+              {user?.email}
+            </p>
+          </div>
           <button
             type="button"
             onClick={() => void handleExportPdf()}
             disabled={exportingPdf || loadingProfile}
-            className="w-full font-ui text-[10px] tracking-[0.2em] uppercase px-4 py-4 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] disabled:opacity-50 transition-colors inline-flex items-center justify-center gap-2"
+            className="shrink-0 font-ui text-[11px] tracking-[0.2em] uppercase px-5 py-2.5 bg-[#0A0A0A] text-white border border-[#C8A97A] hover:bg-[#C8A97A] hover:text-[#0A0A0A] disabled:opacity-50 transition-colors"
           >
-            <span aria-hidden>↓</span>
-            {exportingPdf ? "Preparing PDF…" : "Download profile PDF"}
+            {exportingPdf ? "Exporting…" : "Export"}
           </button>
         </div>
+
+        {banner && (
+          <p
+            className={
+              "font-ui text-[10px] mb-6 px-4 py-3 border " +
+              (banner.type === "ok"
+                ? "border-[#C8A97A]/40 bg-[#FFFBF5] text-[#4A4A4A]"
+                : "border-red-200 bg-red-50 text-red-700")
+            }
+          >
+            {banner.text}
+          </p>
+        )}
+
+        <p className="font-ui text-[10px] text-[#6B6B6B] leading-relaxed mb-8 max-w-md">
+          Download a PDF comp card with your photos, measurements, and profile details.
+        </p>
 
         {typeof profile?.viewCount === "number" && (
           <div className="flex items-center gap-3 mb-8">

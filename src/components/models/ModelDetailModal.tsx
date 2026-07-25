@@ -3,12 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Download, Lock, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Lock, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useBooking } from "@/context/BookingContext";
 import { getFirstName } from "@/lib/public/featured-models";
 import { getClientToken } from "@/lib/client/token";
-import { downloadModelProfilePdf } from "@/lib/pdf/download-pdf";
+import { downloadModelProfilePdf, downloadModelProfilePdfForUser } from "@/lib/pdf/download-pdf";
 import {
   fetchPublicModelGallery,
   mapTierToCategory,
@@ -182,14 +182,15 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
   const inCart = isInCart(resolvedModel.id);
   const modelUserId = resolvedModel.userId ?? resolvedModel.id;
   const isOwnModelProfile =
-    isAuthenticated &&
-    !!user?.id &&
-    (user.id === modelUserId || user.id === resolvedModel.id);
+    isAuthenticated && !!user?.id && user.id === modelUserId;
+  const canExportProfile = isClient || isOwnModelProfile;
 
-  async function handleExportOwnProfilePdf() {
+  async function handleExportProfilePdf() {
     setExportingPdf(true);
     setExportError(null);
-    const result = await downloadModelProfilePdf();
+    const result = isOwnModelProfile
+      ? await downloadModelProfilePdf()
+      : await downloadModelProfilePdfForUser(modelUserId);
     setExportingPdf(false);
     if (!result.ok) {
       setExportError(result.message);
@@ -228,15 +229,14 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
             </h2>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            {isOwnModelProfile && (
+            {canExportProfile && (
               <button
                 type="button"
-                onClick={() => void handleExportOwnProfilePdf()}
+                onClick={() => void handleExportProfilePdf()}
                 disabled={exportingPdf}
-                className="inline-flex items-center gap-2 font-ui text-[9px] tracking-[0.15em] uppercase px-4 py-2.5 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] disabled:opacity-50 transition-colors"
+                className="shrink-0 font-ui text-[11px] tracking-[0.2em] uppercase px-5 py-2.5 bg-[#0A0A0A] text-white border border-[#C8A97A] hover:bg-[#C8A97A] hover:text-[#0A0A0A] disabled:opacity-50 transition-colors"
               >
-                <Download className="size-3.5" strokeWidth={1.75} />
-                {exportingPdf ? "PDF…" : "Export PDF"}
+                {exportingPdf ? "Exporting…" : "Export"}
               </button>
             )}
             <button

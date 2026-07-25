@@ -48,6 +48,15 @@ export async function downloadModelProfilePdf(): Promise<
   );
 }
 
+export async function downloadModelProfilePdfForUser(
+  userId: string,
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  return downloadPdfResponse(
+    `/api/client/models/${encodeURIComponent(userId)}/export-pdf`,
+    "model-profile.pdf",
+  );
+}
+
 export async function downloadInquiryModelsPdf(
   inquiryId: string,
 ): Promise<{ ok: true } | { ok: false; message: string }> {
