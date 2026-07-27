@@ -151,9 +151,10 @@ async function buildFromCart(
 
   const talents = await Promise.all(
     items.map(async (item) => {
-      const { status, data } = await backendFetch(`/v1/users/${item.modelUserId}`, {
-        token,
-      });
+      const { status, data } = await backendFetch(
+        `/v1/public/talent/${item.modelUserId}/profile-export`,
+        { token },
+      );
       if (status === 200 && data && typeof data === "object") {
         return mapUserToTalent(data as UserExportPayload, item);
       }

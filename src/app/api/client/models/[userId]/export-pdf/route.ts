@@ -22,7 +22,10 @@ export async function GET(request: NextRequest, context: RouteContext) {
   if (!token) return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
 
   const { userId } = await context.params;
-  const { status, data } = await backendFetch(`/v1/users/${userId}`, { token });
+  const { status, data } = await backendFetch(
+    `/v1/public/talent/${userId}/profile-export`,
+    { token },
+  );
 
   if (status !== 200 || !data || typeof data !== "object") {
     return NextResponse.json(
