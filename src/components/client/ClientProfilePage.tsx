@@ -11,6 +11,7 @@ import {
 } from "@/lib/client/profile-api";
 import { INQUIRY_STATUS_COLORS, INQUIRY_STATUS_LABELS } from "@/lib/inquiry/status";
 import ReviewForm from "@/components/reviews/ReviewForm";
+import ChangePasswordSection from "@/components/auth/ChangePasswordSection";
 import { downloadInquiryModelsPdf } from "@/lib/pdf/download-pdf";
 import type { Inquiry } from "@/types/inquiry";
 
@@ -183,6 +184,10 @@ export default function ClientProfilePage() {
             </button>
           </section>
         </form>
+
+        <div className="mt-8">
+          <ChangePasswordSection />
+        </div>
 
         <section className="mt-8 bg-white border border-[#E0E0E0] p-6 space-y-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">

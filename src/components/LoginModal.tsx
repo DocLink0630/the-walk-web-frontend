@@ -78,6 +78,15 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           >
             Sign In
           </button>
+          <p className="text-center">
+            <Link
+              href="/forgot-password"
+              onClick={onClose}
+              className="font-ui text-[10px] text-[#9A7329] underline underline-offset-2"
+            >
+              Forgot password?
+            </Link>
+          </p>
         </form>
         <p className="mt-6 font-ui text-[10px] text-[#6B6B6B] text-center leading-relaxed">
           New here?{" "}
