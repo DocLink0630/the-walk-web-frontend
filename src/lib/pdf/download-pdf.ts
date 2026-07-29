@@ -44,7 +44,7 @@ export async function downloadModelProfilePdf(): Promise<
 > {
   return downloadPdfResponse(
     "/api/model/profile/export-pdf",
-    "model-profile.pdf",
+    "model-portfolio.pdf",
   );
 }
 
@@ -53,7 +53,7 @@ export async function downloadModelProfilePdfForUser(
 ): Promise<{ ok: true } | { ok: false; message: string }> {
   return downloadPdfResponse(
     `/api/client/models/${encodeURIComponent(userId)}/export-pdf`,
-    "model-profile.pdf",
+    "model-portfolio.pdf",
   );
 }
 
