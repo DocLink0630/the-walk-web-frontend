@@ -8,6 +8,7 @@ import type { AdminModelRegistrationMedia } from "@/types/admin";
 import { patchOwnModelProfile } from "@/lib/model/profile-api";
 import { downloadModelProfilePdf } from "@/lib/pdf/download-pdf";
 import ModelProfileMediaSection from "./ModelProfileMediaSection";
+import ChangePasswordSection from "@/components/auth/ChangePasswordSection";
 import MembershipPackagesSection from "./MembershipPackagesSection";
 import MembershipPackagesModal from "./MembershipPackagesModal";
 
@@ -325,6 +326,10 @@ export default function ModelProfilePage() {
             </button>
           </form>
         )}
+
+        <div className="mt-8">
+          <ChangePasswordSection />
+        </div>
 
         <div className="mt-12">
           <MembershipPackagesSection />

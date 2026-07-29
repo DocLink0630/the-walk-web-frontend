@@ -25,6 +25,7 @@ export default function ModelProfileMediaSection({
   onError,
 }: ModelProfileMediaSectionProps) {
   const portfolioInputRef = useRef<HTMLInputElement>(null);
+  const profileInputRef = useRef<HTMLInputElement>(null);
   const workInputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [newWorkTitle, setNewWorkTitle] = useState("");
@@ -32,6 +33,24 @@ export default function ModelProfileMediaSection({
 
   const portfolio = media?.portfolioPhotos ?? [];
   const workExperience = media?.workExperience ?? [];
+  const profilePhoto = media?.profilePhoto ?? null;
+
+  async function handleProfilePhotoUpload(file: File) {
+    setBusy(true);
+    const upload = await uploadFloatingImage(file);
+    if (!upload.ok) {
+      onError(upload.message);
+      setBusy(false);
+      return;
+    }
+    const result = await attachModelMedia({ token: upload.token, type: "PROFILE" });
+    setBusy(false);
+    if (!result.ok) {
+      onError(result.message);
+      return;
+    }
+    onMediaChange(result.registrationMedia);
+  }
 
   async function handlePortfolioUpload(file: File) {
     setBusy(true);
@@ -131,6 +150,54 @@ export default function ModelProfileMediaSection({
 
   return (
     <div className="space-y-6">
+      <section className="bg-white border border-[#E0E0E0] p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="relative w-28 h-36 shrink-0 border border-[#E0E0E0] bg-[#F5F5F5] overflow-hidden">
+            {profilePhoto?.url ? (
+              <Image
+                src={profilePhoto.url}
+                alt="Profile"
+                fill
+                className="object-cover"
+                unoptimized
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center font-ui text-[8px] tracking-[0.15em] uppercase text-[#9A9A9A] text-center px-2">
+                No photo
+              </div>
+            )}
+          </div>
+          <div className="space-y-2">
+            <h2 className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#0A0A0A]">
+              Profile picture
+            </h2>
+            <p className="font-ui text-[10px] text-[#6B6B6B] leading-relaxed max-w-xs">
+              This is your main headshot on listings and PDF exports.
+            </p>
+            <input
+              ref={profileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) void handleProfilePhotoUpload(file);
+                e.target.value = "";
+              }}
+            />
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => profileInputRef.current?.click()}
+              className="inline-flex items-center gap-1 font-ui text-[8px] tracking-[0.15em] uppercase border border-[#C8A97A] px-4 py-2 hover:bg-[#FFFBF5] disabled:opacity-50"
+            >
+              <Upload className="size-3" />
+              {profilePhoto ? "Change photo" : "Upload photo"}
+            </button>
+          </div>
+        </div>
+      </section>
+
       <section className="bg-white border border-[#E0E0E0] p-6 space-y-4">
         <div className="flex items-center justify-between gap-3">
           <h2 className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#0A0A0A]">
