@@ -26,15 +26,13 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   title: {
-    fontSize: 26,
-    marginBottom: 6,
+    fontSize: 22,
+    marginBottom: 4,
   },
   subtitle: {
     fontSize: 9,
     color: "#666666",
     marginBottom: 16,
-    textTransform: "uppercase",
-    letterSpacing: 1,
   },
   row: {
     flexDirection: "row",
@@ -79,15 +77,14 @@ const styles = StyleSheet.create({
     lineHeight: 1.45,
     color: "#333333",
   },
-  imageGridLarge: {
+  imageGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 12,
-    justifyContent: "center",
+    gap: 8,
   },
-  portfolioImageLarge: {
-    width: 240,
-    height: 300,
+  portfolioImage: {
+    width: 120,
+    height: 150,
     objectFit: "cover",
     backgroundColor: "#f2f2f2",
   },
@@ -109,15 +106,16 @@ function Stat({ label, value }: { label: string; value?: string | null }) {
 }
 
 export function ModelProfileDocument({ data }: { data: ModelProfilePdfData }) {
-  const displayName = data.fullName?.trim() || "Model";
-  const tierSubtitle = data.tier?.trim() || null;
-
   return (
     <Document>
       <Page size="A4" style={styles.page}>
         <Text style={styles.eyebrow}>The Walk Agency</Text>
-        <Text style={styles.title}>{displayName}</Text>
-        {tierSubtitle ? <Text style={styles.subtitle}>{tierSubtitle}</Text> : null}
+        <Text style={styles.title}>{data.fullName}</Text>
+        <Text style={styles.subtitle}>
+          {data.email}
+          {data.tier ? ` · ${data.tier}` : ""}
+          {typeof data.viewCount === "number" ? ` · ${data.viewCount} profile views` : ""}
+        </Text>
 
         <View style={styles.row}>
           {data.profileImage ? (
@@ -130,6 +128,11 @@ export function ModelProfileDocument({ data }: { data: ModelProfilePdfData }) {
                 <Text style={styles.bio}>{data.shortBio}</Text>
               </>
             ) : null}
+            <Text style={styles.sectionTitle}>Contact</Text>
+            <View style={styles.statGrid}>
+              <Stat label="Phone" value={data.contactNumber} />
+              <Stat label="WhatsApp" value={data.whatsappNumber} />
+            </View>
           </View>
         </View>
 
@@ -148,10 +151,10 @@ export function ModelProfileDocument({ data }: { data: ModelProfilePdfData }) {
 
       {data.portfolioImages.length > 0 ? (
         <Page size="A4" style={styles.page}>
-          <Text style={styles.sectionTitle}>Portfolio — {displayName}</Text>
-          <View style={styles.imageGridLarge}>
+          <Text style={styles.sectionTitle}>Portfolio</Text>
+          <View style={styles.imageGrid}>
             {data.portfolioImages.map((src, index) => (
-              <Image key={`${src}-${index}`} src={src} style={styles.portfolioImageLarge} />
+              <Image key={`${src}-${index}`} src={src} style={styles.portfolioImage} />
             ))}
           </View>
         </Page>
@@ -162,12 +165,12 @@ export function ModelProfileDocument({ data }: { data: ModelProfilePdfData }) {
           <Page key={`${entry.title}-${index}`} size="A4" style={styles.page}>
             <Text style={styles.sectionTitle}>Work experience</Text>
             <Text style={styles.workTitle}>{entry.title}</Text>
-            <View style={styles.imageGridLarge}>
+            <View style={styles.imageGrid}>
               {entry.images.map((src, imageIndex) => (
                 <Image
                   key={`${src}-${imageIndex}`}
                   src={src}
-                  style={styles.portfolioImageLarge}
+                  style={styles.portfolioImage}
                 />
               ))}
             </View>

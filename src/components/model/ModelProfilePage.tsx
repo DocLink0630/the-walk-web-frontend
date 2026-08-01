@@ -180,7 +180,7 @@ export default function ModelProfilePage() {
             disabled={exportingPdf || loadingProfile}
             className="shrink-0 font-ui text-[11px] tracking-[0.2em] uppercase px-5 py-2.5 bg-[#0A0A0A] text-white border border-[#C8A97A] hover:bg-[#C8A97A] hover:text-[#0A0A0A] disabled:opacity-50 transition-colors"
           >
-            {exportingPdf ? "Preparing…" : "Portfolio"}
+            {exportingPdf ? "Exporting…" : "Export"}
           </button>
         </div>
 
@@ -198,7 +198,7 @@ export default function ModelProfilePage() {
         )}
 
         <p className="font-ui text-[10px] text-[#6B6B6B] leading-relaxed mb-8 max-w-md">
-          Download your portfolio PDF with full name, measurements, and enlarged photos.
+          Download a PDF comp card with your photos, measurements, and profile details.
         </p>
 
         {typeof profile?.viewCount === "number" && (
