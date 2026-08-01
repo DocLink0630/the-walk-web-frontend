@@ -41,7 +41,7 @@ export async function generateModelProfilePdf(
 
   return {
     buffer: Buffer.from(buffer),
-    filename: `${slugify(data.fullName || "model")}-profile.pdf`,
+    filename: `${slugify(data.fullName || "model")}-portfolio.pdf`,
   };
 }
 

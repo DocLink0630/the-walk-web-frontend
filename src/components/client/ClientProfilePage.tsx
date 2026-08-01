@@ -207,8 +207,8 @@ export default function ClientProfilePage() {
                 className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 font-ui text-[10px] tracking-[0.2em] uppercase bg-[#0A0A0A] text-white border-2 border-[#C8A97A] hover:bg-[#C8A97A] hover:text-[#0A0A0A] disabled:opacity-50 transition-colors"
               >
                 {exportingInquiryId === inquiries[0].id
-                  ? "Preparing PDF…"
-                  : `Download all ${inquiries[0].items.length} model${inquiries[0].items.length === 1 ? "" : "s"} (one PDF)`}
+                  ? "Preparing…"
+                  : "Portfolio"}
               </button>
             )}
           </div>
@@ -234,7 +234,7 @@ export default function ClientProfilePage() {
                     <div className="flex flex-col">
                       <div className="bg-[#FFFBF5] border-b border-[#C8A97A]/50 px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
                         <p className="font-ui text-[10px] tracking-[0.12em] uppercase text-[#9A7329]">
-                          Export talent PDF
+                          Portfolio
                         </p>
                         <button
                           type="button"
@@ -243,8 +243,8 @@ export default function ClientProfilePage() {
                           className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 font-ui text-[10px] tracking-[0.2em] uppercase bg-[#0A0A0A] text-white border-2 border-[#C8A97A] shadow-sm hover:bg-[#C8A97A] hover:text-[#0A0A0A] disabled:opacity-50 transition-colors"
                         >
                           {exportingInquiryId === inquiry.id
-                            ? "Preparing PDF…"
-                            : `All ${inquiry.items.length} model${inquiry.items.length === 1 ? "" : "s"} (one PDF)`}
+                            ? "Preparing…"
+                            : "Portfolio"}
                         </button>
                       </div>
 

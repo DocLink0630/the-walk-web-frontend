@@ -208,7 +208,7 @@ export async function loadInquiryModelsPdfData(
     body: packageBody,
   });
 
-  if (post.status === 200 && post.data && typeof post.data === "object") {
+  if ((post.status === 200 || post.status === 201) && post.data && typeof post.data === "object") {
     return { data: post.data as InquiryModelsPdfData };
   }
 
