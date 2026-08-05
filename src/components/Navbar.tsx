@@ -306,20 +306,33 @@ export default function Navbar() {
               </button>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen((open) => !open)}
-              className="lg:hidden w-11 h-11 -mr-1 flex items-center justify-center text-[#0A0A0A] hover:text-[#C8A97A] transition-colors duration-300 z-[101]"
-              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={mobileMenuOpen}
-              aria-controls="mobile-nav-panel"
-            >
-              {mobileMenuOpen ? (
-                <X size={22} strokeWidth={1.5} />
-              ) : (
-                <Menu size={22} strokeWidth={1.5} />
-              )}
-            </button>
+            <div className="flex lg:hidden items-center gap-1.5 shrink-0 z-[101]">
+              <button
+                type="button"
+                onClick={() => {
+                  closeMobileMenu();
+                  setShowApplyChoice(true);
+                }}
+                data-cursor="button"
+                className="font-ui text-[10px] font-light tracking-[0.25em] uppercase px-3.5 py-2 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] transition-colors duration-300"
+              >
+                APPLY
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen((open) => !open)}
+                className="w-11 h-11 -mr-1 flex items-center justify-center text-[#0A0A0A] hover:text-[#C8A97A] transition-colors duration-300"
+                aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+                aria-expanded={mobileMenuOpen}
+                aria-controls="mobile-nav-panel"
+              >
+                {mobileMenuOpen ? (
+                  <X size={22} strokeWidth={1.5} />
+                ) : (
+                  <Menu size={22} strokeWidth={1.5} />
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </nav>
