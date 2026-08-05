@@ -1,3 +1,5 @@
+import { readFileSync } from "fs";
+import path from "path";
 import { renderToBuffer } from "@react-pdf/renderer";
 import React from "react";
 import type { ReactElement } from "react";
@@ -9,6 +11,16 @@ import type { InquiryModelsPdfData, ModelProfilePdfData } from "./types";
 
 function slugify(value: string): string {
   return value.replace(/[^a-zA-Z0-9-_]+/g, "_").replace(/_+/g, "_").slice(0, 80);
+}
+
+function loadLogoDataUri(): string | null {
+  try {
+    const logoPath = path.join(process.cwd(), "src/assets/images/logo.png");
+    const buffer = readFileSync(logoPath);
+    return `data:image/png;base64,${buffer.toString("base64")}`;
+  } catch {
+    return null;
+  }
 }
 
 export async function generateModelProfilePdf(
@@ -26,6 +38,8 @@ export async function generateModelProfilePdf(
     })),
   );
 
+  const logoSrc = loadLogoDataUri();
+
   const element = React.createElement(ModelProfileDocument, {
     data: {
       ...data,
@@ -33,6 +47,7 @@ export async function generateModelProfilePdf(
       portfolioImages,
       workExperience,
     },
+    logoSrc,
   }) as ReactElement;
 
   const buffer = await renderToBuffer(
