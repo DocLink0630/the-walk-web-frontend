@@ -41,20 +41,14 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingRight: 16,
   },
-  name: {
-    fontSize: 28,
-    fontFamily: "Helvetica-Bold",
-    color: PDF_GOLD,
-    marginBottom: 6,
+  title: {
+    fontSize: 22,
+    marginBottom: 4,
   },
-  email: {
-    fontSize: 10,
-    color: PDF_INK,
-  },
-  headerLogo: {
-    width: 72,
-    height: 72,
-    objectFit: "contain",
+  subtitle: {
+    fontSize: 9,
+    color: "#666666",
+    marginBottom: 16,
   },
   profileRow: {
     flexDirection: "row",
@@ -139,20 +133,14 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: PDF_INK,
   },
-  galleryTopRow: {
+  imageGrid: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 12,
-    marginBottom: 12,
+    flexWrap: "wrap",
+    gap: 8,
   },
-  galleryBottomRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 24,
-  },
-  galleryImage: {
-    width: 155,
-    height: 210,
+  portfolioImage: {
+    width: 120,
+    height: 150,
     objectFit: "cover",
     backgroundColor: "#f2f2f2",
   },
@@ -268,109 +256,17 @@ function MeasurementCell({
   );
 }
 
-function GalleryGrid({ images }: { images: string[] }) {
-  const top = images.slice(0, 3);
-  const bottom = images.slice(3, 5);
-
-  return (
-    <View>
-      {top.length > 0 ? (
-        <View style={styles.galleryTopRow}>
-          {top.map((src, index) => (
-            <Image
-              key={`top-${src}-${index}`}
-              src={src}
-              style={styles.galleryImage}
-            />
-          ))}
-        </View>
-      ) : null}
-      {bottom.length > 0 ? (
-        <View style={styles.galleryBottomRow}>
-          {bottom.map((src, index) => (
-            <Image
-              key={`bottom-${src}-${index}`}
-              src={src}
-              style={styles.galleryImage}
-            />
-          ))}
-        </View>
-      ) : null}
-    </View>
-  );
-}
-
-function PageFooter({ logoSrc }: { logoSrc?: string | null }) {
-  return (
-    <View style={styles.footer}>
-      {logoSrc ? <Image src={logoSrc} style={styles.footerLogo} /> : null}
-      <View style={styles.contactRow}>
-        <View style={styles.contactLine} />
-        <ContactDiamond />
-        <Text style={styles.contactUs}>Contact Us</Text>
-        <ContactDiamond />
-        <View style={styles.contactLine} />
-      </View>
-      <Text style={styles.contactInfo}>{PDF_CONTACT_PHONE}</Text>
-      <Text style={styles.contactInfo}>{PDF_CONTACT_WEBSITE}</Text>
-    </View>
-  );
-}
-
-function GalleryPage({
-  title,
-  images,
-  logoSrc,
-}: {
-  title: string;
-  images: string[];
-  logoSrc?: string | null;
-}) {
-  return (
-    <Page size="A4" style={styles.page}>
-      <CornerAccents />
-      <Text style={styles.galleryTitle}>{title}</Text>
-      <GalleryGrid images={images} />
-      <PageFooter logoSrc={logoSrc} />
-    </Page>
-  );
-}
-
-export function ModelProfileDocument({
-  data,
-  logoSrc,
-}: {
-  data: ModelProfilePdfData;
-  logoSrc?: string | null;
-}) {
-  const displayName = data.fullName?.trim() || "Model";
-  const email = data.email?.trim() || "";
-
-  const measurementsRow1 = [
-    { label: "Gender", value: data.gender },
-    { label: "Height", value: data.height },
-    { label: "Weight", value: data.weight },
-  ];
-  const measurementsRow2 = [
-    { label: "Chest", value: data.chest },
-    { label: "Shoulder", value: data.shoulder },
-    { label: "Waist", value: data.waist },
-  ];
-  const measurementsRow3 = [
-    { label: "Eyes", value: data.eyeColor },
-    { label: "Hair", value: data.hairColor },
-  ];
-
-  const portfolioChunks = chunkImages(data.portfolioImages.filter(Boolean));
-  const workImages = data.workExperience.flatMap((entry) =>
-    entry.images.filter(Boolean),
-  );
-  const workChunks = chunkImages(workImages);
-
+export function ModelProfileDocument({ data }: { data: ModelProfilePdfData }) {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <CornerAccents />
+        <Text style={styles.eyebrow}>The Walk Agency</Text>
+        <Text style={styles.title}>{data.fullName}</Text>
+        <Text style={styles.subtitle}>
+          {data.email}
+          {data.tier ? ` · ${data.tier}` : ""}
+          {typeof data.viewCount === "number" ? ` · ${data.viewCount} profile views` : ""}
+        </Text>
 
         <View style={styles.headerRow}>
           <View style={styles.nameBlock}>
@@ -393,6 +289,11 @@ export function ModelProfileDocument({
             {data.shortBio?.trim() ? (
               <Text style={styles.bioText}>{data.shortBio.trim()}</Text>
             ) : null}
+            <Text style={styles.sectionTitle}>Contact</Text>
+            <View style={styles.statGrid}>
+              <Stat label="Phone" value={data.contactNumber} />
+              <Stat label="WhatsApp" value={data.whatsappNumber} />
+            </View>
           </View>
         </View>
 
@@ -425,23 +326,34 @@ export function ModelProfileDocument({
         </View>
       </Page>
 
-      {portfolioChunks.map((images, index) => (
-        <GalleryPage
-          key={`portfolio-${index}`}
-          title="Portfolio"
-          images={images}
-          logoSrc={logoSrc}
-        />
-      ))}
+      {data.portfolioImages.length > 0 ? (
+        <Page size="A4" style={styles.page}>
+          <Text style={styles.sectionTitle}>Portfolio</Text>
+          <View style={styles.imageGrid}>
+            {data.portfolioImages.map((src, index) => (
+              <Image key={`${src}-${index}`} src={src} style={styles.portfolioImage} />
+            ))}
+          </View>
+        </Page>
+      ) : null}
 
-      {workChunks.map((images, index) => (
-        <GalleryPage
-          key={`work-${index}`}
-          title="Work Experience"
-          images={images}
-          logoSrc={logoSrc}
-        />
-      ))}
+      {data.workExperience.map((entry, index) =>
+        entry.images.length > 0 ? (
+          <Page key={`${entry.title}-${index}`} size="A4" style={styles.page}>
+            <Text style={styles.sectionTitle}>Work experience</Text>
+            <Text style={styles.workTitle}>{entry.title}</Text>
+            <View style={styles.imageGrid}>
+              {entry.images.map((src, imageIndex) => (
+                <Image
+                  key={`${src}-${imageIndex}`}
+                  src={src}
+                  style={styles.portfolioImage}
+                />
+              ))}
+            </View>
+          </Page>
+        ) : null,
+      )}
     </Document>
   );
 }

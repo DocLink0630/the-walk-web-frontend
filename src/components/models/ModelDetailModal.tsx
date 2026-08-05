@@ -234,7 +234,7 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
                 disabled={exportingPdf}
                 className="shrink-0 font-ui text-[11px] tracking-[0.2em] uppercase px-5 py-2.5 bg-[#0A0A0A] text-white border border-[#C8A97A] hover:bg-[#C8A97A] hover:text-[#0A0A0A] disabled:opacity-50 transition-colors"
               >
-                {exportingPdf ? "Preparing…" : "Portfolio"}
+                {exportingPdf ? "Exporting…" : "Export"}
               </button>
             )}
             <button
