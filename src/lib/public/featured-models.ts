@@ -6,6 +6,22 @@ export function getFirstName(fullName: string): string {
   return trimmed.split(/\s+/)[0] ?? trimmed;
 }
 
+/** Moves a model matching `name` (case-insensitive) to index 0; otherwise returns `models` unchanged. */
+export function pinModelFirst(
+  models: PublicFeaturedModel[],
+  name: string,
+): PublicFeaturedModel[] {
+  const target = name.trim().toLowerCase();
+  if (!target || models.length === 0) return models;
+
+  const idx = models.findIndex((m) => m.name.trim().toLowerCase() === target);
+  if (idx <= 0) return models;
+
+  const next = [...models];
+  const [pinned] = next.splice(idx, 1);
+  return [pinned, ...next];
+}
+
 export async function fetchFeaturedModels(): Promise<
   { ok: true; data: PublicFeaturedModel[] } | { ok: false; message: string }
 > {
@@ -23,7 +39,10 @@ export async function fetchFeaturedModels(): Promise<
     }
 
     const data = (await res.json()) as PublicFeaturedModel[];
-    return { ok: true, data: Array.isArray(data) ? data : [] };
+    return {
+      ok: true,
+      data: pinModelFirst(Array.isArray(data) ? data : [], "Rashmi Keshara"),
+    };
   } catch {
     return { ok: false, message: "Unable to connect to the server." };
   }
