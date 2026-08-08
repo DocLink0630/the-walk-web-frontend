@@ -318,6 +318,40 @@ export default function Navbar() {
               >
                 APPLY
               </button>
+              {isAuthenticated && hasProfileMenu && profileHref && (
+                <Link
+                  href={profileHref}
+                  onClick={closeMobileMenu}
+                  data-cursor="button"
+                  title={user?.name}
+                  aria-label="My profile"
+                  className="flex items-center justify-center w-8 h-8 rounded-full bg-[#0A0A0A] text-white font-ui text-[9px] tracking-widest hover:bg-[#C8A97A] transition-colors shrink-0"
+                >
+                  {(user?.name ?? profileInitial)
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase()
+                    .slice(0, 2)}
+                </Link>
+              )}
+              {isAuthenticated && isClient && !hasProfileMenu && (
+                <Link
+                  href="/client/profile"
+                  onClick={closeMobileMenu}
+                  data-cursor="button"
+                  title={user?.name}
+                  aria-label="My profile"
+                  className="flex items-center justify-center w-8 h-8 rounded-full bg-[#0A0A0A] text-white font-ui text-[9px] tracking-widest hover:bg-[#C8A97A] transition-colors shrink-0"
+                >
+                  {(user?.name ?? "C")
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase()
+                    .slice(0, 2)}
+                </Link>
+              )}
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen((open) => !open)}

@@ -39,7 +39,9 @@ const styles = StyleSheet.create({
   },
   nameBlock: {
     flex: 1,
+    paddingLeft: 64,
     paddingRight: 16,
+    paddingTop: 8,
   },
   name: {
     fontSize: 28,
@@ -52,8 +54,8 @@ const styles = StyleSheet.create({
     color: PDF_INK,
   },
   headerLogo: {
-    width: 72,
-    height: 72,
+    width: 120,
+    height: 48,
     objectFit: "contain",
   },
   profileRow: {

@@ -1,22 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { PublicReview } from "@/types/review";
 import StarRating from "./StarRating";
-
-interface Review {
-  id: string;
-  rating: number | null;
-  text: string | null;
-  createdAt: string;
-  clientName: string;
-}
 
 interface ReviewsListProps {
   talentUserId: string;
 }
 
 export default function ReviewsList({ talentUserId }: ReviewsListProps) {
-  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviews, setReviews] = useState<PublicReview[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,7 +18,7 @@ export default function ReviewsList({ talentUserId }: ReviewsListProps) {
     fetch(`/api/public/talent/${talentUserId}/reviews`)
       .then((r) => r.json())
       .then((data: unknown) => {
-        if (Array.isArray(data)) setReviews(data as Review[]);
+        if (Array.isArray(data)) setReviews(data as PublicReview[]);
       })
       .catch(() => {})
       .finally(() => setLoading(false));

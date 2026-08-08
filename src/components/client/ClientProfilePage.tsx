@@ -9,11 +9,13 @@ import {
   fetchOwnClientProfile,
   patchOwnClientProfile,
 } from "@/lib/client/profile-api";
+import { fetchReviewEligibility } from "@/lib/client/reviews-api";
 import { INQUIRY_STATUS_COLORS, INQUIRY_STATUS_LABELS } from "@/lib/inquiry/status";
 import ReviewForm from "@/components/reviews/ReviewForm";
 import ChangePasswordSection from "@/components/auth/ChangePasswordSection";
 import { downloadInquiryModelsPdf } from "@/lib/pdf/download-pdf";
 import type { Inquiry } from "@/types/inquiry";
+import type { ReviewEligibility } from "@/types/review";
 
 function formatDate(iso: string) {
   try {
@@ -39,6 +41,10 @@ export default function ClientProfilePage() {
   const [banner, setBanner] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [reviewingItemId, setReviewingItemId] = useState<string | null>(null);
   const [submittedItemIds, setSubmittedItemIds] = useState<Set<string>>(new Set());
+  const [eligibilityByTalent, setEligibilityByTalent] = useState<
+    Record<string, ReviewEligibility>
+  >({});
+  const [eligibilityLoading, setEligibilityLoading] = useState(false);
   const [exportingInquiryId, setExportingInquiryId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -53,10 +59,35 @@ export default function ClientProfilePage() {
     }
 
     void Promise.all([fetchOwnClientProfile(), fetchOwnInquiries({ limit: 20 })]).then(
-      ([profile, inquiryResult]) => {
+      async ([profile, inquiryResult]) => {
         setFullName(profile?.clientProfile?.fullName?.trim() || user?.name || "");
         if (inquiryResult.ok) {
-          setInquiries(inquiryResult.data.data);
+          const list = inquiryResult.data.data;
+          setInquiries(list);
+
+          const talentIds = [
+            ...new Set(
+              list
+                .filter((inq) => inq.status === "CLOSED")
+                .flatMap((inq) => inq.items.map((item) => item.modelUserId))
+                .filter(Boolean),
+            ),
+          ];
+
+          if (talentIds.length > 0) {
+            setEligibilityLoading(true);
+            const results = await Promise.all(
+              talentIds.map(async (talentUserId) => {
+                const result = await fetchReviewEligibility(talentUserId);
+                return [
+                  talentUserId,
+                  result.ok ? result.data : { eligible: false },
+                ] as const;
+              }),
+            );
+            setEligibilityByTalent(Object.fromEntries(results));
+            setEligibilityLoading(false);
+          }
         }
         setLoadingProfile(false);
       },
@@ -90,6 +121,33 @@ export default function ClientProfilePage() {
     if (!result.ok) {
       setBanner({ type: "err", text: result.message });
     }
+  }
+
+  function reviewActionForItem(item: Inquiry["items"][number]) {
+    if (submittedItemIds.has(item.id)) {
+      return { kind: "done" as const, label: "Review submitted ✓" };
+    }
+
+    if (eligibilityLoading && !(item.modelUserId in eligibilityByTalent)) {
+      return { kind: "loading" as const };
+    }
+
+    const eligibility = eligibilityByTalent[item.modelUserId];
+    if (eligibility && !eligibility.eligible) {
+      const already =
+        eligibility.alreadyReviewed === true ||
+        eligibility.reason?.toLowerCase().includes("already");
+      return {
+        kind: "done" as const,
+        label: already ? "Review submitted ✓" : "Not eligible",
+      };
+    }
+
+    if (reviewingItemId === item.id) {
+      return { kind: "cancel" as const };
+    }
+
+    return { kind: "leave" as const };
   }
 
   const inputCls =
@@ -287,7 +345,11 @@ export default function ClientProfilePage() {
                           </p>
                         )}
                         <ul className="space-y-3">
-                          {inquiry.items.map((item) => (
+                          {inquiry.items.map((item) => {
+                            const reviewAction =
+                              inquiry.status === "CLOSED" ? reviewActionForItem(item) : null;
+
+                            return (
                             <li key={item.id} className="space-y-2">
                               <div className="font-ui text-[9px] text-[#0A0A0A] flex items-center justify-between gap-2 flex-wrap">
                                 <span>
@@ -297,43 +359,56 @@ export default function ClientProfilePage() {
                                     · {item.modelType}
                                   </span>
                                 </span>
-                                {inquiry.status === "CLOSED" && (
-                                  submittedItemIds.has(item.id) ? (
-                                    <span className="font-ui text-[8px] tracking-[0.1em] text-[#C8A97A]">
-                                      Review submitted ✓
-                                    </span>
-                                  ) : reviewingItemId === item.id ? (
-                                    <button
-                                      type="button"
-                                      onClick={() => setReviewingItemId(null)}
-                                      className="font-ui text-[8px] tracking-[0.1em] uppercase text-[#737373] underline"
-                                    >
-                                      Cancel
-                                    </button>
-                                  ) : (
-                                    <button
-                                      type="button"
-                                      onClick={() => setReviewingItemId(item.id)}
-                                      className="font-ui text-[8px] tracking-[0.1em] uppercase text-[#C8A97A] underline underline-offset-2"
-                                    >
-                                      Leave a review
-                                    </button>
-                                  )
+                                {reviewAction?.kind === "done" && (
+                                  <span className="font-ui text-[8px] tracking-[0.1em] text-[#C8A97A]">
+                                    {reviewAction.label}
+                                  </span>
+                                )}
+                                {reviewAction?.kind === "loading" && (
+                                  <span className="font-ui text-[8px] tracking-[0.1em] text-[#9A9A9A]">
+                                    …
+                                  </span>
+                                )}
+                                {reviewAction?.kind === "cancel" && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setReviewingItemId(null)}
+                                    className="font-ui text-[8px] tracking-[0.1em] uppercase text-[#737373] underline"
+                                  >
+                                    Cancel
+                                  </button>
+                                )}
+                                {reviewAction?.kind === "leave" && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setReviewingItemId(item.id)}
+                                    className="font-ui text-[8px] tracking-[0.1em] uppercase text-[#C8A97A] underline underline-offset-2"
+                                  >
+                                    Leave a review
+                                  </button>
                                 )}
                               </div>
-                              {reviewingItemId === item.id && (
+                              {reviewingItemId === item.id && reviewAction?.kind === "cancel" && (
                                 <div className="border border-[#EBEBEB] p-4 bg-white">
                                   <ReviewForm
                                     inquiryItemId={item.id}
                                     onSubmitted={() => {
                                       setSubmittedItemIds((prev) => new Set(prev).add(item.id));
+                                      setEligibilityByTalent((prev) => ({
+                                        ...prev,
+                                        [item.modelUserId]: {
+                                          eligible: false,
+                                          alreadyReviewed: true,
+                                        },
+                                      }));
                                       setReviewingItemId(null);
                                     }}
                                   />
                                 </div>
                               )}
                             </li>
-                          ))}
+                            );
+                          })}
                         </ul>
                       </div>
                     )}

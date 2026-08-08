@@ -12,6 +12,7 @@ import type {
   AdminModelRegistrationMedia,
   AdminUser,
   AdminUserDetail,
+  CreateModelAccountsResult,
   MediaOrderUpdateItem,
   ModelApprovalPayload,
   PaginatedUsersResponse,
@@ -135,6 +136,32 @@ export async function updateUserStatus(
   }
 
   return { ok: true };
+}
+
+export async function createModelAccountsFromStudents(
+  userIds: string[],
+): Promise<
+  { ok: true; data: CreateModelAccountsResult } | { ok: false; message: string }
+> {
+  const res = await fetch("/api/admin/users/create-model-accounts", {
+    method: "POST",
+    headers: adminAuthHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify({ userIds }),
+  });
+
+  if (!res.ok) {
+    let message = "Failed to create model accounts";
+    try {
+      const body = await res.json();
+      message = parseApiError(body, message);
+    } catch {
+      /* ignore */
+    }
+    return { ok: false, message };
+  }
+
+  const data = (await res.json()) as CreateModelAccountsResult;
+  return { ok: true, data };
 }
 
 export async function approveServiceProvider(

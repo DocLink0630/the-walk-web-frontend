@@ -219,6 +219,12 @@ export interface PaginatedUsersResponse {
   meta: PaginatedUsersMeta;
 }
 
+export interface CreateModelAccountsResult {
+  created: { userId: string; modelCode: string }[];
+  skipped: { userId: string; reason: string }[];
+  failed: { userId: string; reason: string }[];
+}
+
 export interface LoginResponse {
   access_token?: string;
   id_token?: string;

@@ -9,8 +9,6 @@ export type ModelProfilePdfData = {
   tier?: string | null;
   gender?: string | null;
   shortBio?: string | null;
-  contactNumber?: string | null;
-  whatsappNumber?: string | null;
   height?: string | null;
   weight?: string | null;
   chest?: string | null;

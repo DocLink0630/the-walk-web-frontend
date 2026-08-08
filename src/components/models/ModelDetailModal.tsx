@@ -16,7 +16,9 @@ import {
   resolveModelProfileForModal,
 } from "@/lib/public/models";
 import type { PublicModel } from "@/types/public-model";
+import ReviewsList from "@/components/reviews/ReviewsList";
 import ModelDetailField from "./ModelDetailField";
+
 interface ModelDetailModalProps {
   model: PublicModel;
   onClose: () => void;
@@ -234,7 +236,7 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
                 disabled={exportingPdf}
                 className="shrink-0 font-ui text-[11px] tracking-[0.2em] uppercase px-5 py-2.5 bg-[#0A0A0A] text-white border border-[#C8A97A] hover:bg-[#C8A97A] hover:text-[#0A0A0A] disabled:opacity-50 transition-colors"
               >
-                {exportingPdf ? "Exporting…" : "Export"}
+                {exportingPdf ? "Exporting…" : "Portfolio"}
               </button>
             )}
             <button
@@ -416,6 +418,13 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
                 locked={!canViewFullPortfolio}
                 placeholder="Members only"
               />
+
+              <div className="mt-6 pt-5 border-t border-[#E8E8E8]">
+                <p className="font-ui text-[8px] tracking-[0.2em] uppercase text-[#9A9A9A] mb-3">
+                  Client reviews
+                </p>
+                <ReviewsList talentUserId={modelUserId} />
+              </div>
             </div>
 
             <div className="shrink-0 border-t border-[#E0E0E0] px-5 py-4 md:px-6 md:pr-8 space-y-2">
