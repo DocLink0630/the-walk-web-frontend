@@ -1,47 +1,25 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { adminAuthHeaders } from "@/lib/admin/token";
 import StarRating from "@/components/reviews/StarRating";
-
-interface AdminReview {
-  id: string;
-  rating: number | null;
-  text: string | null;
-  status: string;
-  createdAt: string;
-  talentName: string;
-  talentType: string;
-  clientName: string;
-}
-
-interface ReviewsResponse {
-  data: AdminReview[];
-  meta: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
-}
+import { useAdminPendingRegistrations } from "@/hooks/useAdminPendingRegistrations";
+import {
+  fetchAdminReviews,
+  updateAdminReviewStatus,
+} from "@/lib/admin/reviews-api";
+import type { AdminReview } from "@/types/review";
 
 export default function ReviewsPanel() {
+  const { refreshCounts } = useAdminPendingRegistrations();
   const [reviews, setReviews] = useState<AdminReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    try {
-      const res = await fetch("/api/admin/reviews?limit=50", {
-        headers: adminAuthHeaders(),
-      });
-      if (res.ok) {
-        const body = (await res.json()) as ReviewsResponse;
-        setReviews(body.data ?? []);
-      }
-    } catch {
-      // silently fail
+    const result = await fetchAdminReviews({ limit: 50 });
+    if (result.ok) {
+      setReviews(result.data.data ?? []);
     }
     setLoading(false);
   }, []);
@@ -52,17 +30,10 @@ export default function ReviewsPanel() {
 
   async function updateStatus(id: string, status: "APPROVED" | "REJECTED") {
     setUpdatingId(id);
-    try {
-      const res = await fetch(`/api/admin/reviews/${id}/status`, {
-        method: "PATCH",
-        headers: adminAuthHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify({ status }),
-      });
-      if (res.ok) {
-        setReviews((prev) => prev.filter((r) => r.id !== id));
-      }
-    } catch {
-      // silently fail
+    const result = await updateAdminReviewStatus(id, status);
+    if (result.ok) {
+      setReviews((prev) => prev.filter((r) => r.id !== id));
+      void refreshCounts();
     }
     setUpdatingId(null);
   }

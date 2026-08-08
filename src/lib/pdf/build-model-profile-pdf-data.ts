@@ -16,8 +16,6 @@ type OwnProfileResponse = {
     waistEnc?: string | null;
     eyeColorEnc?: string | null;
     hairColorEnc?: string | null;
-    contactNumberEnc?: string | null;
-    whatsappNumberEnc?: string | null;
   } | null;
   registrationMedia?: AdminModelRegistrationMedia | null;
 };
@@ -35,8 +33,6 @@ export function buildModelProfilePdfData(profile: OwnProfileResponse): ModelProf
     tier: mp?.tier ?? null,
     gender: mp?.gender ?? null,
     shortBio: mp?.shortBio ?? null,
-    contactNumber: mp?.contactNumberEnc ?? null,
-    whatsappNumber: mp?.whatsappNumberEnc ?? null,
     height: mp?.heightEnc ?? null,
     weight: mp?.weightEnc ?? null,
     chest: mp?.chestEnc ?? null,

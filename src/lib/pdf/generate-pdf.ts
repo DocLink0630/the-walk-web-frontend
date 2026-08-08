@@ -14,13 +14,22 @@ function slugify(value: string): string {
 }
 
 function loadLogoDataUri(): string | null {
-  try {
-    const logoPath = path.join(process.cwd(), "src/assets/images/logo.png");
-    const buffer = readFileSync(logoPath);
-    return `data:image/png;base64,${buffer.toString("base64")}`;
-  } catch {
-    return null;
+  const candidates = [
+    { relativePath: "src/assets/images/logo.png", mime: "image/png" },
+    { relativePath: "public/logo.jpeg", mime: "image/jpeg" },
+  ] as const;
+
+  for (const candidate of candidates) {
+    try {
+      const logoPath = path.join(process.cwd(), candidate.relativePath);
+      const buffer = readFileSync(logoPath);
+      return `data:${candidate.mime};base64,${buffer.toString("base64")}`;
+    } catch {
+      // try next candidate
+    }
   }
+
+  return null;
 }
 
 export async function generateModelProfilePdf(

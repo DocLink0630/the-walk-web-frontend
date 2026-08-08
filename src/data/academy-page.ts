@@ -113,7 +113,7 @@ export const ACADEMY_PAGE: AcademyPageContent = {
     registration: {
       label: "Registration Fee",
       note: "One-time, non-refundable",
-      amount: "1,000",
+      amount: "2,000",
     },
     installments: [
       { label: "1st Payment", amount: "20,000" },
@@ -129,7 +129,7 @@ export const ACADEMY_PAGE: AcademyPageContent = {
       savings: "5,000 LKR",
     },
     summary:
-      "Total Investment: 1,000 LKR (Registration) + Course Fee Option",
+      "Total Investment: 2,000 LKR (Registration) + Course Fee Option",
   },
   testimonials: {
     eyebrow: "ALUMNI VOICES",

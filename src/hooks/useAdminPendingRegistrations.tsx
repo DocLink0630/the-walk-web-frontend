@@ -28,6 +28,7 @@ const EMPTY_COUNTS: PendingRegistrationCounts = {
   beauticians: 0,
   photographers: 0,
   influencers: 0,
+  reviews: 0,
 };
 
 const AdminPendingRegistrationsContext =
