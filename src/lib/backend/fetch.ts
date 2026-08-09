@@ -58,3 +58,12 @@ export async function backendFetch(
 
   return { status: response.status, data };
 }
+
+export function errorMessage(data: unknown, fallback: string): string {
+  if (data && typeof data === "object" && "message" in data) {
+    const msg = (data as { message: unknown }).message;
+    if (typeof msg === "string") return msg;
+    if (Array.isArray(msg)) return msg.join(", ");
+  }
+  return fallback;
+}

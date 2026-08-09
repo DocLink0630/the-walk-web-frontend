@@ -100,8 +100,17 @@ const styles = StyleSheet.create({
     color: PDF_GOLD,
     letterSpacing: 2,
     textTransform: "uppercase",
+    textAlign: "center",
     marginBottom: 22,
     marginTop: 8,
+  },
+  galleryHeaderLogo: {
+    position: "absolute",
+    top: 40,
+    right: 48,
+    width: 120,
+    height: 48,
+    objectFit: "contain",
   },
   statGrid: {
     flexDirection: "row",
@@ -331,6 +340,9 @@ function GalleryPage({
   return (
     <Page size="A4" style={styles.page}>
       <CornerAccents />
+      {logoSrc ? (
+        <Image src={logoSrc} style={styles.galleryHeaderLogo} />
+      ) : null}
       <Text style={styles.galleryTitle}>{title}</Text>
       <GalleryGrid images={images} />
       <PageFooter logoSrc={logoSrc} />

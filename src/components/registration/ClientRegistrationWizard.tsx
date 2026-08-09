@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { CLIENT_REGISTRATION_COPY } from "@/lib/registration/client-copy";
 import type { ClientRegistrationStore } from "@/types/client-registration";
-import ClientRegistrationProgress from "./ClientRegistrationProgress";
+import RegistrationProgress, { CLIENT_STEPS } from "./RegistrationProgress";
 import StepAccount from "./StepAccount";
 import StepPersonalClient from "./StepPersonalClient";
 import {
@@ -95,7 +95,7 @@ export default function ClientRegistrationWizard({
           <SuccessPanel store={store} />
         ) : (
           <>
-            <ClientRegistrationProgress step={store.step} />
+            <RegistrationProgress step={store.step} steps={CLIENT_STEPS} />
             {store.step === 1 && (
               <StepAccount
                 store={store}

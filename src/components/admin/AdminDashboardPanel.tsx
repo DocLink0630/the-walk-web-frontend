@@ -2,8 +2,12 @@
 
 import { ArrowRight } from "lucide-react";
 import type { AdminSection } from "@/types/admin-nav";
-import ModelDashboardKpiRow from "./ModelDashboardKpiRow";
-import StudentDashboardKpiRow from "./StudentDashboardKpiRow";
+import DashboardKpiRow, {
+  MODEL_KPI_METRICS,
+  MODEL_KPI_ROLES,
+  STUDENT_KPI_METRICS,
+  STUDENT_KPI_ROLES,
+} from "./DashboardKpiRow";
 import { adminCard, adminPageDesc, adminSectionTitle } from "./admin-ui";
 
 interface AdminDashboardPanelProps {
@@ -20,11 +24,15 @@ export default function AdminDashboardPanel({ onSectionChange }: AdminDashboardP
         </p>
       </div>
 
-      <ModelDashboardKpiRow />
+      <DashboardKpiRow roles={MODEL_KPI_ROLES} metrics={MODEL_KPI_METRICS} />
 
       <div>
         <h3 className={`${adminSectionTitle} mb-3`}>Academy</h3>
-        <StudentDashboardKpiRow />
+        <DashboardKpiRow
+          roles={STUDENT_KPI_ROLES}
+          metrics={STUDENT_KPI_METRICS}
+          gridClassName="grid grid-cols-1 gap-3 sm:gap-4 sm:max-w-xs"
+        />
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">

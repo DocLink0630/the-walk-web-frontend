@@ -1,14 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getClientBearerToken } from "@/lib/client/auth-request";
 import { getBackendUrl } from "@/lib/backend/fetch";
 import { generateInquiryModelsPdf } from "@/lib/pdf/generate-pdf";
 import { loadInquiryModelsPdfData } from "@/lib/pdf/load-inquiry-pdf-data";
 import type { BookingItem } from "@/types/talents";
 
-function getToken(request: NextRequest): string | null {
-  const auth = request.headers.get("authorization");
-  if (auth?.startsWith("Bearer ")) return auth.slice(7);
-  return null;
-}
 
 type DraftExportBody = {
   phone?: string;
@@ -27,7 +23,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "BACKEND_URL is not configured" }, { status: 500 });
   }
 
-  const token = getToken(request);
+  const token = getClientBearerToken(request);
   if (!token) return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
 
   let body: DraftExportBody;

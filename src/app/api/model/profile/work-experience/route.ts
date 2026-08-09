@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getClientBearerToken } from "@/lib/client/auth-request";
 import { backendFetch, getBackendUrl } from "@/lib/backend/fetch";
 
-function getToken(request: NextRequest): string | null {
-  const auth = request.headers.get("authorization");
-  if (auth?.startsWith("Bearer ")) return auth.slice(7);
-  return null;
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +10,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "BACKEND_URL is not configured" }, { status: 500 });
   }
 
-  const token = getToken(request);
+  const token = getClientBearerToken(request);
   if (!token) return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
 
   let body: unknown;

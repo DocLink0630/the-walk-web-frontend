@@ -15,8 +15,8 @@ function slugify(value: string): string {
 
 function loadLogoDataUri(): string | null {
   const candidates = [
-    { relativePath: "src/assets/images/logo.png", mime: "image/png" },
     { relativePath: "public/logo.jpeg", mime: "image/jpeg" },
+    { relativePath: "src/assets/images/logo.png", mime: "image/png" },
   ] as const;
 
   for (const candidate of candidates) {
