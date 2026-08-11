@@ -34,7 +34,7 @@ export default function AdminSidebar({
   onLogout,
   onNavigate,
 }: AdminSidebarProps) {
-  const { counts } = useAdminPendingRegistrations();
+  const { unseenCounts, markSectionSeen } = useAdminPendingRegistrations();
 
   return (
     <div className="flex h-full flex-col bg-white border-r border-gray-200 shadow-sm">
@@ -53,13 +53,14 @@ export default function AdminSidebar({
         {ADMIN_NAV_ITEMS.map((item) => {
           const Icon = NAV_ICONS[item.id];
           const active = activeSection === item.id;
-          const pendingCount = countForSection(counts, item.id);
+          const pendingCount = countForSection(unseenCounts, item.id);
 
           return (
             <button
               key={item.id}
               type="button"
               onClick={() => {
+                markSectionSeen(item.id);
                 onSectionChange(item.id);
                 onNavigate?.();
               }}

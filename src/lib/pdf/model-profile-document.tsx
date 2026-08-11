@@ -40,7 +40,6 @@ const styles = StyleSheet.create({
   nameBlock: {
     flex: 1,
     paddingLeft: 64,
-    paddingRight: 16,
     paddingTop: 8,
   },
   name: {
@@ -52,11 +51,6 @@ const styles = StyleSheet.create({
   email: {
     fontSize: 10,
     color: PDF_INK,
-  },
-  headerLogo: {
-    width: 120,
-    height: 48,
-    objectFit: "contain",
   },
   profileRow: {
     flexDirection: "row",
@@ -103,14 +97,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 22,
     marginTop: 8,
-  },
-  galleryHeaderLogo: {
-    position: "absolute",
-    top: 40,
-    right: 48,
-    width: 120,
-    height: 48,
-    objectFit: "contain",
   },
   statGrid: {
     flexDirection: "row",
@@ -175,8 +161,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   footerLogo: {
-    width: 70,
-    height: 70,
+    width: 110,
+    height: 110,
     objectFit: "contain",
     marginBottom: 8,
   },
@@ -340,9 +326,6 @@ function GalleryPage({
   return (
     <Page size="A4" style={styles.page}>
       <CornerAccents />
-      {logoSrc ? (
-        <Image src={logoSrc} style={styles.galleryHeaderLogo} />
-      ) : null}
       <Text style={styles.galleryTitle}>{title}</Text>
       <GalleryGrid images={images} />
       <PageFooter logoSrc={logoSrc} />
@@ -391,9 +374,6 @@ export function ModelProfileDocument({
             <Text style={styles.name}>{displayName}</Text>
             {email ? <Text style={styles.email}>{email}</Text> : null}
           </View>
-          {logoSrc ? (
-            <Image src={logoSrc} style={styles.headerLogo} />
-          ) : null}
         </View>
 
         <View style={styles.profileRow}>
