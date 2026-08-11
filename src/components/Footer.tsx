@@ -85,9 +85,23 @@ export default function Footer({
         </div>
 
         <div className="border-t border-white/10 pt-6 md:pt-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <p className="font-ui text-[9px] font-light tracking-[0.25em] uppercase text-white/30 text-center md:text-left">
-            {displayCopyright}
-          </p>
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center md:text-left">
+            <p className="font-ui text-[9px] font-light tracking-[0.25em] uppercase text-white/30">
+              {displayCopyright}
+            </p>
+            <p className="font-ui text-[9px] font-light tracking-[0.25em] uppercase text-white/30">
+              Powered by{" "}
+              <a
+                href="https://www.doclinkcare.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                data-cursor="link"
+                className="text-white/40 hover:text-white/60 transition-colors duration-300"
+              >
+                DocLink
+              </a>
+            </p>
+          </div>
           {legalLinks.length > 0 && (
             <div className="flex flex-col sm:flex-row items-center justify-center md:justify-end gap-4 sm:gap-6 md:gap-8">
               {legalLinks.map((link) => (

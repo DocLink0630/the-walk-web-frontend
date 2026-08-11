@@ -1,15 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getClientBearerToken } from "@/lib/client/auth-request";
 import { backendFetch, getBackendUrl } from "@/lib/backend/fetch";
 import { buildModelProfilePdfData } from "@/lib/pdf/build-model-profile-pdf-data";
 import { generateModelProfilePdf } from "@/lib/pdf/generate-pdf";
 
 type RouteContext = { params: Promise<{ userId: string }> };
 
-function getToken(request: NextRequest): string | null {
-  const auth = request.headers.get("authorization");
-  if (auth?.startsWith("Bearer ")) return auth.slice(7);
-  return null;
-}
 
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
@@ -18,7 +14,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ message: "BACKEND_URL is not configured" }, { status: 500 });
   }
 
-  const token = getToken(request);
+  const token = getClientBearerToken(request);
   if (!token) return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
 
   const { userId } = await context.params;
