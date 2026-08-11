@@ -17,6 +17,7 @@ import {
 } from "@/lib/public/models";
 import type { PublicModel } from "@/types/public-model";
 import ReviewsList from "@/components/reviews/ReviewsList";
+import ModelAddReviewModal from "./ModelAddReviewModal";
 import ModelDetailField from "./ModelDetailField";
 
 interface ModelDetailModalProps {
@@ -31,6 +32,7 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
   const [resolvedModel, setResolvedModel] = useState(model);
   const [exportingPdf, setExportingPdf] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
+  const [reviewOpen, setReviewOpen] = useState(false);
 
   const canViewFullPortfolio = isClient;
 
@@ -156,6 +158,7 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
     document.body.style.overflow = "hidden";
 
     function handleKeyDown(event: KeyboardEvent) {
+      if (reviewOpen) return;
       if (event.key === "Escape") onClose();
       if (event.key === "ArrowRight") setSlideIndex((i) => (i + 1) % slideCount);
       if (event.key === "ArrowLeft") setSlideIndex((i) => (i - 1 + slideCount) % slideCount);
@@ -166,7 +169,7 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [onClose, slideCount]);
+  }, [onClose, reviewOpen, slideCount]);
 
   function goNext() {
     setSlideIndex((i) => (i + 1) % slideCount);
@@ -202,6 +205,7 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
   }
 
   return (
+    <>
     <div
       className="fixed inset-0 z-[200] flex items-center justify-center p-0 md:p-6 lg:p-10"
       role="dialog"
@@ -446,6 +450,13 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
                       View inquiry cart
                     </Link>
                   )}
+                  <button
+                    type="button"
+                    onClick={() => setReviewOpen(true)}
+                    className="block w-full min-w-0 box-border text-center font-ui text-[10px] tracking-[0.18em] uppercase px-4 py-3.5 border border-[#0A0A0A] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-colors"
+                  >
+                    Add review
+                  </button>
                 </>
               ) : (
                 <Link
@@ -519,5 +530,14 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
         </div>
       </div>
     </div>
+
+      {reviewOpen && (
+        <ModelAddReviewModal
+          modelName={resolvedModel.name}
+          talentUserId={modelUserId}
+          onClose={() => setReviewOpen(false)}
+        />
+      )}
+    </>
   );
 }

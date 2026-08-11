@@ -51,6 +51,83 @@ export function countForSection(
   return counts[section as keyof PendingRegistrationCounts];
 }
 
+/** Sections that can show a sidebar notification badge. */
+export const BADGE_COUNT_SECTIONS = [
+  ...PENDING_COUNT_SECTIONS,
+  "reviews",
+] as const satisfies ReadonlyArray<keyof PendingRegistrationCounts>;
+
+export type BadgeCountSection = (typeof BADGE_COUNT_SECTIONS)[number];
+
+export const SEEN_BASELINES_STORAGE_KEY = "admin-pending-seen-baselines";
+
+export const EMPTY_PENDING_COUNTS: PendingRegistrationCounts = {
+  models: 0,
+  students: 0,
+  beauticians: 0,
+  photographers: 0,
+  influencers: 0,
+  reviews: 0,
+};
+
+export function isBadgeCountSection(section: AdminSection): section is BadgeCountSection {
+  return (BADGE_COUNT_SECTIONS as readonly string[]).includes(section);
+}
+
+export function loadSeenBaselines(): PendingRegistrationCounts {
+  if (typeof window === "undefined") return { ...EMPTY_PENDING_COUNTS };
+
+  try {
+    const raw = window.localStorage.getItem(SEEN_BASELINES_STORAGE_KEY);
+    if (!raw) return { ...EMPTY_PENDING_COUNTS };
+    const parsed = JSON.parse(raw) as Partial<PendingRegistrationCounts>;
+    const baselines = { ...EMPTY_PENDING_COUNTS };
+    for (const section of BADGE_COUNT_SECTIONS) {
+      const value = parsed[section];
+      baselines[section] = typeof value === "number" && value >= 0 ? value : 0;
+    }
+    return baselines;
+  } catch {
+    return { ...EMPTY_PENDING_COUNTS };
+  }
+}
+
+export function saveSeenBaselines(baselines: PendingRegistrationCounts): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(SEEN_BASELINES_STORAGE_KEY, JSON.stringify(baselines));
+  } catch {
+    // Ignore quota / private-mode failures.
+  }
+}
+
+/** Clamp baselines so they never exceed live counts (e.g. after approvals). */
+export function clampSeenBaselines(
+  live: PendingRegistrationCounts,
+  seen: PendingRegistrationCounts,
+): PendingRegistrationCounts {
+  const next = { ...seen };
+  let changed = false;
+  for (const section of BADGE_COUNT_SECTIONS) {
+    if (live[section] < next[section]) {
+      next[section] = live[section];
+      changed = true;
+    }
+  }
+  return changed ? next : seen;
+}
+
+export function computeUnseenCounts(
+  live: PendingRegistrationCounts,
+  seen: PendingRegistrationCounts,
+): PendingRegistrationCounts {
+  const unseen = { ...EMPTY_PENDING_COUNTS };
+  for (const section of BADGE_COUNT_SECTIONS) {
+    unseen[section] = Math.max(0, live[section] - seen[section]);
+  }
+  return unseen;
+}
+
 async function countPendingForRoles(roles: UserRole[]): Promise<number | null> {
   const result = await fetchAdminUsers({
     page: 1,

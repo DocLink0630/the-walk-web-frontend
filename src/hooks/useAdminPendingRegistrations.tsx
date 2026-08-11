@@ -1,13 +1,20 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
+  clampSeenBaselines,
+  computeUnseenCounts,
+  EMPTY_PENDING_COUNTS,
   fetchPendingRegistrationCounts,
+  isBadgeCountSection,
+  loadSeenBaselines,
   PENDING_COUNT_LABELS,
   PENDING_COUNT_SECTIONS,
+  saveSeenBaselines,
   type PendingCountSection,
   type PendingRegistrationCounts,
 } from "@/lib/admin/pending-registrations-api";
+import type { AdminSection } from "@/types/admin-nav";
 
 export interface AdminToast {
   id: string;
@@ -16,20 +23,13 @@ export interface AdminToast {
 
 interface AdminPendingRegistrationsContextValue {
   counts: PendingRegistrationCounts;
+  unseenCounts: PendingRegistrationCounts;
   loading: boolean;
   refreshCounts: () => Promise<void>;
+  markSectionSeen: (section: AdminSection) => void;
   toasts: AdminToast[];
   dismissToast: (id: string) => void;
 }
-
-const EMPTY_COUNTS: PendingRegistrationCounts = {
-  models: 0,
-  students: 0,
-  beauticians: 0,
-  photographers: 0,
-  influencers: 0,
-  reviews: 0,
-};
 
 const AdminPendingRegistrationsContext =
   createContext<AdminPendingRegistrationsContextValue | null>(null);
@@ -66,11 +66,21 @@ export function AdminPendingRegistrationsProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [counts, setCounts] = useState<PendingRegistrationCounts>(EMPTY_COUNTS);
+  const [counts, setCounts] = useState<PendingRegistrationCounts>(EMPTY_PENDING_COUNTS);
+  const [seenBaselines, setSeenBaselines] = useState<PendingRegistrationCounts>(EMPTY_PENDING_COUNTS);
   const [loading, setLoading] = useState(true);
   const [toasts, setToasts] = useState<AdminToast[]>([]);
   const previousCountsRef = useRef<PendingRegistrationCounts | null>(null);
   const initialLoadRef = useRef(true);
+  const countsRef = useRef(counts);
+
+  useEffect(() => {
+    setSeenBaselines(loadSeenBaselines());
+  }, []);
+
+  useEffect(() => {
+    countsRef.current = counts;
+  }, [counts]);
 
   const refreshCounts = useCallback(async () => {
     const result = await fetchPendingRegistrationCounts();
@@ -88,12 +98,36 @@ export function AdminPendingRegistrationsProvider({
 
     previousCountsRef.current = next;
     setCounts(next);
+    setSeenBaselines((prev) => {
+      const clamped = clampSeenBaselines(next, prev);
+      if (clamped !== prev) {
+        saveSeenBaselines(clamped);
+      }
+      return clamped;
+    });
     setLoading(false);
+  }, []);
+
+  const markSectionSeen = useCallback((section: AdminSection) => {
+    if (!isBadgeCountSection(section)) return;
+
+    setSeenBaselines((prev) => {
+      const live = countsRef.current[section];
+      if (prev[section] === live) return prev;
+      const next = { ...prev, [section]: live };
+      saveSeenBaselines(next);
+      return next;
+    });
   }, []);
 
   const dismissToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
+
+  const unseenCounts = useMemo(
+    () => computeUnseenCounts(counts, seenBaselines),
+    [counts, seenBaselines],
+  );
 
   useEffect(() => {
     void refreshCounts();
@@ -117,7 +151,15 @@ export function AdminPendingRegistrationsProvider({
 
   return (
     <AdminPendingRegistrationsContext.Provider
-      value={{ counts, loading, refreshCounts, toasts, dismissToast }}
+      value={{
+        counts,
+        unseenCounts,
+        loading,
+        refreshCounts,
+        markSectionSeen,
+        toasts,
+        dismissToast,
+      }}
     >
       {children}
     </AdminPendingRegistrationsContext.Provider>
