@@ -62,9 +62,4 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     label: "Inquiries",
     description: "Review and manage client booking requests",
   },
-  {
-    id: "reviews",
-    label: "Reviews",
-    description: "Approve or reject client-submitted talent reviews",
-  },
 ];
