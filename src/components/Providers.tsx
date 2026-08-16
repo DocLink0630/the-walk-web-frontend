@@ -6,6 +6,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { BookingProvider } from "@/context/BookingContext";
 import CustomCursor from "@/components/CustomCursor";
 import Navbar from "@/components/Navbar";
+import ShootCompletedReviewPrompt from "@/components/client/ShootCompletedReviewPrompt";
 import ScrollTriggerResync from "@/components/ScrollTriggerResync";
 
 function PublicSiteShell({ children }: { children: ReactNode }) {
@@ -15,6 +16,7 @@ function PublicSiteShell({ children }: { children: ReactNode }) {
         <CustomCursor />
         <ScrollTriggerResync />
         <Navbar />
+        <ShootCompletedReviewPrompt />
         {children}
       </BookingProvider>
     </AuthProvider>

@@ -11,6 +11,17 @@ interface ReviewFormProps {
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
 
+function parseErrorMessage(body: { message?: unknown }): string {
+  const message = body.message;
+  if (Array.isArray(message)) {
+    return message.map(String).join(", ");
+  }
+  if (typeof message === "string" && message.trim()) {
+    return message;
+  }
+  return "Failed to submit review";
+}
+
 export default function ReviewForm({ inquiryItemId, onSubmitted }: ReviewFormProps) {
   const [rating, setRating] = useState(0);
   const [text, setText] = useState("");
@@ -19,6 +30,12 @@ export default function ReviewForm({ inquiryItemId, onSubmitted }: ReviewFormPro
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    if (!inquiryItemId) {
+      setErrorMsg("Missing inquiry item. You can only review after a confirmed booking.");
+      setSubmitState("error");
+      return;
+    }
 
     setSubmitState("submitting");
     setErrorMsg(null);
@@ -45,8 +62,8 @@ export default function ReviewForm({ inquiryItemId, onSubmitted }: ReviewFormPro
       });
 
       if (!res.ok) {
-        const body = (await res.json()) as { message?: string };
-        throw new Error(body.message ?? "Failed to submit review");
+        const body = (await res.json()) as { message?: unknown };
+        throw new Error(parseErrorMessage(body));
       }
 
       setSubmitState("success");

@@ -8,6 +8,7 @@ import {
   updateUserStatus,
 } from "@/lib/admin/users-api";
 import type { AdminUser, AdminUserDetail } from "@/types/admin";
+import ModelReviewMediaSection from "./ModelReviewMediaSection";
 import {
   adminAlertErr,
   adminAlertOk,
@@ -178,6 +179,17 @@ export default function InfluencerReviewPanel({
                   <DetailRow label="Bio" value={profile.shortBio} />
                 </div>
               )}
+
+              <ModelReviewMediaSection
+                userId={user.id}
+                media={detail?.registrationMedia}
+                showNic={false}
+                showWorkExperience={false}
+                onMediaUpdated={(registrationMedia) =>
+                  setDetail((prev) => (prev ? { ...prev, registrationMedia } : prev))
+                }
+                onError={(text) => setBanner({ type: "err", text })}
+              />
 
               {banner && (
                 <p className={banner.type === "ok" ? adminAlertOk : adminAlertErr}>{banner.text}</p>

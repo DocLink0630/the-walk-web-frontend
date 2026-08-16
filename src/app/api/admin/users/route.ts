@@ -29,6 +29,8 @@ export async function GET(request: NextRequest) {
       search: searchParams.get("search") ?? undefined,
       status: searchParams.get("status") ?? undefined,
       roles: roles ?? undefined,
+      sort: searchParams.get("sort") ?? "createdAt",
+      order: searchParams.get("order") ?? "desc",
     },
   });
 

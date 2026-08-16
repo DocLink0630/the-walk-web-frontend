@@ -7,6 +7,7 @@ import type { ReactElement } from "react";
 import { InquiryModelsDocument } from "./inquiry-models-document";
 import { ModelProfileDocument } from "./model-profile-document";
 import { fetchImageDataUri, resolveImageDataUris } from "./fetch-image-data-uri";
+import { normalizeInquiryTalent } from "./normalize-inquiry-talent";
 import type { InquiryModelsPdfData, ModelProfilePdfData } from "./types";
 
 function slugify(value: string): string {
@@ -72,21 +73,39 @@ export async function generateModelProfilePdf(
 export async function generateInquiryModelsPdf(
   data: InquiryModelsPdfData,
 ): Promise<{ buffer: Buffer; filename: string }> {
+  const logoSrc = loadLogoDataUri();
+
   const talents = await Promise.all(
-    data.talents.map(async (talent) => ({
-      ...talent,
-      images: await resolveImageDataUris(talent.images),
-      workExperience: await Promise.all(
-        talent.workExperience.map(async (entry) => ({
+    data.talents.map(async (raw) => {
+      const talent = normalizeInquiryTalent(raw);
+      const profileImage = talent.profileImage
+        ? await fetchImageDataUri(talent.profileImage)
+        : null;
+      const portfolioImages = await resolveImageDataUris(
+        talent.portfolioImages ?? [],
+      );
+      const workExperience = await Promise.all(
+        (talent.workExperience ?? []).map(async (entry) => ({
           title: entry.title,
           images: await resolveImageDataUris(entry.images),
         })),
-      ),
-    })),
+      );
+
+      return {
+        ...talent,
+        profileImage,
+        portfolioImages,
+        images: [profileImage, ...portfolioImages].filter(
+          (url): url is string => Boolean(url),
+        ),
+        workExperience,
+      };
+    }),
   );
 
   const element = React.createElement(InquiryModelsDocument, {
     data: { ...data, talents },
+    logoSrc,
   }) as ReactElement;
 
   const buffer = await renderToBuffer(

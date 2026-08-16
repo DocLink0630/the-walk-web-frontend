@@ -29,6 +29,8 @@ export type InquiryTalentPdfData = {
   category?: string | null;
   priceRate?: string | null;
   fullName: string;
+  email?: string | null;
+  gender?: string | null;
   shortBio?: string | null;
   tier?: string | null;
   rate?: string | null;
@@ -43,6 +45,9 @@ export type InquiryTalentPdfData = {
   location?: string | null;
   yearsOfExperience?: number | null;
   equipmentOverview?: string | null;
+  profileImage?: string | null;
+  portfolioImages?: string[];
+  /** Mixed image list from older payloads; prefer profileImage + portfolioImages. */
   images: string[];
   workExperience: PdfWorkExperience[];
 };

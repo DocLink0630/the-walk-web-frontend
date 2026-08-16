@@ -29,9 +29,13 @@ export interface AdminReviewsResponse {
   };
 }
 
-/** GET /api/reviews/eligibility — parse defensively; only `eligible` is required. */
+/** GET /api/reviews/eligibility — mirrors backend `{ canReview, inquiryItemId?, existingReview? }`. */
 export interface ReviewEligibility {
-  eligible: boolean;
-  reason?: string;
-  alreadyReviewed?: boolean;
+  canReview: boolean;
+  inquiryItemId?: string;
+  existingReview?: {
+    rating: number | null;
+    text: string | null;
+    status: ReviewStatus | string;
+  };
 }

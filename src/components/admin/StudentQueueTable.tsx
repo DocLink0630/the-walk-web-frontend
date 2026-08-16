@@ -1,9 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   createModelAccountsFromStudents,
+  deleteAdminUser,
+  deleteAdminUsers,
   fetchAdminUsers,
+  formatBulkDeleteResult,
   updateUserStatus,
 } from "@/lib/admin/users-api";
 import {
@@ -12,7 +15,10 @@ import {
 } from "@/lib/admin/student-user-status";
 import type { AdminUser, UserStatus } from "@/types/admin";
 import { useAdminPendingRegistrations } from "@/hooks/useAdminPendingRegistrations";
+import { useAdminUserSelection } from "@/hooks/useAdminUserSelection";
+import AdminBulkDeleteBar from "./AdminBulkDeleteBar";
 import AdminModelMobileList from "./AdminModelMobileList";
+import AdminPagination from "./AdminPagination";
 import StudentReviewPanel from "./StudentReviewPanel";
 import {
   adminAlertErr,
@@ -88,8 +94,20 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [reviewUser, setReviewUser] = useState<AdminUser | null>(null);
   const [pendingReviewCount, setPendingReviewCount] = useState(0);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [creatingModels, setCreatingModels] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const {
+    selectedIds,
+    toggleSelect,
+    toggleSelectAllOnPage,
+    clearSelection,
+    allPageSelected,
+  } = useAdminUserSelection(users);
+  const modelRoleByIdRef = useRef<Map<string, boolean>>(new Map());
+  for (const user of users) {
+    modelRoleByIdRef.current.set(user.id, alreadyHasModelRole(user));
+  }
 
   const isApprovedTab = activeTab === "approved";
 
@@ -100,15 +118,9 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
         ? "No approved students found."
         : "No students found.";
 
-  const selectableUsers = useMemo(
-    () => (isApprovedTab ? users.filter((u) => !alreadyHasModelRole(u)) : []),
-    [isApprovedTab, users],
+  const createModelIds = Array.from(selectedIds).filter(
+    (id) => modelRoleByIdRef.current.get(id) !== true,
   );
-
-  const allSelectableSelected =
-    selectableUsers.length > 0 && selectableUsers.every((u) => selectedIds.has(u.id));
-
-  const colSpan = isApprovedTab ? 6 : 5;
 
   const loadPendingReviewCount = useCallback(async () => {
     const result = await fetchAdminUsers({
@@ -158,8 +170,8 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
   }, [loadPendingReviewCount]);
 
   useEffect(() => {
-    setSelectedIds(new Set());
-  }, [activeTab, page, search]);
+    clearSelection();
+  }, [activeTab, search, clearSelection]);
 
   async function refreshAfterChange() {
     await loadUsers();
@@ -189,30 +201,55 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
     await refreshAfterChange();
   }
 
+  async function handleDelete(user: AdminUser) {
+    const name = user.displayName ?? user.email;
+    if (
+      !confirm(
+        `Permanently delete "${name}"?\n\nThis removes their account, uploaded files, and records. This cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+
+    setDeletingId(user.id);
+    setBanner(null);
+    const result = await deleteAdminUser(user.id);
+    setDeletingId(null);
+
+    if (!result.ok) {
+      setBanner({ type: "err", text: result.message });
+      return;
+    }
+
+    if (reviewUser?.id === user.id) setReviewUser(null);
+    setBanner({ type: "ok", text: "Student account deleted." });
+    await refreshAfterChange();
+  }
+
+  async function handleBulkDelete() {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+
+    setBulkDeleting(true);
+    setBanner(null);
+    const result = await deleteAdminUsers(ids);
+    setBulkDeleting(false);
+    setBanner(formatBulkDeleteResult(result));
+
+    if (reviewUser && ids.includes(reviewUser.id)) setReviewUser(null);
+    if (result.deleted > 0) {
+      clearSelection();
+      await refreshAfterChange();
+    }
+  }
+
   function applySearch() {
     setPage(1);
     setSearch(searchInput.trim());
   }
 
-  function toggleSelect(userId: string) {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(userId)) next.delete(userId);
-      else next.add(userId);
-      return next;
-    });
-  }
-
-  function toggleSelectAllOnPage() {
-    if (allSelectableSelected) {
-      setSelectedIds(new Set());
-      return;
-    }
-    setSelectedIds(new Set(selectableUsers.map((u) => u.id)));
-  }
-
   async function handleCreateModelAccounts() {
-    const ids = Array.from(selectedIds);
+    const ids = createModelIds;
     if (ids.length === 0) return;
 
     const confirmed = confirm(
@@ -248,7 +285,7 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
       type: failed.length > 0 && created.length === 0 ? "err" : "ok",
       text: summary + detail,
     });
-    setSelectedIds(new Set());
+    clearSelection();
     await refreshAfterChange();
   }
 
@@ -304,23 +341,26 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
         </div>
       </div>
 
-      {isApprovedTab && selectedIds.size > 0 && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
-          <p className="text-sm text-gray-700">
-            {selectedIds.size} student{selectedIds.size === 1 ? "" : "s"} selected
-          </p>
-          <button
-            type="button"
-            disabled={creatingModels}
-            onClick={() => void handleCreateModelAccounts()}
-            className={adminBtnPrimary}
-          >
-            {creatingModels
-              ? "Creating…"
-              : `Create model accounts (${selectedIds.size})`}
-          </button>
-        </div>
-      )}
+      <AdminBulkDeleteBar
+        selectedCount={selectedIds.size}
+        deleting={bulkDeleting}
+        disabled={loading || creatingModels}
+        onDelete={handleBulkDelete}
+        extraActions={
+          isApprovedTab ? (
+            <button
+              type="button"
+              disabled={creatingModels || bulkDeleting || createModelIds.length === 0}
+              onClick={() => void handleCreateModelAccounts()}
+              className={adminBtnPrimary}
+            >
+              {creatingModels
+                ? "Creating…"
+                : `Create model accounts (${createModelIds.length})`}
+            </button>
+          ) : null
+        }
+      />
 
       {banner && (
         <div className={banner.type === "ok" ? adminAlertOk : adminAlertErr}>{banner.text}</div>
@@ -340,12 +380,13 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
           }
           onUpdate={handleUpdate}
           onReview={setReviewUser}
+          onDelete={(user) => void handleDelete(user)}
+          deletingId={deletingId}
           formatDate={formatDate}
           secondaryField="contactNumber"
-          selectable={isApprovedTab}
+          selectable
           selectedIds={selectedIds}
           onToggleSelect={toggleSelect}
-          isSelectDisabled={alreadyHasModelRole}
         />
       )}
 
@@ -365,18 +406,16 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
         <table className="w-full min-w-[640px]">
           <thead>
             <tr>
-              {isApprovedTab && (
-                <th className={adminTh}>
-                  <input
-                    type="checkbox"
-                    checked={allSelectableSelected}
-                    disabled={selectableUsers.length === 0 || loading}
-                    onChange={toggleSelectAllOnPage}
-                    className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-400 disabled:opacity-40"
-                    aria-label="Select all students on this page"
-                  />
-                </th>
-              )}
+              <th className={adminTh}>
+                <input
+                  type="checkbox"
+                  checked={allPageSelected}
+                  disabled={users.length === 0 || loading}
+                  onChange={toggleSelectAllOnPage}
+                  className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-400 disabled:opacity-40"
+                  aria-label="Select all students on this page"
+                />
+              </th>
               {["Name", "Contact", "Status", "Submitted", ""].map((h) => (
                 <th key={h || "actions"} className={adminTh}>
                   {h}
@@ -387,13 +426,13 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={colSpan} className={`${adminTd} text-center text-gray-500`}>
+                <td colSpan={6} className={`${adminTd} text-center text-gray-500`}>
                   Loading…
                 </td>
               </tr>
             ) : users.length === 0 ? (
               <tr>
-                <td colSpan={colSpan} className={`${adminTd} text-center text-gray-500`}>
+                <td colSpan={6} className={`${adminTd} text-center text-gray-500`}>
                   {emptyMessage}
                 </td>
               </tr>
@@ -402,19 +441,16 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
                 const hasModel = alreadyHasModelRole(user);
                 return (
                   <tr key={user.id} className="hover:bg-gray-50/80">
-                    {isApprovedTab && (
-                      <td className={adminTd}>
-                        <input
-                          type="checkbox"
-                          checked={selectedIds.has(user.id)}
-                          disabled={hasModel || creatingModels}
-                          onChange={() => toggleSelect(user.id)}
-                          className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-400 disabled:opacity-40"
-                          aria-label={`Select ${user.displayName ?? user.email}`}
-                          title={hasModel ? "Already a model" : undefined}
-                        />
-                      </td>
-                    )}
+                    <td className={adminTd}>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(user.id)}
+                        disabled={creatingModels || bulkDeleting}
+                        onChange={() => toggleSelect(user.id)}
+                        className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-400 disabled:opacity-40"
+                        aria-label={`Select ${user.displayName ?? user.email}`}
+                      />
+                    </td>
                     <td className={adminTd}>
                       <div className="flex flex-wrap items-center gap-2">
                         <span>{user.displayName ?? "—"}</span>
@@ -468,6 +504,14 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
                         >
                           {updatingId === user.id ? "Saving…" : "Save"}
                         </button>
+                        <button
+                          type="button"
+                          disabled={deletingId === user.id || updatingId === user.id || bulkDeleting}
+                          onClick={() => void handleDelete(user)}
+                          className="text-xs px-3 py-1 border border-red-200 text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                        >
+                          {deletingId === user.id ? "Deleting…" : "Delete"}
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -478,29 +522,12 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
         </table>
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between gap-3 pt-1">
-          <button
-            type="button"
-            disabled={page <= 1 || loading}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className={adminBtnSecondary + " !py-2 text-xs"}
-          >
-            Previous
-          </button>
-          <span className="text-sm text-gray-500">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            type="button"
-            disabled={page >= totalPages || loading}
-            onClick={() => setPage((p) => p + 1)}
-            className={adminBtnSecondary + " !py-2 text-xs"}
-          >
-            Next
-          </button>
-        </div>
-      )}
+      <AdminPagination
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        disabled={loading}
+      />
 
       {reviewUser && (
         <StudentReviewPanel

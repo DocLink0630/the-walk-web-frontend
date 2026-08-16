@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { X } from "lucide-react";
-import { fetchAdminInquiry, updateInquiryStatus } from "@/lib/admin/inquiries-api";
+import { useEffect, useMemo, useState } from "react";
+import { Check, X } from "lucide-react";
 import {
-  INQUIRY_QUEUE_STATUSES,
-  INQUIRY_STATUS_LABELS,
-} from "@/lib/inquiry/status";
-import type { Inquiry, InquiryStatus } from "@/types/inquiry";
+  fetchAdminInquiry,
+  updateInquiryItems,
+  updateInquiryStatus,
+} from "@/lib/admin/inquiries-api";
+import { useAdminPendingRegistrations } from "@/hooks/useAdminPendingRegistrations";
+import { INQUIRY_STATUS_LABELS, inquiryStatusSelectOptions } from "@/lib/inquiry/status";
+import type { Inquiry, InquiryItem, InquiryStatus } from "@/types/inquiry";
 import {
   adminAlertErr,
   adminAlertOk,
@@ -39,6 +41,16 @@ function formatDate(iso: string) {
   }
 }
 
+function formatNameList(names: string[]): string {
+  if (names.length <= 1) return names[0] ?? "";
+  if (names.length === 2) return `${names[0]} and ${names[1]}`;
+  return `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
+}
+
+function itemIds(items: InquiryItem[] | undefined): string[] {
+  return (items ?? []).map((item) => item.id);
+}
+
 export default function InquiryReviewPanel({
   inquiryId,
   onClose,
@@ -47,10 +59,12 @@ export default function InquiryReviewPanel({
   const [inquiry, setInquiry] = useState<Inquiry | null>(null);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<InquiryStatus>("NEW");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [banner, setBanner] = useState<{ type: "ok" | "err"; text: string } | null>(
     null,
   );
+  const { refreshCounts } = useAdminPendingRegistrations();
 
   useEffect(() => {
     let cancelled = false;
@@ -60,6 +74,7 @@ export default function InquiryReviewPanel({
       if (result.ok) {
         setInquiry(result.data);
         setStatus(result.data.status);
+        setSelectedIds(itemIds(result.data.items));
       } else {
         setBanner({ type: "err", text: result.message });
       }
@@ -70,19 +85,83 @@ export default function InquiryReviewPanel({
     };
   }, [inquiryId]);
 
-  async function handleSave() {
-    if (!inquiry) return;
-    setSaving(true);
-    setBanner(null);
-    const result = await updateInquiryStatus(inquiry.id, status);
-    setSaving(false);
-    if (!result.ok) {
-      setBanner({ type: "err", text: result.message });
+  const items = inquiry?.items ?? [];
+  const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+  const removedItems = items.filter((item) => !selectedSet.has(item.id));
+  const statusChanged = Boolean(inquiry && status !== inquiry.status);
+  const itemsChanged = removedItems.length > 0;
+  const canSave = !saving && (statusChanged || itemsChanged);
+
+  function toggleItem(id: string) {
+    if (selectedIds.includes(id)) {
+      if (selectedIds.length <= 1) {
+        setBanner({
+          type: "err",
+          text: "Keep at least one talent on the inquiry.",
+        });
+        return;
+      }
+      setBanner(null);
+      setSelectedIds(selectedIds.filter((itemId) => itemId !== id));
       return;
     }
-    setInquiry(result.data);
-    setBanner({ type: "ok", text: "Status updated." });
+    setBanner(null);
+    setSelectedIds([...selectedIds, id]);
+  }
+
+  async function handleSave() {
+    if (!inquiry || !canSave) return;
+
+    if (itemsChanged) {
+      const removedNames = formatNameList(removedItems.map((item) => item.modelName));
+      const confirmed = window.confirm(
+        `An SMS will be sent to ${inquiry.phone} that ${removedNames} ${
+          removedItems.length === 1 ? "is" : "are"
+        } not available. Continue?`,
+      );
+      if (!confirmed) return;
+    }
+
+    setSaving(true);
+    setBanner(null);
+
+    let latest = inquiry;
+    const messages: string[] = [];
+
+    if (itemsChanged) {
+      const itemsResult = await updateInquiryItems(inquiry.id, selectedIds, true);
+      if (!itemsResult.ok) {
+        setSaving(false);
+        setBanner({ type: "err", text: itemsResult.message });
+        return;
+      }
+      latest = itemsResult.data;
+      const names = formatNameList(removedItems.map((item) => item.modelName));
+      messages.push(`Client notified that ${names} ${removedItems.length === 1 ? "is" : "are"} unavailable.`);
+    }
+
+    if (statusChanged) {
+      const statusResult = await updateInquiryStatus(inquiry.id, status);
+      if (!statusResult.ok) {
+        setInquiry(latest);
+        setSelectedIds(itemIds(latest.items));
+        setSaving(false);
+        setBanner({ type: "err", text: statusResult.message });
+        onUpdated();
+        void refreshCounts();
+        return;
+      }
+      latest = statusResult.data;
+      messages.push("Status updated.");
+    }
+
+    setInquiry(latest);
+    setStatus(latest.status);
+    setSelectedIds(itemIds(latest.items));
+    setSaving(false);
+    setBanner({ type: "ok", text: messages.join(" ") });
     onUpdated();
+    void refreshCounts();
   }
 
   return (
@@ -142,23 +221,62 @@ export default function InquiryReviewPanel({
 
               <div>
                 <p className="text-xs font-medium text-gray-500 mb-2">
-                  Selected talent ({inquiry.items.length})
+                  Selected talent ({selectedIds.length} of {items.length})
                 </p>
                 <ul className="space-y-2">
-                  {inquiry.items.map((item) => (
-                    <li
-                      key={item.id}
-                      className="rounded-lg border border-gray-200 px-4 py-3 text-sm"
-                    >
-                      <p className="font-medium text-gray-900">{item.modelName}</p>
-                      <p className="text-gray-500 capitalize">
-                        {item.modelType}
-                        {item.category ? ` · ${item.category}` : ""}
-                        {item.priceRate ? ` · ${item.priceRate}` : ""}
-                      </p>
-                    </li>
-                  ))}
+                  {items.map((item) => {
+                    const selected = selectedSet.has(item.id);
+                    return (
+                      <li
+                        key={item.id}
+                        className={`flex items-start justify-between gap-3 rounded-lg border px-4 py-3 text-sm ${
+                          selected
+                            ? "border-gray-200 bg-white"
+                            : "border-red-200 bg-red-50/60"
+                        }`}
+                      >
+                        <div className={selected ? "" : "opacity-60"}>
+                          <p className="font-medium text-gray-900">{item.modelName}</p>
+                          <p className="text-gray-500 capitalize">
+                            {item.modelType}
+                            {item.category ? ` · ${item.category}` : ""}
+                            {item.priceRate ? ` · ${item.priceRate}` : ""}
+                          </p>
+                          {!selected && (
+                            <p className="text-xs text-red-700 mt-1">Not available</p>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => toggleItem(item.id)}
+                          className={`shrink-0 rounded-full p-1.5 border ${
+                            selected
+                              ? "border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                              : "border-red-300 bg-white text-red-600 hover:bg-red-50"
+                          }`}
+                          aria-label={
+                            selected
+                              ? `Deselect ${item.modelName}`
+                              : `Keep ${item.modelName}`
+                          }
+                          aria-pressed={selected}
+                        >
+                          {selected ? (
+                            <Check className="size-4" strokeWidth={2.25} />
+                          ) : (
+                            <X className="size-4" strokeWidth={2.25} />
+                          )}
+                        </button>
+                      </li>
+                    );
+                  })}
                 </ul>
+                {itemsChanged && (
+                  <p className="text-xs text-gray-500 mt-2">
+                    Saving will SMS {inquiry.phone} that the deselected talent{" "}
+                    {removedItems.length === 1 ? "is" : "are"} not available.
+                  </p>
+                )}
               </div>
 
               <div>
@@ -168,9 +286,9 @@ export default function InquiryReviewPanel({
                   onChange={(e) => setStatus(e.target.value as InquiryStatus)}
                   className={adminInput}
                 >
-                  {INQUIRY_QUEUE_STATUSES.map((s) => (
+                  {inquiryStatusSelectOptions(status).map((s) => (
                     <option key={s} value={s}>
-                      {INQUIRY_STATUS_LABELS[s]}
+                      {INQUIRY_STATUS_LABELS[s] ?? s}
                     </option>
                   ))}
                 </select>
@@ -182,11 +300,11 @@ export default function InquiryReviewPanel({
                 </button>
                 <button
                   type="button"
-                  disabled={saving || status === inquiry.status}
+                  disabled={!canSave}
                   onClick={() => void handleSave()}
                   className={adminBtnPrimary}
                 >
-                  {saving ? "Saving…" : "Save status"}
+                  {saving ? "Saving…" : "Save"}
                 </button>
               </div>
             </>

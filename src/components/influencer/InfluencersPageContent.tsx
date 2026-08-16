@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
-import InfluencerPublicModal, { type PublicInfluencer } from "./InfluencerPublicModal";
+import InfluencerPublicModal from "./InfluencerPublicModal";
+import { fetchPublicInfluencerRoster } from "@/lib/public/influencers";
+import type { PublicInfluencer } from "@/types/public-influencer";
 
 function GridSkeleton() {
   return (
@@ -25,17 +27,10 @@ export default function InfluencersPageContent() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    try {
-      const sp = new URLSearchParams({ limit: "100" });
-      if (search.trim()) sp.set("search", search.trim());
-      const res = await fetch(`/api/public/influencers?${sp}`);
-      if (res.ok) {
-        const json = (await res.json()) as { data: PublicInfluencer[] };
-        setInfluencers(json.data ?? []);
-      }
-    } catch {
-      // silently fail
-    }
+    const result = await fetchPublicInfluencerRoster({
+      search: search.trim() || undefined,
+    });
+    setInfluencers(result.ok ? result.data : []);
     setLoading(false);
   }, [search]);
 

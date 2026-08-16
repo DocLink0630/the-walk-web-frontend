@@ -39,6 +39,16 @@ interface DraftMediaState {
   }[];
 }
 
+function emptyDraft(): DraftMediaState {
+  return {
+    profilePhoto: null,
+    nicFront: null,
+    nicBack: null,
+    portfolioPhotos: [],
+    workExperience: [],
+  };
+}
+
 function cloneMedia(media: AdminModelRegistrationMedia): DraftMediaState {
   return {
     profilePhoto: media.profilePhoto ?? null,
@@ -204,6 +214,8 @@ interface ModelReviewMediaSectionProps {
   media?: AdminModelRegistrationMedia | null;
   onMediaUpdated: (media: AdminModelRegistrationMedia) => void;
   onError?: (message: string) => void;
+  showNic?: boolean;
+  showWorkExperience?: boolean;
 }
 
 export default function ModelReviewMediaSection({
@@ -211,9 +223,11 @@ export default function ModelReviewMediaSection({
   media,
   onMediaUpdated,
   onError,
+  showNic = true,
+  showWorkExperience = true,
 }: ModelReviewMediaSectionProps) {
   const [draft, setDraft] = useState<DraftMediaState | null>(
-    media ? cloneMedia(media) : null,
+    media ? cloneMedia(media) : emptyDraft(),
   );
   const [saving, setSaving] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -230,11 +244,9 @@ export default function ModelReviewMediaSection({
   const replaceInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (media) {
-      setDraft(cloneMedia(media));
-      setError(null);
-      setSaved(false);
-    }
+    setDraft(media ? cloneMedia(media) : emptyDraft());
+    setError(null);
+    setSaved(false);
   }, [media]);
 
   const isDirty = useMemo(() => {
@@ -431,7 +443,7 @@ export default function ModelReviewMediaSection({
 
       <div className="space-y-2">
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-            Profile &amp; NIC
+            {showNic ? "Profile & NIC" : "Profile photo"}
           </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {draft?.profilePhoto ? (
@@ -460,56 +472,60 @@ export default function ModelReviewMediaSection({
             </button>
           )}
 
-          {draft?.nicFront ? (
-            <MediaThumb
-              item={draft.nicFront}
-              alt="NIC front"
-              label="NIC front"
-              canMoveUp={false}
-              canMoveDown={false}
-              onMoveUp={() => {}}
-              onMoveDown={() => {}}
-              onDelete={() => void handleDelete(draft.nicFront!.storageFileId)}
-              onReplace={() => triggerReplace("NIC_FRONT")}
-            />
-          ) : (
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => triggerReplace("NIC_FRONT")}
-              className="aspect-[3/4] border border-dashed border-[#E0E0E0] flex flex-col items-center justify-center gap-1 hover:border-[#C8A97A] disabled:opacity-50"
-            >
-              <Upload className="size-4 text-[#9A9A9A]" />
-              <span className="font-ui text-[8px] uppercase tracking-[0.1em] text-[#9A9A9A]">
-                NIC front
-              </span>
-            </button>
-          )}
+          {showNic && (
+            <>
+              {draft?.nicFront ? (
+                <MediaThumb
+                  item={draft.nicFront}
+                  alt="NIC front"
+                  label="NIC front"
+                  canMoveUp={false}
+                  canMoveDown={false}
+                  onMoveUp={() => {}}
+                  onMoveDown={() => {}}
+                  onDelete={() => void handleDelete(draft.nicFront!.storageFileId)}
+                  onReplace={() => triggerReplace("NIC_FRONT")}
+                />
+              ) : (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => triggerReplace("NIC_FRONT")}
+                  className="aspect-[3/4] border border-dashed border-[#E0E0E0] flex flex-col items-center justify-center gap-1 hover:border-[#C8A97A] disabled:opacity-50"
+                >
+                  <Upload className="size-4 text-[#9A9A9A]" />
+                  <span className="font-ui text-[8px] uppercase tracking-[0.1em] text-[#9A9A9A]">
+                    NIC front
+                  </span>
+                </button>
+              )}
 
-          {draft?.nicBack ? (
-            <MediaThumb
-              item={draft.nicBack}
-              alt="NIC back"
-              label="NIC back"
-              canMoveUp={false}
-              canMoveDown={false}
-              onMoveUp={() => {}}
-              onMoveDown={() => {}}
-              onDelete={() => void handleDelete(draft.nicBack!.storageFileId)}
-              onReplace={() => triggerReplace("NIC_BACK")}
-            />
-          ) : (
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => triggerReplace("NIC_BACK")}
-              className="aspect-[3/4] border border-dashed border-[#E0E0E0] flex flex-col items-center justify-center gap-1 hover:border-[#C8A97A] disabled:opacity-50"
-            >
-              <Upload className="size-4 text-[#9A9A9A]" />
-              <span className="font-ui text-[8px] uppercase tracking-[0.1em] text-[#9A9A9A]">
-                NIC back
-              </span>
-            </button>
+              {draft?.nicBack ? (
+                <MediaThumb
+                  item={draft.nicBack}
+                  alt="NIC back"
+                  label="NIC back"
+                  canMoveUp={false}
+                  canMoveDown={false}
+                  onMoveUp={() => {}}
+                  onMoveDown={() => {}}
+                  onDelete={() => void handleDelete(draft.nicBack!.storageFileId)}
+                  onReplace={() => triggerReplace("NIC_BACK")}
+                />
+              ) : (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => triggerReplace("NIC_BACK")}
+                  className="aspect-[3/4] border border-dashed border-[#E0E0E0] flex flex-col items-center justify-center gap-1 hover:border-[#C8A97A] disabled:opacity-50"
+                >
+                  <Upload className="size-4 text-[#9A9A9A]" />
+                  <span className="font-ui text-[8px] uppercase tracking-[0.1em] text-[#9A9A9A]">
+                    NIC back
+                  </span>
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -562,19 +578,22 @@ export default function ModelReviewMediaSection({
                   updatePortfolio(moveItem(draft.portfolioPhotos, index, 1))
                 }
                 onDelete={() => void handleDelete(item.storageFileId)}
-                canDelete={draft.portfolioPhotos.length > 1}
+                canDelete={showNic ? draft.portfolioPhotos.length > 1 : true}
               />
             ))}
           </div>
         ) : (
           !hasAny && (
             <p className="font-ui text-[10px] text-[#4A4A4A] leading-relaxed border border-dashed border-[#E0E0E0] p-4">
-              No registration images were found for this model.
+              {showNic
+                ? "No registration images were found for this model."
+                : "No photos uploaded yet — add a profile or portfolio photo."}
             </p>
           )
         )}
       </div>
 
+      {showWorkExperience && (
       <div className="space-y-3">
         <p className="font-ui text-[8px] tracking-[0.2em] uppercase text-[#9A9A9A]">
           Work experience
@@ -678,6 +697,7 @@ export default function ModelReviewMediaSection({
           />
         </div>
       </div>
+      )}
     </section>
   );
 }

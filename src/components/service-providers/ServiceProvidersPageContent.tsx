@@ -33,7 +33,7 @@ function mapToTalentProfile(provider: PublicServiceProvider, type: ServiceProvid
   const mainImage = provider.imageUrl ?? "";
   const images = provider.portfolioImages.length > 0 ? provider.portfolioImages : mainImage ? [mainImage] : [];
   return {
-    id: provider.userId,
+    id: provider.userId || provider.id,
     name: provider.name,
     type,
     images,
@@ -155,7 +155,7 @@ function ServiceProviderDetailModal({ provider, type, onClose }: DetailModalProp
             {provider.shortBio && (
               <div>
                 <p className="font-ui text-[8px] tracking-[0.2em] uppercase text-[#9A9A9A] mb-1">About</p>
-                <p className="font-ui text-[11px] text-[#4A4A4A] leading-relaxed">{provider.shortBio}</p>
+                <p className="font-ui text-[11px] text-[#4A4A4A] leading-relaxed break-words">{provider.shortBio}</p>
               </div>
             )}
 
@@ -174,8 +174,16 @@ function ServiceProviderDetailModal({ provider, type, onClose }: DetailModalProp
 
             <button
               type="button"
-              onClick={() => inCart ? removeFromCart(talent.id) : addToCart(talent)}
-              className={`w-full font-ui text-[10px] tracking-[0.2em] uppercase px-6 py-3 transition-colors flex items-center justify-center gap-2 ${
+              disabled={!inCart && !talent.id}
+              onClick={() => {
+                if (inCart) {
+                  removeFromCart(talent.id);
+                  return;
+                }
+                if (!talent.id) return;
+                addToCart(talent);
+              }}
+              className={`w-full font-ui text-[10px] tracking-[0.2em] uppercase px-6 py-3 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
                 inCart
                   ? "bg-[#C8A97A] text-white hover:bg-[#b8985e]"
                   : "bg-[#0A0A0A] text-white hover:bg-[#C8A97A]"
@@ -188,7 +196,7 @@ function ServiceProviderDetailModal({ provider, type, onClose }: DetailModalProp
               <p className="font-ui text-[8px] tracking-[0.2em] uppercase text-[#9A9A9A] mb-3">
                 Client reviews
               </p>
-              <ReviewsList talentUserId={provider.userId} />
+              <ReviewsList talentUserId={talent.id} />
             </div>
           </div>
         </div>

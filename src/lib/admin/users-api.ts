@@ -8,6 +8,7 @@ import {
   uploadRegistrationImageTokens,
 } from "@/lib/registration/upload-registration-image-tokens";
 import { adminAuthHeaders, getAdminToken } from "@/lib/admin/token";
+import { sortByCreatedAtDesc } from "@/lib/admin/sort-by-created-at";
 import type {
   AdminModelRegistrationMedia,
   AdminUser,
@@ -35,6 +36,8 @@ export async function fetchAdminUsers(
   const sp = new URLSearchParams();
   sp.set("page", String(params.page ?? 1));
   sp.set("limit", String(params.limit ?? 20));
+  sp.set("sort", "createdAt");
+  sp.set("order", "desc");
   if (params.search) sp.set("search", params.search);
   if (params.status) sp.set("status", params.status);
   if (params.roles && params.roles.length > 0) {
@@ -57,7 +60,13 @@ export async function fetchAdminUsers(
   }
 
   const data = (await res.json()) as PaginatedUsersResponse;
-  return { ok: true, data };
+  return {
+    ok: true,
+    data: {
+      ...data,
+      data: sortByCreatedAtDesc(data.data ?? []),
+    },
+  };
 }
 
 export async function fetchAdminUserDetail(
@@ -370,6 +379,45 @@ export async function deleteAdminUser(
   }
 
   return { ok: true };
+}
+
+export async function deleteAdminUsers(ids: string[]): Promise<{
+  deleted: number;
+  failed: { id: string; message: string }[];
+}> {
+  const failed: { id: string; message: string }[] = [];
+  let deleted = 0;
+
+  for (const id of ids) {
+    const result = await deleteAdminUser(id);
+    if (result.ok) deleted += 1;
+    else failed.push({ id, message: result.message });
+  }
+
+  return { deleted, failed };
+}
+
+export function formatBulkDeleteResult(result: {
+  deleted: number;
+  failed: { id: string; message: string }[];
+}): { type: "ok" | "err"; text: string } {
+  const { deleted, failed } = result;
+  if (failed.length === 0) {
+    return {
+      type: "ok",
+      text: `Deleted ${deleted} account${deleted === 1 ? "" : "s"}.`,
+    };
+  }
+  if (deleted === 0) {
+    return {
+      type: "err",
+      text: `Failed to delete ${failed.length} account${failed.length === 1 ? "" : "s"}. ${failed[0]?.message ?? ""}`.trim(),
+    };
+  }
+  return {
+    type: "err",
+    text: `Deleted ${deleted}. Failed ${failed.length}.`,
+  };
 }
 
 export type AdminAttachMediaType =

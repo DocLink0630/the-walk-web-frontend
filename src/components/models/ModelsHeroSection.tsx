@@ -46,7 +46,7 @@ export default function ModelsHeroSection({
   }, []);
 
   return (
-    <section className="relative h-[50vh] md:h-[60vh] w-full overflow-hidden">
+    <section className="relative h-[28vh] md:h-[60vh] w-full overflow-hidden">
       <div ref={heroImageRef} className="absolute inset-0 z-0 overflow-hidden">
         <Image
           src={backgroundImage}
@@ -65,14 +65,14 @@ export default function ModelsHeroSection({
             "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%)",
         }}
       />
-      <div className="absolute inset-0 z-20 flex items-end pb-10 md:pb-16">
+      <div className="absolute inset-0 z-20 flex items-end pb-6 md:pb-16">
         <div className="max-w-[1440px] w-full mx-auto px-4 md:px-8 lg:px-[80px]">
-          <p className="font-ui text-[9px] md:text-[11px] tracking-[0.35em] uppercase text-[#C8A97A] mb-3 md:mb-4">
+          <p className="font-ui text-[9px] md:text-[11px] tracking-[0.35em] uppercase text-[#C8A97A] mb-2 md:mb-4">
             TALENT ROSTER
           </p>
           <h1
             ref={headingRef}
-            className="font-display text-[56px] md:text-[80px] lg:text-[100px] font-light tracking-[0.15em] md:tracking-[0.3em] text-white leading-[0.9]"
+            className="font-display text-[40px] md:text-[80px] lg:text-[100px] font-light tracking-[0.15em] md:tracking-[0.3em] text-white leading-[0.9]"
           >
             MODELS
           </h1>

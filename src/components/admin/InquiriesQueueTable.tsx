@@ -2,11 +2,15 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { fetchAdminInquiries, updateInquiryStatus } from "@/lib/admin/inquiries-api";
+import { useAdminPendingRegistrations } from "@/hooks/useAdminPendingRegistrations";
 import {
   INQUIRY_QUEUE_STATUSES,
   INQUIRY_STATUS_LABELS,
+  formatInquiryTalentSummary,
+  inquiryStatusSelectOptions,
 } from "@/lib/inquiry/status";
 import type { Inquiry, InquiryStatus } from "@/types/inquiry";
+import AdminPagination from "./AdminPagination";
 import InquiryMobileList from "./InquiryMobileList";
 import InquiryReviewPanel from "./InquiryReviewPanel";
 import {
@@ -35,6 +39,7 @@ function formatDate(iso: string) {
 }
 
 export default function InquiriesQueueTable() {
+  const { refreshCounts } = useAdminPendingRegistrations();
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -46,7 +51,7 @@ export default function InquiriesQueueTable() {
 
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
-  const [statusFilter, setStatusFilter] = useState<InquiryStatus | "">("NEW");
+  const [statusFilter, setStatusFilter] = useState<InquiryStatus | "">("");
 
   const [pendingStatus, setPendingStatus] = useState<Record<string, InquiryStatus>>({});
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -67,9 +72,9 @@ export default function InquiriesQueueTable() {
       setLoading(false);
       return;
     }
-    const rows = result.data.data;
+    const rows = Array.isArray(result.data.data) ? result.data.data : [];
     setInquiries(rows);
-    setTotalPages(result.data.meta.totalPages);
+    setTotalPages(result.data.meta?.totalPages ?? 1);
     const initial: Record<string, InquiryStatus> = {};
     for (const row of rows) {
       initial[row.id] = row.status;
@@ -101,6 +106,7 @@ export default function InquiriesQueueTable() {
       text: `Updated inquiry to ${INQUIRY_STATUS_LABELS[next]}`,
     });
     await loadInquiries();
+    void refreshCounts();
   }
 
   function applySearch() {
@@ -222,13 +228,17 @@ export default function InquiriesQueueTable() {
                     <p className="text-xs text-gray-500">{inquiry.clientEmail}</p>
                   </td>
                   <td className={adminTd}>{inquiry.phone}</td>
-                  <td className={adminTd}>{inquiry.items.length}</td>
+                  <td className={`${adminTd} max-w-[220px]`}>
+                    <p className="truncate" title={formatInquiryTalentSummary(inquiry.items, 8)}>
+                      {formatInquiryTalentSummary(inquiry.items)}
+                    </p>
+                  </td>
                   <td className={`${adminTd} text-gray-500`}>
                     {inquiry.eventDate ?? "—"}
                   </td>
                   <td className={adminTd}>
                     <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700">
-                      {INQUIRY_STATUS_LABELS[inquiry.status]}
+                      {INQUIRY_STATUS_LABELS[inquiry.status] ?? inquiry.status}
                     </span>
                   </td>
                   <td className={adminTd}>
@@ -250,9 +260,11 @@ export default function InquiriesQueueTable() {
                         }
                         className={adminInput + " !py-1.5 text-xs min-w-[130px]"}
                       >
-                        {INQUIRY_QUEUE_STATUSES.map((s) => (
+                        {inquiryStatusSelectOptions(
+                          pendingStatus[inquiry.id] ?? inquiry.status,
+                        ).map((s) => (
                           <option key={s} value={s}>
-                            {INQUIRY_STATUS_LABELS[s]}
+                            {INQUIRY_STATUS_LABELS[s] ?? s}
                           </option>
                         ))}
                       </select>
@@ -276,35 +288,21 @@ export default function InquiriesQueueTable() {
         </table>
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between gap-3 pt-1">
-          <button
-            type="button"
-            disabled={page <= 1 || loading}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className={adminBtnSecondary + " !py-2 text-xs"}
-          >
-            Previous
-          </button>
-          <span className="text-sm text-gray-500">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            type="button"
-            disabled={page >= totalPages || loading}
-            onClick={() => setPage((p) => p + 1)}
-            className={adminBtnSecondary + " !py-2 text-xs"}
-          >
-            Next
-          </button>
-        </div>
-      )}
+      <AdminPagination
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        disabled={loading}
+      />
 
       {reviewId && (
         <InquiryReviewPanel
           inquiryId={reviewId}
           onClose={() => setReviewId(null)}
-          onUpdated={() => void loadInquiries()}
+          onUpdated={() => {
+            void loadInquiries();
+            void refreshCounts();
+          }}
         />
       )}
     </div>

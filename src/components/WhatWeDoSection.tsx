@@ -20,6 +20,7 @@ const CARD_LAYOUT = [
   "md:mt-14 lg:mt-16",
   "",
   "md:mt-10 lg:mt-12",
+  "",
 ] as const;
 
 function toShowcaseProps(d: Discipline) {
@@ -48,7 +49,7 @@ export default function WhatWeDoSection({
   id = "what-we-do",
   eyebrow = "THE PLATFORM",
   heading = "FIND HERE",
-  description = "A single platform where clients discover and book models, beauty artists, and photographers  and where talent builds a public profile.",
+  description = "A single platform where clients discover and book models, beauty artists, photographers, and influencers and where talent builds a public profile.",
   items = disciplines,
 }: WhatWeDoSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);

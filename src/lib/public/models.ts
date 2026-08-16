@@ -38,6 +38,17 @@ export function mapTierToCategory(tier?: ModelTier | null): ModelCategory | unde
   }
 }
 
+export type NormalizedGender = "Male" | "Female" | "Other";
+
+export function normalizeGender(gender?: string | null): NormalizedGender | undefined {
+  if (!gender?.trim()) return undefined;
+  const value = gender.trim().toLowerCase();
+  if (value === "male" || value === "m") return "Male";
+  if (value === "female" || value === "f") return "Female";
+  if (value === "other") return "Other";
+  return undefined;
+}
+
 export function parseHeightCm(height?: string | null): number | null {
   if (!height?.trim()) return null;
   const cmMatch = height.match(/(\d+)\s*cm/i);
@@ -52,6 +63,40 @@ export function parseHeightCm(height?: string | null): number | null {
 
   const numeric = parseInt(height.replace(/\D/g, ""), 10);
   return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
+}
+
+/** 5'0" (60") through 6'6" (78") in 1-inch steps */
+export const HEIGHT_FILTER_MIN_INCHES = 60;
+export const HEIGHT_FILTER_MAX_INCHES = 78;
+
+export function inchesToHeightLabel(totalInches: number): string {
+  const feet = Math.floor(totalInches / 12);
+  const inches = totalInches % 12;
+  return `${feet}'${inches}"`;
+}
+
+export const HEIGHT_FILTER_OPTIONS: { inches: number; label: string }[] = Array.from(
+  { length: HEIGHT_FILTER_MAX_INCHES - HEIGHT_FILTER_MIN_INCHES + 1 },
+  (_, i) => {
+    const inches = HEIGHT_FILTER_MIN_INCHES + i;
+    return { inches, label: inchesToHeightLabel(inches) };
+  },
+);
+
+export function parseHeightInches(height?: string | null): number | null {
+  if (!height?.trim()) return null;
+
+  const feetMatch = height.match(/(\d+)'(\d+)"/);
+  if (feetMatch) {
+    const feet = parseInt(feetMatch[1], 10);
+    const inches = parseInt(feetMatch[2], 10);
+    const total = feet * 12 + inches;
+    return Number.isFinite(total) && total > 0 ? total : null;
+  }
+
+  const cm = parseHeightCm(height);
+  if (cm === null) return null;
+  return Math.round(cm / 2.54);
 }
 
 function formatMeasurements(profile?: AdminUserDetail["modelProfile"]): string | undefined {
@@ -113,6 +158,7 @@ export function mapPublicApiModelToPublicModel(
     userId: item.userId ?? null,
     name: item.name,
     category: mapTierToCategory(item.tier),
+    gender: normalizeGender(item.gender),
     imageUrl: portfolioImages[0] ?? item.imageUrl,
     height: item.height?.trim() || undefined,
     portfolioImages,
@@ -198,7 +244,7 @@ function mapDetailToPublicModel(detail: AdminUserDetail): PublicModel {
     imageUrl,
     tier: profile?.tier,
     category: mapTierToCategory(profile?.tier),
-    gender: profile?.gender,
+    gender: normalizeGender(profile?.gender),
     height: profile?.heightEnc ?? undefined,
     weight: profile?.weightEnc ?? undefined,
     chest: profile?.chestEnc ?? undefined,
@@ -223,6 +269,7 @@ function mergePublicWithDetail(
     id: detail.id,
     name: detail.name || publicModel.name,
     height: detail.height || publicModel.height,
+    gender: detail.gender || publicModel.gender,
     imageUrl: publicModel.imageUrl ?? detail.imageUrl,
     portfolioImages:
       detail.portfolioImages.length > 0
@@ -560,16 +607,14 @@ export function filterModels(models: PublicModel[], filters: ModelFilters): Publ
     }
 
     if (filters.heightMin !== null || filters.heightMax !== null) {
-      const heightCm = parseHeightCm(model.height);
-      if (heightCm === null) return false;
-      if (filters.heightMin !== null && heightCm < filters.heightMin) return false;
-      if (filters.heightMax !== null && heightCm > filters.heightMax) return false;
+      const heightInches = parseHeightInches(model.height);
+      if (heightInches === null) return false;
+      if (filters.heightMin !== null && heightInches < filters.heightMin) return false;
+      if (filters.heightMax !== null && heightInches > filters.heightMax) return false;
     }
 
     if (filters.gender !== "All") {
-      const gender = model.gender?.toLowerCase() ?? "";
-      const target = filters.gender.toLowerCase();
-      if (!gender.includes(target)) return false;
+      if (normalizeGender(model.gender) !== filters.gender) return false;
     }
 
     return true;

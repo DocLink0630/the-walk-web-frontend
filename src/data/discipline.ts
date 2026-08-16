@@ -3,6 +3,7 @@ import modelAcademy from '@/assets/images/model-academy.webp'
 import models from '@/assets/images/models.webp'
 import photographers from '@/assets/images/photgrapher.webp'
 import beautyArtists from '@/assets/images/beautician.webp'
+import influencerPortrait from '@/assets/images/influencer-portrait.jpg'
 export const disciplines: Discipline [] = [
     {
         number: '01',
@@ -53,6 +54,19 @@ export const disciplines: Discipline [] = [
         label: 'FIND AN ARTIST →',
         image:
           beautyArtists.src,
+        imagePosition: 'center',
+        size: 'large',
+      },
+      {
+        number: '05',
+        title: 'INFLUENCERS',
+        tagline: 'Fashion · Beauty · Lifestyle',
+        description:
+          'Content creators available for brand partnerships and campaigns. Review their channels, reach, and past work before you inquire.',
+        link: '/influencers',
+        label: 'FIND AN INFLUENCER →',
+        image:
+          influencerPortrait.src,
         imagePosition: 'center',
         size: 'large',
       },

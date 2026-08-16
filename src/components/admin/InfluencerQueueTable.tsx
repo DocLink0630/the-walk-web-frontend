@@ -1,9 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { deleteAdminUser, fetchAdminUsers } from "@/lib/admin/users-api";
+import {
+  deleteAdminUser,
+  deleteAdminUsers,
+  fetchAdminUsers,
+  formatBulkDeleteResult,
+} from "@/lib/admin/users-api";
 import { useAdminPendingRegistrations } from "@/hooks/useAdminPendingRegistrations";
+import { useAdminUserSelection } from "@/hooks/useAdminUserSelection";
 import type { AdminUser, UserStatus } from "@/types/admin";
+import AdminBulkDeleteBar from "./AdminBulkDeleteBar";
+import AdminPagination from "./AdminPagination";
 import InfluencerReviewPanel from "./InfluencerReviewPanel";
 import {
   adminAlertErr,
@@ -46,6 +54,14 @@ export default function InfluencerQueueTable() {
   const [searchInput, setSearchInput] = useState("");
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const {
+    selectedIds,
+    toggleSelect,
+    toggleSelectAllOnPage,
+    clearSelection,
+    allPageSelected,
+  } = useAdminUserSelection(users);
 
   const currentTab = TABS.find((t) => t.id === tab) ?? TABS[0];
 
@@ -71,6 +87,10 @@ export default function InfluencerQueueTable() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    clearSelection();
+  }, [tab, search, clearSelection]);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -110,6 +130,24 @@ export default function InfluencerQueueTable() {
     void load();
   }
 
+  async function handleBulkDelete() {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+
+    setBulkDeleting(true);
+    setBanner(null);
+    const result = await deleteAdminUsers(ids);
+    setBulkDeleting(false);
+    setBanner(formatBulkDeleteResult(result));
+
+    if (selectedUser && ids.includes(selectedUser.id)) setSelectedUser(null);
+    if (result.deleted > 0) {
+      clearSelection();
+      void refreshCounts();
+      void load();
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex gap-1 border-b border-gray-200">
@@ -142,6 +180,13 @@ export default function InfluencerQueueTable() {
         </button>
       </form>
 
+      <AdminBulkDeleteBar
+        selectedCount={selectedIds.size}
+        deleting={bulkDeleting}
+        disabled={loading}
+        onDelete={handleBulkDelete}
+      />
+
       {banner && (
         <p className={banner.type === "ok" ? "text-sm text-green-700" : adminAlertErr}>
           {banner.text}
@@ -159,6 +204,16 @@ export default function InfluencerQueueTable() {
           <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-gray-50">
               <tr>
+                <th className={adminTh}>
+                  <input
+                    type="checkbox"
+                    checked={allPageSelected}
+                    disabled={users.length === 0 || loading}
+                    onChange={toggleSelectAllOnPage}
+                    className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-400 disabled:opacity-40"
+                    aria-label="Select all influencers on this page"
+                  />
+                </th>
                 <th className={adminTh}>Name / Email</th>
                 <th className={adminTh}>Status</th>
                 <th className={adminTh}>Applied</th>
@@ -168,6 +223,16 @@ export default function InfluencerQueueTable() {
             <tbody className="divide-y divide-gray-100 bg-white">
               {users.map((u) => (
                 <tr key={u.id} className="hover:bg-gray-50">
+                  <td className={adminTd}>
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(u.id)}
+                      disabled={bulkDeleting}
+                      onChange={() => toggleSelect(u.id)}
+                      className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-400 disabled:opacity-40"
+                      aria-label={`Select ${u.displayName ?? u.email}`}
+                    />
+                  </td>
                   <td className={adminTd}>
                     <div>
                       <p className="font-medium text-gray-900">{u.displayName ?? "—"}</p>
@@ -202,7 +267,7 @@ export default function InfluencerQueueTable() {
                       <button
                         type="button"
                         onClick={() => void handleDelete(u)}
-                        disabled={deletingId === u.id}
+                        disabled={deletingId === u.id || bulkDeleting}
                         className="text-xs px-3 py-1 border border-red-200 text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
                       >
                         {deletingId === u.id ? "Deleting…" : "Delete"}
@@ -216,29 +281,12 @@ export default function InfluencerQueueTable() {
         </div>
       )}
 
-      {totalPages > 1 && (
-        <div className="flex items-center gap-2 text-sm">
-          <button
-            type="button"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page <= 1}
-            className={adminBtnSecondary + " disabled:opacity-40"}
-          >
-            Prev
-          </button>
-          <span className="text-gray-500">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            type="button"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page >= totalPages}
-            className={adminBtnSecondary + " disabled:opacity-40"}
-          >
-            Next
-          </button>
-        </div>
-      )}
+      <AdminPagination
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        disabled={loading}
+      />
 
       {selectedUser && (
         <InfluencerReviewPanel

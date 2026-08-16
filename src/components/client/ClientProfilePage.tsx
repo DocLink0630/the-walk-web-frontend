@@ -9,13 +9,11 @@ import {
   fetchOwnClientProfile,
   patchOwnClientProfile,
 } from "@/lib/client/profile-api";
-import { fetchReviewEligibility } from "@/lib/client/reviews-api";
 import { INQUIRY_STATUS_COLORS, INQUIRY_STATUS_LABELS } from "@/lib/inquiry/status";
 import ReviewForm from "@/components/reviews/ReviewForm";
 import ChangePasswordSection from "@/components/auth/ChangePasswordSection";
 import { downloadInquiryModelsPdf } from "@/lib/pdf/download-pdf";
 import type { Inquiry } from "@/types/inquiry";
-import type { ReviewEligibility } from "@/types/review";
 
 function formatDate(iso: string) {
   try {
@@ -41,10 +39,6 @@ export default function ClientProfilePage() {
   const [banner, setBanner] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [reviewingItemId, setReviewingItemId] = useState<string | null>(null);
   const [submittedItemIds, setSubmittedItemIds] = useState<Set<string>>(new Set());
-  const [eligibilityByTalent, setEligibilityByTalent] = useState<
-    Record<string, ReviewEligibility>
-  >({});
-  const [eligibilityLoading, setEligibilityLoading] = useState(false);
   const [exportingInquiryId, setExportingInquiryId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -59,35 +53,10 @@ export default function ClientProfilePage() {
     }
 
     void Promise.all([fetchOwnClientProfile(), fetchOwnInquiries({ limit: 20 })]).then(
-      async ([profile, inquiryResult]) => {
+      ([profile, inquiryResult]) => {
         setFullName(profile?.clientProfile?.fullName?.trim() || user?.name || "");
         if (inquiryResult.ok) {
-          const list = inquiryResult.data.data;
-          setInquiries(list);
-
-          const talentIds = [
-            ...new Set(
-              list
-                .filter((inq) => inq.status === "CLOSED")
-                .flatMap((inq) => inq.items.map((item) => item.modelUserId))
-                .filter(Boolean),
-            ),
-          ];
-
-          if (talentIds.length > 0) {
-            setEligibilityLoading(true);
-            const results = await Promise.all(
-              talentIds.map(async (talentUserId) => {
-                const result = await fetchReviewEligibility(talentUserId);
-                return [
-                  talentUserId,
-                  result.ok ? result.data : { eligible: false },
-                ] as const;
-              }),
-            );
-            setEligibilityByTalent(Object.fromEntries(results));
-            setEligibilityLoading(false);
-          }
+          setInquiries(inquiryResult.data.data);
         }
         setLoadingProfile(false);
       },
@@ -126,21 +95,6 @@ export default function ClientProfilePage() {
   function reviewActionForItem(item: Inquiry["items"][number]) {
     if (submittedItemIds.has(item.id)) {
       return { kind: "done" as const, label: "Review submitted ✓" };
-    }
-
-    if (eligibilityLoading && !(item.modelUserId in eligibilityByTalent)) {
-      return { kind: "loading" as const };
-    }
-
-    const eligibility = eligibilityByTalent[item.modelUserId];
-    if (eligibility && !eligibility.eligible) {
-      const already =
-        eligibility.alreadyReviewed === true ||
-        eligibility.reason?.toLowerCase().includes("already");
-      return {
-        kind: "done" as const,
-        label: already ? "Review submitted ✓" : "Not eligible",
-      };
     }
 
     if (reviewingItemId === item.id) {
@@ -347,7 +301,9 @@ export default function ClientProfilePage() {
                         <ul className="space-y-3">
                           {inquiry.items.map((item) => {
                             const reviewAction =
-                              inquiry.status === "CLOSED" ? reviewActionForItem(item) : null;
+                              inquiry.status === "CLOSED" || inquiry.status === "CONFIRMED"
+                                ? reviewActionForItem(item)
+                                : null;
 
                             return (
                             <li key={item.id} className="space-y-2">
@@ -362,11 +318,6 @@ export default function ClientProfilePage() {
                                 {reviewAction?.kind === "done" && (
                                   <span className="font-ui text-[8px] tracking-[0.1em] text-[#C8A97A]">
                                     {reviewAction.label}
-                                  </span>
-                                )}
-                                {reviewAction?.kind === "loading" && (
-                                  <span className="font-ui text-[8px] tracking-[0.1em] text-[#9A9A9A]">
-                                    …
                                   </span>
                                 )}
                                 {reviewAction?.kind === "cancel" && (
@@ -394,13 +345,6 @@ export default function ClientProfilePage() {
                                     inquiryItemId={item.id}
                                     onSubmitted={() => {
                                       setSubmittedItemIds((prev) => new Set(prev).add(item.id));
-                                      setEligibilityByTalent((prev) => ({
-                                        ...prev,
-                                        [item.modelUserId]: {
-                                          eligible: false,
-                                          alreadyReviewed: true,
-                                        },
-                                      }));
                                       setReviewingItemId(null);
                                     }}
                                   />

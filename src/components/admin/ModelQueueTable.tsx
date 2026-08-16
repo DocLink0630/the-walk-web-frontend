@@ -1,14 +1,23 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { fetchAdminUsers, updateUserStatus, deleteAdminUser } from "@/lib/admin/users-api";
+import {
+  fetchAdminUsers,
+  updateUserStatus,
+  deleteAdminUser,
+  deleteAdminUsers,
+  formatBulkDeleteResult,
+} from "@/lib/admin/users-api";
 import {
   MODEL_QUEUE_STATUSES,
   MODEL_STATUS_LABELS,
 } from "@/lib/admin/model-user-status";
 import type { AdminUser, UserStatus } from "@/types/admin";
 import { useAdminPendingRegistrations } from "@/hooks/useAdminPendingRegistrations";
+import { useAdminUserSelection } from "@/hooks/useAdminUserSelection";
+import AdminBulkDeleteBar from "./AdminBulkDeleteBar";
 import AdminModelMobileList from "./AdminModelMobileList";
+import AdminPagination from "./AdminPagination";
 import ModelReviewPanel from "./ModelReviewPanel";
 import {
   adminAlertErr,
@@ -72,6 +81,14 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
   const [reviewUser, setReviewUser] = useState<AdminUser | null>(null);
   const [pendingReviewCount, setPendingReviewCount] = useState(0);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const {
+    selectedIds,
+    toggleSelect,
+    toggleSelectAllOnPage,
+    clearSelection,
+    allPageSelected,
+  } = useAdminUserSelection(users);
 
   const loadPendingReviewCount = useCallback(async () => {
     const result = await fetchAdminUsers({
@@ -119,6 +136,10 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
   useEffect(() => {
     void loadPendingReviewCount();
   }, [loadPendingReviewCount]);
+
+  useEffect(() => {
+    clearSelection();
+  }, [activeTab, search, clearSelection]);
 
   async function refreshAfterChange() {
     await loadUsers();
@@ -168,6 +189,23 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
     if (reviewUser?.id === user.id) setReviewUser(null);
     setBanner({ type: "ok", text: "Model account deleted." });
     await refreshAfterChange();
+  }
+
+  async function handleBulkDelete() {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+
+    setBulkDeleting(true);
+    setBanner(null);
+    const result = await deleteAdminUsers(ids);
+    setBulkDeleting(false);
+    setBanner(formatBulkDeleteResult(result));
+
+    if (reviewUser && ids.includes(reviewUser.id)) setReviewUser(null);
+    if (result.deleted > 0) {
+      clearSelection();
+      await refreshAfterChange();
+    }
   }
 
   function applySearch() {
@@ -227,6 +265,13 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
         </div>
       </div>
 
+      <AdminBulkDeleteBar
+        selectedCount={selectedIds.size}
+        deleting={bulkDeleting}
+        disabled={loading}
+        onDelete={handleBulkDelete}
+      />
+
       {banner && (
         <div className={banner.type === "ok" ? adminAlertOk : adminAlertErr}>{banner.text}</div>
       )}
@@ -248,6 +293,9 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
           onDelete={(user) => void handleDelete(user)}
           deletingId={deletingId}
           formatDate={formatDate}
+          selectable
+          selectedIds={selectedIds}
+          onToggleSelect={toggleSelect}
         />
       )}
 
@@ -271,6 +319,16 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
         <table className="w-full min-w-[640px]">
           <thead>
             <tr>
+              <th className={adminTh}>
+                <input
+                  type="checkbox"
+                  checked={allPageSelected}
+                  disabled={users.length === 0 || loading}
+                  onChange={toggleSelectAllOnPage}
+                  className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-400 disabled:opacity-40"
+                  aria-label="Select all models on this page"
+                />
+              </th>
               {["Name", "Email", "Status", "Joined", ""].map((h) => (
                 <th key={h || "actions"} className={adminTh}>
                   {h}
@@ -281,13 +339,13 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={5} className={`${adminTd} text-center text-gray-500`}>
+                <td colSpan={6} className={`${adminTd} text-center text-gray-500`}>
                   Loading…
                 </td>
               </tr>
             ) : users.length === 0 ? (
               <tr>
-                <td colSpan={5} className={`${adminTd} text-center text-gray-500`}>
+                <td colSpan={6} className={`${adminTd} text-center text-gray-500`}>
                   {activeTab === "current"
                     ? "No active models found."
                     : "No models pending review."}
@@ -296,6 +354,16 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
             ) : (
               users.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50/80">
+                  <td className={adminTd}>
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(user.id)}
+                      disabled={bulkDeleting}
+                      onChange={() => toggleSelect(user.id)}
+                      className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-400 disabled:opacity-40"
+                      aria-label={`Select ${user.displayName ?? user.email}`}
+                    />
+                  </td>
                   <td className={adminTd}>{user.displayName ?? "—"}</td>
                   <td className={`${adminTd} text-gray-600`}>{user.email}</td>
                   <td className={adminTd}>
@@ -342,7 +410,7 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
                       </button>
                       <button
                         type="button"
-                        disabled={deletingId === user.id || updatingId === user.id}
+                        disabled={deletingId === user.id || updatingId === user.id || bulkDeleting}
                         onClick={() => void handleDelete(user)}
                         className="text-xs px-3 py-1 border border-red-200 text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
                       >
@@ -357,29 +425,12 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
         </table>
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between gap-3 pt-1">
-          <button
-            type="button"
-            disabled={page <= 1 || loading}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className={adminBtnSecondary + " !py-2 text-xs"}
-          >
-            Previous
-          </button>
-          <span className="text-sm text-gray-500">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            type="button"
-            disabled={page >= totalPages || loading}
-            onClick={() => setPage((p) => p + 1)}
-            className={adminBtnSecondary + " !py-2 text-xs"}
-          >
-            Next
-          </button>
-        </div>
-      )}
+      <AdminPagination
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        disabled={loading}
+      />
 
       {reviewUser && (
         <ModelReviewPanel

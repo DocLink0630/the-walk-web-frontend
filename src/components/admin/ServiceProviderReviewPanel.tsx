@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { approveServiceProvider, deleteAdminUser, fetchAdminUserDetail, updateUserStatus } from "@/lib/admin/users-api";
 import type { AdminUser, AdminUserDetail } from "@/types/admin";
 import type { AdminSection } from "@/types/admin-nav";
+import ModelReviewMediaSection from "./ModelReviewMediaSection";
 import {
   adminAlertErr,
   adminAlertOk,
@@ -152,6 +153,17 @@ export default function ServiceProviderReviewPanel({
                   <DetailRow label="Submitted rate" value={profile.rateCard} />
                 </div>
               )}
+
+              <ModelReviewMediaSection
+                userId={user.id}
+                media={detail?.registrationMedia}
+                showNic={false}
+                showWorkExperience={false}
+                onMediaUpdated={(registrationMedia) =>
+                  setDetail((prev) => (prev ? { ...prev, registrationMedia } : prev))
+                }
+                onError={(text) => setBanner({ type: "err", text })}
+              />
 
               {canReview && (
                 <div className={adminCard + " space-y-3"}>

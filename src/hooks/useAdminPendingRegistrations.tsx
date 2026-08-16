@@ -58,6 +58,15 @@ function detectNewRegistrations(
     }
   }
 
+  const inquiryDelta = current.inquiries - previous.inquiries;
+  if (inquiryDelta > 0) {
+    toasts.push({
+      id: `inquiries-${now}-${inquiryDelta}`,
+      message:
+        inquiryDelta === 1 ? "1 new inquiry" : `${inquiryDelta} new inquiries`,
+    });
+  }
+
   return toasts;
 }
 
