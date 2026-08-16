@@ -10,12 +10,14 @@ interface ModelsMasonryGridProps {
   models: PublicModel[];
   cardRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
   onSelect: (model: PublicModel) => void;
+  emptyMessage?: string;
 }
 
 export default function ModelsMasonryGrid({
   models,
   cardRefs,
   onSelect,
+  emptyMessage = "No models match these filters.",
 }: ModelsMasonryGridProps) {
   const { isAuthenticated } = useAuth();
   const { isInCart } = useBooking();
@@ -24,14 +26,14 @@ export default function ModelsMasonryGrid({
     return (
       <div className="text-center py-20">
         <p className="font-display text-[20px] font-light text-[#9A9A9A] italic">
-          No models match these filters.
+          {emptyMessage}
         </p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+    <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
       {models.map((model, index) => {
         const displayName = isAuthenticated
           ? model.name
@@ -63,7 +65,7 @@ export default function ModelsMasonryGrid({
                     alt={displayName}
                     fill
                     className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 25vw"
+                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                     unoptimized
                   />
                 ) : (
@@ -78,8 +80,8 @@ export default function ModelsMasonryGrid({
                     <span className="font-ui text-[9px] text-white">✓</span>
                   </div>
                 )}
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/70 to-transparent px-4 pb-4 pt-16">
-                  <h3 className="font-ui text-[22px] md:text-[26px] font-bold tracking-[0.06em] uppercase text-white leading-[1.1] [text-shadow:0_2px_16px_rgba(0,0,0,1),0_1px_3px_rgba(0,0,0,0.9)]">
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/70 to-transparent px-2 pb-2 pt-10 md:px-4 md:pb-4 md:pt-16">
+                  <h3 className="font-ui text-[14px] md:text-[26px] font-bold tracking-[0.06em] uppercase text-white leading-[1.1] [text-shadow:0_2px_16px_rgba(0,0,0,1),0_1px_3px_rgba(0,0,0,0.9)]">
                     {displayName}
                   </h3>
                   {model.category && (

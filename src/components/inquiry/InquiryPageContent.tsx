@@ -198,12 +198,26 @@ export default function InquiryPageContent() {
           <p className="font-ui text-sm text-[#4A4A4A]">
             Your inquiry cart is empty. Browse talent and add profiles to inquire.
           </p>
-          <Link
-            href="/models"
-            className="font-ui text-[11px] tracking-[0.15em] uppercase text-[#9A7329] underline underline-offset-4"
-          >
-            Browse models
-          </Link>
+          <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
+            <Link
+              href="/models"
+              className="font-ui text-[11px] tracking-[0.15em] uppercase text-[#9A7329] underline underline-offset-4"
+            >
+              Browse models
+            </Link>
+            <Link
+              href="/beauticians"
+              className="font-ui text-[11px] tracking-[0.15em] uppercase text-[#9A7329] underline underline-offset-4"
+            >
+              Browse beauticians
+            </Link>
+            <Link
+              href="/photographers"
+              className="font-ui text-[11px] tracking-[0.15em] uppercase text-[#9A7329] underline underline-offset-4"
+            >
+              Browse photographers
+            </Link>
+          </div>
         </div>
       ) : submitted ? (
         <div className="space-y-6">

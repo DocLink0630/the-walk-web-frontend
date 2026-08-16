@@ -15,6 +15,7 @@ export interface PublicApiModel {
   userId?: string | null;
   name: string;
   tier?: ModelTier | null;
+  gender?: string | null;
   height?: string | null;
   imageUrl: string | null;
   portfolioImages?: string[];
@@ -55,4 +56,6 @@ export interface PublicModel {
   workExperienceImages?: string[];
   /** True when sourced from featured-only fallback (guest or permission denied) */
   isFeaturedOnly?: boolean;
+  /** True when this card is a public influencer, not a MODEL-role listing */
+  isInfluencer?: boolean;
 }

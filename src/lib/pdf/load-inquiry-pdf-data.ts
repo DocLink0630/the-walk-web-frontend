@@ -1,5 +1,9 @@
 import { backendFetch } from "@/lib/backend/fetch";
 import { buildInquiryDraftPdfData } from "@/lib/pdf/build-inquiry-draft-pdf-data";
+import {
+  normalizeInquiryTalent,
+  uniqueUrls,
+} from "@/lib/pdf/normalize-inquiry-talent";
 import type { InquiryModelsPdfData, InquiryTalentPdfData } from "@/lib/pdf/types";
 import type { BookingItem } from "@/types/talents";
 import type { AdminModelRegistrationMedia } from "@/types/admin";
@@ -23,32 +27,19 @@ function isRouteMissing(status: number, data: unknown): boolean {
   return false;
 }
 
-function collectMediaUrls(media?: AdminModelRegistrationMedia | null): string[] {
-  if (!media) return [];
-  const urls: string[] = [];
-  if (media.profilePhoto?.url) urls.push(media.profilePhoto.url);
-  for (const photo of media.portfolioPhotos ?? []) {
-    if (photo.url) urls.push(photo.url);
-  }
-  for (const entry of media.workExperience ?? []) {
-    for (const image of entry.images ?? []) {
-      if (image.url) urls.push(image.url);
-    }
-  }
-  const seen = new Set<string>();
-  const unique: string[] = [];
-  for (const url of urls) {
-    if (seen.has(url)) continue;
-    seen.add(url);
-    unique.push(url);
-  }
-  return unique.slice(0, 16);
+function normalizePackage(data: InquiryModelsPdfData): InquiryModelsPdfData {
+  return {
+    ...data,
+    talents: (data.talents ?? []).map(normalizeInquiryTalent),
+  };
 }
 
 type UserExportPayload = {
+  email?: string;
   modelProfile?: {
     fullName?: string;
     shortBio?: string | null;
+    gender?: string | null;
     tier?: string | null;
     rate?: string | null;
     heightEnc?: string | null;
@@ -93,8 +84,17 @@ function mapUserToTalent(
   const beautician = user.beauticianProfile;
   const photographer = user.photographerProfile;
   const media = user.registrationMedia;
+  const portfolioImages = uniqueUrls(
+    media?.portfolioPhotos?.map((photo) => photo.url) ?? [],
+  );
+  const profileImage = media?.profilePhoto?.url ?? portfolioImages[0] ?? null;
+  const workExperience =
+    media?.workExperience?.map((entry) => ({
+      title: entry.title,
+      images: uniqueUrls(entry.images.map((img) => img.url)),
+    })) ?? [];
 
-  return {
+  return normalizeInquiryTalent({
     modelUserId: item.modelUserId,
     modelName: item.modelName,
     modelType: item.modelType,
@@ -105,6 +105,8 @@ function mapUserToTalent(
       beautician?.fullName?.trim() ||
       photographer?.fullName?.trim() ||
       item.modelName,
+    email: user.email?.trim() || null,
+    gender: model?.gender?.trim() || null,
     shortBio:
       model?.shortBio?.trim() ||
       beautician?.shortBio?.trim() ||
@@ -128,13 +130,11 @@ function mapUserToTalent(
     yearsOfExperience:
       beautician?.yearsOfExperience ?? photographer?.yearsOfExperience ?? null,
     equipmentOverview: photographer?.equipmentOverview?.trim() || null,
-    images: collectMediaUrls(media),
-    workExperience:
-      media?.workExperience?.map((entry) => ({
-        title: entry.title,
-        images: entry.images.map((img) => img.url).filter(Boolean).slice(0, 4),
-      })) ?? [],
-  };
+    profileImage,
+    portfolioImages,
+    images: uniqueUrls([profileImage, ...portfolioImages]),
+    workExperience,
+  });
 }
 
 async function buildFromCart(
@@ -209,13 +209,13 @@ export async function loadInquiryModelsPdfData(
   });
 
   if ((post.status === 200 || post.status === 201) && post.data && typeof post.data === "object") {
-    return { data: post.data as InquiryModelsPdfData };
+    return { data: normalizePackage(post.data as InquiryModelsPdfData) };
   }
 
   if (inquiryId && isRouteMissing(post.status, post.data)) {
     const get = await backendFetch(`/v1/inquiries/${inquiryId}/export`, { token });
     if (get.status === 200 && get.data && typeof get.data === "object") {
-      return { data: get.data as InquiryModelsPdfData };
+      return { data: normalizePackage(get.data as InquiryModelsPdfData) };
     }
     const message =
       get.data && typeof get.data === "object" && "message" in get.data

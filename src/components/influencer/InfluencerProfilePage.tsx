@@ -4,11 +4,14 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { getClientToken } from "@/lib/client/token";
+import type { AdminModelRegistrationMedia } from "@/types/admin";
+import ModelProfileMediaSection from "@/components/model/ModelProfileMediaSection";
 
 interface InfluencerOwnProfile {
   id: string;
   email: string;
   status: string;
+  registrationMedia?: AdminModelRegistrationMedia | null;
   influencerProfile?: {
     fullName?: string;
     contentCategories?: string[];
@@ -64,6 +67,9 @@ export default function InfluencerProfilePage() {
   const router = useRouter();
   const [profile, setProfile] = useState<InfluencerOwnProfile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
+  const [registrationMedia, setRegistrationMedia] =
+    useState<AdminModelRegistrationMedia | null>(null);
+  const [banner, setBanner] = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
   useEffect(() => {
     if (isLoading) return;
@@ -81,6 +87,7 @@ export default function InfluencerProfilePage() {
 
     void fetchOwnProfile(token).then((data) => {
       setProfile(data);
+      setRegistrationMedia(data?.registrationMedia ?? null);
       setLoadingProfile(false);
     });
   }, [isAuthenticated, isLoading, isInfluencer, router]);
@@ -100,7 +107,7 @@ export default function InfluencerProfilePage() {
 
   return (
     <main className="min-h-screen bg-[#FAFAFA] pt-24 pb-16 px-4">
-      <div className="max-w-xl mx-auto">
+      <div className="max-w-2xl mx-auto">
         <p className="font-ui text-[8px] tracking-[0.35em] uppercase text-[#C8A97A] mb-2">
           Influencer account
         </p>
@@ -153,6 +160,34 @@ export default function InfluencerProfilePage() {
           <DetailRow label="Rate card" value={influencer?.rateCard} />
           <DetailRow label="Past brand work" value={influencer?.pastBrandWork} />
           <DetailRow label="Bio" value={influencer?.shortBio} />
+        </div>
+
+        <div className="mt-6 space-y-6">
+          {banner && (
+            <div
+              className={
+                banner.type === "ok"
+                  ? "border border-[#C8A97A] bg-[#C8A97A]/10 px-5 py-3"
+                  : "border border-red-300 bg-red-50 px-5 py-3"
+              }
+            >
+              <p
+                className={
+                  "font-ui text-[10px] " +
+                  (banner.type === "ok" ? "text-[#0A0A0A]" : "text-red-700")
+                }
+              >
+                {banner.text}
+              </p>
+            </div>
+          )}
+          <ModelProfileMediaSection
+            media={registrationMedia}
+            showWorkExperience={false}
+            allowEmptyPortfolio
+            onMediaChange={setRegistrationMedia}
+            onError={(message) => setBanner({ type: "err", text: message })}
+          />
         </div>
       </div>
     </main>

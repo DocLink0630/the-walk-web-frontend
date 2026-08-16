@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Lock, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Lock, ShoppingCart, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useBooking } from "@/context/BookingContext";
 import { getFirstName } from "@/lib/public/featured-models";
@@ -27,7 +27,7 @@ interface ModelDetailModalProps {
 
 export default function ModelDetailModal({ model, onClose }: ModelDetailModalProps) {
   const { isAuthenticated, isClient, user } = useAuth();
-  const { addToCart, isInCart } = useBooking();
+  const { addToCart, bookingCart, isInCart } = useBooking();
   const [slideIndex, setSlideIndex] = useState(0);
   const [resolvedModel, setResolvedModel] = useState(model);
   const [exportingPdf, setExportingPdf] = useState(false);
@@ -182,8 +182,9 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
   const currentSlide = slides[slideIndex];
   const hasImage = !!currentSlide?.image;
   const tierLabel = resolvedModel.category ?? mapTierToCategory(resolvedModel.tier);
-  const inCart = isInCart(resolvedModel.id);
   const modelUserId = resolvedModel.userId ?? resolvedModel.id;
+  const inCart =
+    isInCart(modelUserId) || isInCart(resolvedModel.id) || isInCart(model.id);
   const isOwnModelProfile =
     isAuthenticated && !!user?.id && user.id === modelUserId;
   const canExportProfile = isClient || isOwnModelProfile;
@@ -442,14 +443,18 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
                   >
                     {inCart ? "Added to inquiry" : "Add to inquiry"}
                   </button>
-                  {inCart && (
-                    <Link
-                      href="/inquiry"
-                      className="block w-full text-center font-ui text-[9px] tracking-[0.2em] uppercase text-[#9A7329] underline"
-                    >
-                      View inquiry cart
-                    </Link>
-                  )}
+                  <Link
+                    href="/inquiry"
+                    className="flex w-full min-w-0 items-center justify-center gap-2 font-ui text-[10px] font-bold tracking-[0.18em] uppercase px-4 py-3 bg-[#C8A97A]/20 text-[#9A7329] border border-[#C8A97A] hover:bg-[#C8A97A] hover:text-white transition-colors"
+                  >
+                    <ShoppingCart size={14} strokeWidth={2.25} />
+                    View inquiry cart
+                    {bookingCart.length > 0 && (
+                      <span className="flex h-4 min-w-4 items-center justify-center bg-[#9A7329] px-1 font-ui text-[8px] tracking-normal text-white">
+                        {bookingCart.length}
+                      </span>
+                    )}
+                  </Link>
                   <button
                     type="button"
                     onClick={() => setReviewOpen(true)}

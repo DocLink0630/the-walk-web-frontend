@@ -1,10 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { fetchAdminUsers, deleteAdminUser } from "@/lib/admin/users-api";
+import {
+  fetchAdminUsers,
+  deleteAdminUser,
+  deleteAdminUsers,
+  formatBulkDeleteResult,
+} from "@/lib/admin/users-api";
 import { useAdminPendingRegistrations } from "@/hooks/useAdminPendingRegistrations";
+import { useAdminUserSelection } from "@/hooks/useAdminUserSelection";
 import type { AdminUser, UserStatus } from "@/types/admin";
 import type { AdminSection } from "@/types/admin-nav";
+import AdminBulkDeleteBar from "./AdminBulkDeleteBar";
+import AdminPagination from "./AdminPagination";
 import ServiceProviderReviewPanel from "./ServiceProviderReviewPanel";
 import {
   adminAlertErr,
@@ -48,6 +56,14 @@ export default function ServiceProviderQueueTable({ providerType }: Props) {
   const [searchInput, setSearchInput] = useState("");
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const {
+    selectedIds,
+    toggleSelect,
+    toggleSelectAllOnPage,
+    clearSelection,
+    allPageSelected,
+  } = useAdminUserSelection(users);
 
   const currentTab = TABS.find((t) => t.id === tab) ?? TABS[0];
 
@@ -68,6 +84,10 @@ export default function ServiceProviderQueueTable({ providerType }: Props) {
   }, [page, search, currentTab.status, role]);
 
   useEffect(() => { void load(); }, [load]);
+
+  useEffect(() => {
+    clearSelection();
+  }, [tab, search, role, clearSelection]);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -103,6 +123,24 @@ export default function ServiceProviderQueueTable({ providerType }: Props) {
     void load();
   }
 
+  async function handleBulkDelete() {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+
+    setBulkDeleting(true);
+    setBanner(null);
+    const result = await deleteAdminUsers(ids);
+    setBulkDeleting(false);
+    setBanner(formatBulkDeleteResult(result));
+
+    if (selectedUser && ids.includes(selectedUser.id)) setSelectedUser(null);
+    if (result.deleted > 0) {
+      clearSelection();
+      void refreshCounts();
+      void load();
+    }
+  }
+
   return (
     <div className="space-y-4">
       {/* Tabs */}
@@ -135,6 +173,13 @@ export default function ServiceProviderQueueTable({ providerType }: Props) {
         <button type="submit" className={adminBtnSecondary}>Search</button>
       </form>
 
+      <AdminBulkDeleteBar
+        selectedCount={selectedIds.size}
+        deleting={bulkDeleting}
+        disabled={loading}
+        onDelete={handleBulkDelete}
+      />
+
       {banner && <p className={banner.type === "ok" ? "text-sm text-green-700" : adminAlertErr}>{banner.text}</p>}
 
       {loading ? (
@@ -148,6 +193,16 @@ export default function ServiceProviderQueueTable({ providerType }: Props) {
           <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-gray-50">
               <tr>
+                <th className={adminTh}>
+                  <input
+                    type="checkbox"
+                    checked={allPageSelected}
+                    disabled={users.length === 0 || loading}
+                    onChange={toggleSelectAllOnPage}
+                    className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-400 disabled:opacity-40"
+                    aria-label={`Select all ${typeLabel.toLowerCase()}s on this page`}
+                  />
+                </th>
                 <th className={adminTh}>Name / Email</th>
                 <th className={adminTh}>Status</th>
                 <th className={adminTh}>Applied</th>
@@ -157,6 +212,16 @@ export default function ServiceProviderQueueTable({ providerType }: Props) {
             <tbody className="divide-y divide-gray-100 bg-white">
               {users.map((u) => (
                 <tr key={u.id} className="hover:bg-gray-50">
+                  <td className={adminTd}>
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(u.id)}
+                      disabled={bulkDeleting}
+                      onChange={() => toggleSelect(u.id)}
+                      className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-400 disabled:opacity-40"
+                      aria-label={`Select ${u.displayName ?? u.email}`}
+                    />
+                  </td>
                   <td className={adminTd}>
                     <div>
                       <p className="font-medium text-gray-900">{u.displayName ?? "—"}</p>
@@ -186,7 +251,7 @@ export default function ServiceProviderQueueTable({ providerType }: Props) {
                       <button
                         type="button"
                         onClick={() => void handleDelete(u)}
-                        disabled={deletingId === u.id}
+                        disabled={deletingId === u.id || bulkDeleting}
                         className="text-xs px-3 py-1 border border-red-200 text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
                       >
                         {deletingId === u.id ? "Deleting…" : "Delete"}
@@ -200,14 +265,12 @@ export default function ServiceProviderQueueTable({ providerType }: Props) {
         </div>
       )}
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center gap-2 text-sm">
-          <button type="button" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} className={adminBtnSecondary + " disabled:opacity-40"}>Prev</button>
-          <span className="text-gray-500">Page {page} of {totalPages}</span>
-          <button type="button" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages} className={adminBtnSecondary + " disabled:opacity-40"}>Next</button>
-        </div>
-      )}
+      <AdminPagination
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        disabled={loading}
+      />
 
       {selectedUser && (
         <ServiceProviderReviewPanel

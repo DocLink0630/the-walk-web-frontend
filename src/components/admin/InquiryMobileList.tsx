@@ -1,7 +1,11 @@
 "use client";
 
 import type { Inquiry, InquiryStatus } from "@/types/inquiry";
-import { INQUIRY_STATUS_LABELS } from "@/lib/inquiry/status";
+import {
+  INQUIRY_STATUS_LABELS,
+  formatInquiryTalentSummary,
+  inquiryStatusSelectOptions,
+} from "@/lib/inquiry/status";
 import {
   adminBtnAccent,
   adminBtnPrimary,
@@ -42,11 +46,11 @@ export default function InquiryMobileList({
               <p className="text-sm text-gray-500 truncate">{inquiry.phone}</p>
             </div>
             <span className={adminStatusBadge}>
-              {INQUIRY_STATUS_LABELS[inquiry.status]}
+              {INQUIRY_STATUS_LABELS[inquiry.status] ?? inquiry.status}
             </span>
           </div>
           <p className="text-sm text-gray-600">
-            {inquiry.items.length} talent{inquiry.items.length === 1 ? "" : "s"}
+            {formatInquiryTalentSummary(inquiry.items)}
             {inquiry.eventDate ? ` · ${inquiry.eventDate}` : ""}
           </p>
           <p className="text-xs text-gray-400">{formatDate(inquiry.createdAt)}</p>
@@ -65,10 +69,10 @@ export default function InquiryMobileList({
               }
               className={adminInput + " !py-1.5 text-xs min-w-[120px]"}
             >
-              {(["NEW", "IN_PROGRESS", "CONFIRMED", "CLOSED"] as InquiryStatus[]).map(
+              {inquiryStatusSelectOptions(pendingStatus[inquiry.id] ?? inquiry.status).map(
                 (s) => (
                   <option key={s} value={s}>
-                    {INQUIRY_STATUS_LABELS[s]}
+                    {INQUIRY_STATUS_LABELS[s] ?? s}
                   </option>
                 ),
               )}

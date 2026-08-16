@@ -38,12 +38,16 @@ interface AuthContextType {
     isModel?: boolean;
     isClient?: boolean;
     isInfluencer?: boolean;
+    isPhotographer?: boolean;
+    isBeautician?: boolean;
   }>;
   logout: () => void;
   isAuthenticated: boolean;
   isClient: boolean;
   isModel: boolean;
   isInfluencer: boolean;
+  isPhotographer: boolean;
+  isBeautician: boolean;
   isLoading: boolean;
 }
 
@@ -96,6 +100,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             clientProfile?: { fullName?: string };
             modelProfile?: { fullName?: string };
             influencerProfile?: { fullName?: string };
+            beauticianProfile?: { fullName?: string };
+            photographerProfile?: { fullName?: string };
           };
           applySession(buildClientSession(data));
           setIsLoading(false);
@@ -123,6 +129,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isModel?: boolean;
     isClient?: boolean;
     isInfluencer?: boolean;
+    isPhotographer?: boolean;
+    isBeautician?: boolean;
   }> => {
     try {
       const res = await fetch("/api/auth/login", {
@@ -142,6 +150,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           clientProfile?: { fullName?: string };
           modelProfile?: { fullName?: string };
           influencerProfile?: { fullName?: string };
+          beauticianProfile?: { fullName?: string };
+          photographerProfile?: { fullName?: string };
         };
       };
 
@@ -164,11 +174,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userIsModel = data.user.roles?.includes("MODEL") ?? false;
       const userIsClient = data.user.roles?.includes("CORPORATE_CLIENT") ?? false;
       const userIsInfluencer = data.user.roles?.includes("INFLUENCER") ?? false;
+      const userIsPhotographer = data.user.roles?.includes("PHOTOGRAPHER") ?? false;
+      const userIsBeautician = data.user.roles?.includes("BEAUTICIAN") ?? false;
       return {
         ok: true,
         isModel: userIsModel,
         isClient: userIsClient,
         isInfluencer: userIsInfluencer,
+        isPhotographer: userIsPhotographer,
+        isBeautician: userIsBeautician,
       };
     } catch {
       return { ok: false, message: "Unable to sign in. Please try again." };
@@ -186,6 +200,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const isModel = !!user?.roles?.includes("MODEL");
   const isInfluencer = !!user?.roles?.includes("INFLUENCER");
+  const isPhotographer = !!user?.roles?.includes("PHOTOGRAPHER");
+  const isBeautician = !!user?.roles?.includes("BEAUTICIAN");
 
   return (
     <AuthContext.Provider
@@ -197,6 +213,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isClient,
         isModel,
         isInfluencer,
+        isPhotographer,
+        isBeautician,
         isLoading,
       }}
     >

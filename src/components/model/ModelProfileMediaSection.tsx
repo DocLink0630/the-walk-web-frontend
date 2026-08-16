@@ -17,12 +17,16 @@ interface ModelProfileMediaSectionProps {
   media: AdminModelRegistrationMedia | null | undefined;
   onMediaChange: (media: AdminModelRegistrationMedia) => void;
   onError: (message: string) => void;
+  showWorkExperience?: boolean;
+  allowEmptyPortfolio?: boolean;
 }
 
 export default function ModelProfileMediaSection({
   media,
   onMediaChange,
   onError,
+  showWorkExperience = true,
+  allowEmptyPortfolio = false,
 }: ModelProfileMediaSectionProps) {
   const portfolioInputRef = useRef<HTMLInputElement>(null);
   const profileInputRef = useRef<HTMLInputElement>(null);
@@ -240,7 +244,7 @@ export default function ModelProfileMediaSection({
               )}
               <button
                 type="button"
-                disabled={busy || portfolio.length <= 1}
+                disabled={busy || (!allowEmptyPortfolio && portfolio.length <= 1)}
                 onClick={() => void handleDeletePhoto(item.storageFileId)}
                 className="absolute top-1 right-1 p-1 bg-black/60 text-white hover:bg-red-600 disabled:opacity-40"
                 aria-label="Delete photo"
@@ -252,6 +256,7 @@ export default function ModelProfileMediaSection({
         </div>
       </section>
 
+      {showWorkExperience && (
       <section className="bg-white border border-[#E0E0E0] p-6 space-y-4">
         <h2 className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#0A0A0A]">
           Work experience
@@ -350,6 +355,7 @@ export default function ModelProfileMediaSection({
           />
         </div>
       </section>
+      )}
     </div>
   );
 }

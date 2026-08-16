@@ -7,12 +7,18 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { getClientToken } from "@/lib/client/token";
 import {
+  fetchPublicInfluencerRoster,
+  mapInfluencerToPublicModel,
+} from "@/lib/public/influencers";
+import {
   DEFAULT_MODEL_FILTERS,
   filterModels,
   loadModelsPageData,
   type ModelFilters,
 } from "@/lib/public/models";
+import type { PublicInfluencer } from "@/types/public-influencer";
 import type { PublicModel } from "@/types/public-model";
+import InfluencerPublicModal from "@/components/influencer/InfluencerPublicModal";
 import ModelDetailModal from "./ModelDetailModal";
 import ModelsFilterBar from "./ModelsFilterBar";
 import ModelsHeroSection from "./ModelsHeroSection";
@@ -23,7 +29,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 function GridSkeleton() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+    <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
       {Array.from({ length: 8 }, (_, i) => (
         <div key={i}>
           <div className="aspect-[3/4] bg-[#F0F0F0] border border-[#E8E8E8] animate-pulse" />
@@ -38,6 +44,7 @@ export default function ModelsPageContent() {
   const { isAuthenticated } = useAuth();
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const triggersRef = useRef<ScrollTrigger[]>([]);
+  const [showRosterCta, setShowRosterCta] = useState(false);
 
   const [models, setModels] = useState<PublicModel[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,9 +52,19 @@ export default function ModelsPageContent() {
   const [error, setError] = useState<string | undefined>();
   const [restricted, setRestricted] = useState(true);
 
+  const [influencers, setInfluencers] = useState<PublicInfluencer[]>([]);
+  const [influencersLoaded, setInfluencersLoaded] = useState(false);
+  const [influencersLoading, setInfluencersLoading] = useState(false);
+  const [influencersError, setInfluencersError] = useState<string | undefined>();
+
   const [filters, setFilters] = useState<ModelFilters>(DEFAULT_MODEL_FILTERS);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [selectedModel, setSelectedModel] = useState<PublicModel | null>(null);
+  const [selectedInfluencer, setSelectedInfluencer] = useState<PublicInfluencer | null>(
+    null,
+  );
+
+  const isInfluencerFilter = filters.category === "Influencer";
 
   const loadModels = useCallback(async () => {
     setLoading(true);
@@ -64,6 +81,20 @@ export default function ModelsPageContent() {
     setLoading(false);
   }, [isAuthenticated]);
 
+  const loadInfluencers = useCallback(async () => {
+    setInfluencersLoading(true);
+    setInfluencersError(undefined);
+
+    const result = await fetchPublicInfluencerRoster();
+    if (result.ok) {
+      setInfluencers(result.data);
+    } else {
+      setInfluencersError(result.message);
+    }
+    setInfluencersLoaded(true);
+    setInfluencersLoading(false);
+  }, []);
+
   useEffect(() => {
     document.body.style.overflow = "auto";
     window.scrollTo(0, 0);
@@ -73,10 +104,37 @@ export default function ModelsPageContent() {
     loadModels();
   }, [loadModels]);
 
-  const filteredModels = useMemo(
-    () => filterModels(models, filters),
-    [models, filters],
-  );
+  useEffect(() => {
+    if (!isInfluencerFilter || influencersLoaded) return;
+    void loadInfluencers();
+  }, [isInfluencerFilter, influencersLoaded, loadInfluencers]);
+
+  useEffect(() => {
+    if (!isInfluencerFilter) setSelectedInfluencer(null);
+  }, [isInfluencerFilter]);
+
+  const displayedModels = useMemo(() => {
+    if (isInfluencerFilter) {
+      return influencers.map(mapInfluencerToPublicModel);
+    }
+    return filterModels(models, filters);
+  }, [isInfluencerFilter, influencers, models, filters]);
+
+  const gridLoading = isInfluencerFilter
+    ? !influencersLoaded || influencersLoading
+    : loading;
+  const gridError = isInfluencerFilter ? influencersError : error;
+
+  function handleSelect(model: PublicModel) {
+    if (model.isInfluencer) {
+      const influencer = influencers.find(
+        (item) => item.userId === model.userId || item.userId === model.id,
+      );
+      if (influencer) setSelectedInfluencer(influencer);
+      return;
+    }
+    setSelectedModel(model);
+  }
 
   useEffect(() => {
     const cleanups: (() => void)[] = [];
@@ -167,24 +225,28 @@ export default function ModelsPageContent() {
       triggersRef.current.forEach((trigger) => trigger.kill());
       triggersRef.current = [];
     };
-  }, [filteredModels]);
+  }, [displayedModels]);
 
   return (
-    <div className="min-h-screen bg-white pt-[88px] md:pt-[96px] pb-36 md:pb-40">
+    <div
+      className={`min-h-screen bg-white pt-[88px] md:pt-[96px] ${
+        showRosterCta ? "pb-36 md:pb-40" : "pb-8"
+      }`}
+    >
       <ModelsHeroSection />
 
       <ModelsFilterBar
         filters={filters}
         onChange={setFilters}
-        count={filteredModels.length}
+        count={displayedModels.length}
         showAdvanced={showAdvancedFilters}
         onToggleAdvanced={() => setShowAdvancedFilters((v) => !v)}
         showAdvancedFilters={!restricted}
       />
 
-      <section className="py-12 md:py-20 bg-white overflow-hidden">
+      <section className="py-6 md:py-20 bg-white overflow-hidden">
         <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-[80px]">
-          {notice && (
+          {notice && !isInfluencerFilter && (
             <div className="mb-6 border border-[#C8A97A]/30 bg-[#C8A97A]/10 px-4 py-3">
               <p className="font-ui text-[10px] text-[#4A4A4A] leading-relaxed">
                 {notice}
@@ -205,30 +267,33 @@ export default function ModelsPageContent() {
             </div>
           )}
 
-          {error && models.length === 0 && (
+          {gridError && displayedModels.length === 0 ? (
             <div className="text-center py-16 space-y-4">
-              <p className="font-ui text-sm text-[#4A4A4A]">{error}</p>
+              <p className="font-ui text-sm text-[#4A4A4A]">{gridError}</p>
               <button
                 type="button"
-                onClick={loadModels}
+                onClick={isInfluencerFilter ? loadInfluencers : loadModels}
                 className="font-ui text-[9px] tracking-[0.2em] uppercase px-6 py-3 border border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-colors"
               >
                 Retry
               </button>
             </div>
-          )}
-
-          {loading ? (
+          ) : gridLoading ? (
             <GridSkeleton />
           ) : (
             <ModelsMasonryGrid
-              models={filteredModels}
+              models={displayedModels}
               cardRefs={cardRefs}
-              onSelect={setSelectedModel}
+              onSelect={handleSelect}
+              emptyMessage={
+                isInfluencerFilter
+                  ? "No influencers found."
+                  : "No models match these filters."
+              }
             />
           )}
 
-          {!loading && models.length === 0 && !error && (
+          {!loading && !isInfluencerFilter && models.length === 0 && !error && (
             <div className="text-center py-16 space-y-4">
               <p className="font-display text-[20px] font-light text-[#9A9A9A] italic">
                 New models will appear here once approved.
@@ -244,12 +309,19 @@ export default function ModelsPageContent() {
         </div>
       </section>
 
-      <ModelsRosterCta />
+      <ModelsRosterCta onVisibilityChange={setShowRosterCta} />
 
       {selectedModel && (
         <ModelDetailModal
           model={selectedModel}
           onClose={() => setSelectedModel(null)}
+        />
+      )}
+
+      {selectedInfluencer && (
+        <InfluencerPublicModal
+          influencer={selectedInfluencer}
+          onClose={() => setSelectedInfluencer(null)}
         />
       )}
     </div>

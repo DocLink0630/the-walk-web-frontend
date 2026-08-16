@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { backendFetch, getBackendUrl } from "@/lib/backend/fetch";
+import { sanitizePublicServiceProvidersPayload } from "@/lib/public/plaintext-field";
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,5 +19,5 @@ export async function GET(request: NextRequest) {
     },
   });
 
-  return NextResponse.json(data ?? {}, { status });
+  return NextResponse.json(sanitizePublicServiceProvidersPayload(data ?? {}), { status });
 }

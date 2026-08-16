@@ -1,5 +1,6 @@
 import { fetchAdminUsers } from "@/lib/admin/users-api";
 import { fetchPendingReviewsCount } from "@/lib/admin/reviews-api";
+import { fetchPendingInquiriesCount } from "@/lib/admin/inquiries-api";
 import type { UserRole } from "@/types/admin";
 import type { AdminSection } from "@/types/admin-nav";
 
@@ -10,6 +11,7 @@ export interface PendingRegistrationCounts {
   photographers: number;
   influencers: number;
   reviews: number;
+  inquiries: number;
 }
 
 export type PendingCountSection =
@@ -55,6 +57,7 @@ export function countForSection(
 export const BADGE_COUNT_SECTIONS = [
   ...PENDING_COUNT_SECTIONS,
   "reviews",
+  "inquiries",
 ] as const satisfies ReadonlyArray<keyof PendingRegistrationCounts>;
 
 export type BadgeCountSection = (typeof BADGE_COUNT_SECTIONS)[number];
@@ -68,6 +71,7 @@ export const EMPTY_PENDING_COUNTS: PendingRegistrationCounts = {
   photographers: 0,
   influencers: 0,
   reviews: 0,
+  inquiries: 0,
 };
 
 export function isBadgeCountSection(section: AdminSection): section is BadgeCountSection {
@@ -143,23 +147,29 @@ export async function fetchPendingRegistrationCounts(): Promise<
   | { ok: true; data: PendingRegistrationCounts }
   | { ok: false; message: string }
 > {
-  const [roleResults, reviewsCount] = await Promise.all([
+  const [roleResults, reviewsCount, inquiriesCount] = await Promise.all([
     Promise.all(
       PENDING_COUNT_SECTIONS.map((section) => countPendingForRoles(SECTION_ROLES[section])),
     ),
     fetchPendingReviewsCount(),
+    fetchPendingInquiriesCount(),
   ]);
 
-  if (roleResults.every((total) => total === null) && reviewsCount === null) {
+  if (
+    roleResults.every((total) => total === null) &&
+    reviewsCount === null &&
+    inquiriesCount === null
+  ) {
     return { ok: false, message: "Failed to load pending counts" };
   }
 
   const data = PENDING_COUNT_SECTIONS.reduce((acc, section, index) => {
     acc[section] = roleResults[index] ?? 0;
     return acc;
-  }, {} as PendingRegistrationCounts);
+  }, { ...EMPTY_PENDING_COUNTS });
 
   data.reviews = reviewsCount ?? 0;
+  data.inquiries = inquiriesCount ?? 0;
 
   return { ok: true, data };
 }

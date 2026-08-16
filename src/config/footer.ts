@@ -25,6 +25,7 @@ export const DEFAULT_FOOTER_SECTIONS: FooterSection[] = [
     links: [
       { label: "Models", href: "/models" },
       { label: "Beauty Artists", href: "/beauticians" },
+      { label: "Influencers", href: "/influencers" },
       { label: "Photographers", href: "/photographers" },
       { label: "The Academy", href: "/academy" },
     ],

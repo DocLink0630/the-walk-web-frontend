@@ -37,11 +37,15 @@ export function buildClientSession(user: {
   clientProfile?: { fullName?: string };
   modelProfile?: { fullName?: string };
   influencerProfile?: { fullName?: string };
+  beauticianProfile?: { fullName?: string };
+  photographerProfile?: { fullName?: string };
 }): ClientSession {
   const name =
     user.clientProfile?.fullName ??
     user.modelProfile?.fullName ??
     user.influencerProfile?.fullName ??
+    user.beauticianProfile?.fullName ??
+    user.photographerProfile?.fullName ??
     user.email.split("@")[0];
 
   return {

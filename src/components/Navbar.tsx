@@ -15,6 +15,7 @@ const TALENT_LINKS = [
   { href: "/models", label: "Models" },
   { href: "/beauticians", label: "Beauticians" },
   { href: "/photographers", label: "Photographers" },
+  { href: "/influencers", label: "Influencers" },
 ] as const;
 
 const NAV_LINKS = [
@@ -35,7 +36,7 @@ const talentDropdownLinkClass =
 export default function Navbar() {
   const navRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
-  const { isAuthenticated, logout, user, isModel, isClient, isInfluencer } = useAuth();
+  const { isAuthenticated, logout, user, isModel, isClient, isInfluencer, isPhotographer, isBeautician } = useAuth();
   const { bookingCart } = useBooking();
   const [showLogin, setShowLogin] = useState(false);
   const [showApplyChoice, setShowApplyChoice] = useState(false);
@@ -64,9 +65,21 @@ export default function Navbar() {
     ? "/model/profile"
     : isInfluencer
       ? "/influencer/profile"
-      : null;
-  const hasProfileMenu = isModel || isInfluencer;
-  const profileInitial = isModel ? "M" : isInfluencer ? "I" : "U";
+      : isPhotographer
+        ? "/photographer/profile"
+        : isBeautician
+          ? "/beautician/profile"
+          : null;
+  const hasProfileMenu = isModel || isInfluencer || isPhotographer || isBeautician;
+  const profileInitial = isModel
+    ? "M"
+    : isInfluencer
+      ? "I"
+      : isPhotographer
+        ? "P"
+        : isBeautician
+          ? "B"
+          : "U";
 
   useEffect(() => {
     const nav = navRef.current;

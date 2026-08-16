@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { ArrowLeft, Menu, X } from "lucide-react";
 import { useAdminAuthStore } from "@/stores/adminAuthStore";
 import { ADMIN_NAV_ITEMS, type AdminSection } from "@/types/admin-nav";
 import AdminSidebar from "./AdminSidebar";
@@ -69,6 +69,17 @@ export default function AdminShell({
           >
             {sidebarOpen ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
+          {activeSection !== "dashboard" && (
+            <button
+              type="button"
+              onClick={() => onSectionChange("dashboard")}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-2.5 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-400 hover:bg-gray-50"
+              aria-label="Back to dashboard"
+            >
+              <ArrowLeft className="size-4" strokeWidth={1.75} />
+              <span>Back</span>
+            </button>
+          )}
           <h1 className={`${adminPageTitle} min-w-0 truncate`}>{activeItem.label}</h1>
         </header>
 

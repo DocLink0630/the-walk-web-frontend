@@ -1,4 +1,4 @@
-import type { ReviewEligibility } from "@/types/review";
+import type { ReviewEligibility, ReviewStatus } from "@/types/review";
 import { getClientToken } from "./token";
 
 function authHeaders(extra: Record<string, string> = {}): Record<string, string> {
@@ -8,19 +8,28 @@ function authHeaders(extra: Record<string, string> = {}): Record<string, string>
 }
 
 function parseEligibility(data: unknown): ReviewEligibility {
-  if (data && typeof data === "object" && "eligible" in data) {
-    const eligible = (data as { eligible: unknown }).eligible === true;
-    const reason =
-      "reason" in data && typeof (data as { reason: unknown }).reason === "string"
-        ? (data as { reason: string }).reason
-        : undefined;
-    const alreadyReviewed =
-      "alreadyReviewed" in data
-        ? (data as { alreadyReviewed: unknown }).alreadyReviewed === true
-        : undefined;
-    return { eligible, reason, alreadyReviewed };
+  if (!data || typeof data !== "object") {
+    return { canReview: false };
   }
-  return { eligible: false };
+
+  const raw = data as Record<string, unknown>;
+  const canReview = raw.canReview === true;
+  const inquiryItemId =
+    typeof raw.inquiryItemId === "string" && raw.inquiryItemId.trim()
+      ? raw.inquiryItemId
+      : undefined;
+
+  let existingReview: ReviewEligibility["existingReview"];
+  if (raw.existingReview && typeof raw.existingReview === "object") {
+    const er = raw.existingReview as Record<string, unknown>;
+    existingReview = {
+      rating: typeof er.rating === "number" ? er.rating : null,
+      text: typeof er.text === "string" ? er.text : null,
+      status: (typeof er.status === "string" ? er.status : "PENDING") as ReviewStatus | string,
+    };
+  }
+
+  return { canReview, inquiryItemId, existingReview };
 }
 
 export async function fetchReviewEligibility(

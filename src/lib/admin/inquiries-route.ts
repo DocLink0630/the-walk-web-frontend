@@ -37,7 +37,11 @@ export async function adminInquiriesProxy(
     body,
     searchParams:
       request.method === "GET" && path === ""
-        ? Object.fromEntries(request.nextUrl.searchParams.entries())
+        ? {
+            ...Object.fromEntries(request.nextUrl.searchParams.entries()),
+            sort: request.nextUrl.searchParams.get("sort") ?? "createdAt",
+            order: request.nextUrl.searchParams.get("order") ?? "desc",
+          }
         : undefined,
   });
 
