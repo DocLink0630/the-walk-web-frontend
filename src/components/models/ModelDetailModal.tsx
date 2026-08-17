@@ -475,7 +475,7 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
           </div>
         </div>
 
-        <div className="shrink-0 border-t border-[#E0E0E0] bg-[#FAFAFA] px-5 py-5 md:px-8">
+        <div className="hidden md:block shrink-0 border-t border-[#E0E0E0] bg-[#FAFAFA] px-5 py-5 md:px-8">
           <p className="font-ui text-[8px] tracking-[0.3em] uppercase text-[#9A9A9A] mb-3">
             {galleryLabel}
           </p>

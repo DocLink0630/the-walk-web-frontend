@@ -12,6 +12,7 @@ import {
 import {
   STUDENT_QUEUE_STATUSES,
   STUDENT_STATUS_LABELS,
+  studentStatusOptions,
 } from "@/lib/admin/student-user-status";
 import type { AdminUser, UserStatus } from "@/types/admin";
 import { useAdminPendingRegistrations } from "@/hooks/useAdminPendingRegistrations";
@@ -41,6 +42,11 @@ const STUDENT_LIST_TABS = [
     id: "pending" as const,
     label: "Pending Approval",
     status: "PENDING_ADMIN_REVIEW" as UserStatus,
+  },
+  {
+    id: "pendingPayment" as const,
+    label: "Pending Payment",
+    status: "PENDING_PAYMENT" as UserStatus,
   },
   {
     id: "approved" as const,
@@ -94,6 +100,7 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [reviewUser, setReviewUser] = useState<AdminUser | null>(null);
   const [pendingReviewCount, setPendingReviewCount] = useState(0);
+  const [pendingPaymentCount, setPendingPaymentCount] = useState(0);
   const [creatingModels, setCreatingModels] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [bulkDeleting, setBulkDeleting] = useState(false);
@@ -114,23 +121,36 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
   const emptyMessage =
     activeTab === "pending"
       ? "No student applications pending review."
-      : activeTab === "approved"
-        ? "No approved students found."
-        : "No students found.";
+      : activeTab === "pendingPayment"
+        ? "No students pending payment."
+        : activeTab === "approved"
+          ? "No approved students found."
+          : "No students found.";
 
   const createModelIds = Array.from(selectedIds).filter(
     (id) => modelRoleByIdRef.current.get(id) !== true,
   );
 
-  const loadPendingReviewCount = useCallback(async () => {
-    const result = await fetchAdminUsers({
-      page: 1,
-      limit: 1,
-      status: "PENDING_ADMIN_REVIEW",
-      roles: [...STUDENT_ROLES],
-    });
-    if (result.ok) {
-      setPendingReviewCount(result.data.meta.total);
+  const loadTabCounts = useCallback(async () => {
+    const [review, payment] = await Promise.all([
+      fetchAdminUsers({
+        page: 1,
+        limit: 1,
+        status: "PENDING_ADMIN_REVIEW",
+        roles: [...STUDENT_ROLES],
+      }),
+      fetchAdminUsers({
+        page: 1,
+        limit: 1,
+        status: "PENDING_PAYMENT",
+        roles: [...STUDENT_ROLES],
+      }),
+    ]);
+    if (review.ok) {
+      setPendingReviewCount(review.data.meta.total);
+    }
+    if (payment.ok) {
+      setPendingPaymentCount(payment.data.meta.total);
     }
   }, []);
 
@@ -166,8 +186,8 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
   }, [loadUsers]);
 
   useEffect(() => {
-    void loadPendingReviewCount();
-  }, [loadPendingReviewCount]);
+    void loadTabCounts();
+  }, [loadTabCounts]);
 
   useEffect(() => {
     clearSelection();
@@ -175,7 +195,7 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
 
   async function refreshAfterChange() {
     await loadUsers();
-    await loadPendingReviewCount();
+    await loadTabCounts();
     await refreshCounts();
     onUsersChanged?.();
   }
@@ -292,32 +312,40 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-1 rounded-lg border border-gray-200 bg-gray-50 p-1 w-fit">
-        {STUDENT_LIST_TABS.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => {
-              setPage(1);
-              setActiveTab(tab.id);
-            }}
-            className={[
-              "inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition",
-              activeTab === tab.id
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600 hover:text-gray-900",
-            ].join(" ")}
-          >
-            {tab.label}
-            {tab.id === "pending" && pendingReviewCount > 0 && (
-              <span
-                className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-amber-500 text-white text-[11px] font-semibold leading-none"
-                aria-label={`${pendingReviewCount} pending approval`}
-              >
-                {pendingReviewCount > 99 ? "99+" : pendingReviewCount}
-              </span>
-            )}
-          </button>
-        ))}
+        {STUDENT_LIST_TABS.map((tab) => {
+          const tabCount =
+            tab.id === "pending"
+              ? pendingReviewCount
+              : tab.id === "pendingPayment"
+                ? pendingPaymentCount
+                : 0;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => {
+                setPage(1);
+                setActiveTab(tab.id);
+              }}
+              className={[
+                "inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition",
+                activeTab === tab.id
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900",
+              ].join(" ")}
+            >
+              {tab.label}
+              {tabCount > 0 && (
+                <span
+                  className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-amber-500 text-white text-[11px] font-semibold leading-none"
+                  aria-label={`${tabCount} ${tab.label.toLowerCase()}`}
+                >
+                  {tabCount > 99 ? "99+" : tabCount}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]">
@@ -487,7 +515,7 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
                           }
                           className={adminInput + " !py-1.5 text-xs min-w-[130px]"}
                         >
-                          {STUDENT_QUEUE_STATUSES.map((s) => (
+                          {studentStatusOptions(user.status).map((s) => (
                             <option key={s} value={s}>
                               {STUDENT_STATUS_LABELS[s]}
                             </option>

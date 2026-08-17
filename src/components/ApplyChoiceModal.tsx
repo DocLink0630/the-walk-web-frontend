@@ -26,9 +26,9 @@ const APPLY_PATHS = [
   {
     href: "/register",
     eyebrow: "The Walk Academy",
-    title: "Student",
+    title: "Training Student",
     description: "Professional modelling training and industry placement.",
-    cta: "Apply as student",
+    cta: "Apply as training student",
     image: academyCard.image,
     accent: "border-l-[#C8A97A]",
   },
@@ -121,24 +121,20 @@ export default function ApplyChoiceModal({ isOpen, onClose }: ApplyChoiceModalPr
                     sizes="160px"
                   />
                 </div>
-                <div className="flex flex-1 flex-col justify-center gap-1.5 px-4 py-4 sm:px-5 sm:py-5 bg-[#FAFAFA] group-hover:bg-[#0A0A0A] group-hover:text-white transition-colors duration-300">
+                <div className="flex flex-1 min-w-0 flex-col justify-center gap-1.5 px-4 py-4 sm:px-5 sm:py-5 bg-[#FAFAFA] group-hover:bg-[#0A0A0A] group-hover:text-white transition-colors duration-300">
                   <p className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#9A7329] group-hover:text-[#C8A97A]">
                     {path.eyebrow}
                   </p>
-                  <div className="flex flex-wrap items-end justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-display text-xl sm:text-2xl font-light leading-tight">
-                        {path.title}
-                      </h3>
-                      <p className="mt-1 font-ui text-sm text-[#4A4A4A] group-hover:text-white/80 leading-relaxed">
-                        {path.description}
-                      </p>
-                    </div>
-                    <span className="inline-flex items-center gap-2 shrink-0 font-ui text-[10px] tracking-[0.2em] uppercase px-3.5 py-2.5 bg-[#0A0A0A] text-white group-hover:bg-white group-hover:text-[#0A0A0A] transition-colors">
-                      {path.cta}
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </span>
-                  </div>
+                  <h3 className="font-display text-xl sm:text-2xl font-light leading-tight">
+                    {path.title}
+                  </h3>
+                  <p className="mt-1 font-ui text-sm text-[#4A4A4A] group-hover:text-white/80 leading-relaxed">
+                    {path.description}
+                  </p>
+                  <span className="mt-2 inline-flex items-center gap-2 self-start font-ui text-[10px] tracking-[0.2em] uppercase px-3.5 py-2.5 bg-[#0A0A0A] text-white group-hover:bg-white group-hover:text-[#0A0A0A] transition-colors">
+                    {path.cta}
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </span>
                 </div>
               </Link>
             ))}
