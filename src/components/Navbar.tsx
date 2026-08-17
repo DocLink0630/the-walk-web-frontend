@@ -331,6 +331,19 @@ export default function Navbar() {
               >
                 APPLY
               </button>
+              {!isAuthenticated && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeMobileMenu();
+                    setShowLogin(true);
+                  }}
+                  data-cursor="button"
+                  className="font-ui text-[10px] font-light tracking-[0.25em] uppercase px-3.5 py-2 border border-[#0A0A0A] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-colors duration-300"
+                >
+                  LOGIN
+                </button>
+              )}
               {isAuthenticated && hasProfileMenu && profileHref && (
                 <Link
                   href={profileHref}

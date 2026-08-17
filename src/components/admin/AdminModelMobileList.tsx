@@ -106,7 +106,10 @@ export default function AdminModelMobileList({
                   onChange={(e) => onStatusChange(user.id, e.target.value as UserStatus)}
                   className={adminInput}
                 >
-                  {allStatuses.map((s) => (
+                  {(allStatuses.includes(user.status)
+                    ? allStatuses
+                    : [user.status, ...allStatuses]
+                  ).map((s) => (
                     <option key={s} value={s}>
                       {statusLabels[s]}
                     </option>

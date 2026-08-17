@@ -3,6 +3,9 @@
 export const formLabel =
   "block font-ui text-[11px] font-normal tracking-[0.12em] uppercase text-[#0A0A0A] mb-1.5";
 
+export const formLabelStrong =
+  "block font-ui text-[11px] font-medium tracking-[0.12em] uppercase text-[#0A0A0A] mb-1.5";
+
 export const formRequiredMark = "text-[#9A7329] font-normal";
 
 export const formSubtitle =

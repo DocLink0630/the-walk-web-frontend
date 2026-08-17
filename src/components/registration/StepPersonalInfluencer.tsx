@@ -11,7 +11,7 @@ import {
   formHint,
   formInput,
   formInputError,
-  formLabel,
+  formLabelStrong,
   formRequiredMark,
   formSubtitle,
   formTextarea,
@@ -45,9 +45,11 @@ function SocialField({
 }) {
   return (
     <div className="border border-[#E8E8E8] p-4 space-y-3">
-      <p className="font-ui text-[10px] tracking-[0.15em] uppercase text-[#0A0A0A]">{label}</p>
+      <p className="font-ui text-[11px] font-semibold tracking-[0.2em] uppercase text-[#9A7329]">
+        {label}
+      </p>
       <div className="space-y-1.5">
-        <label htmlFor={`${id}-url`} className={formLabel}>
+        <label htmlFor={`${id}-url`} className={formLabelStrong}>
           Profile URL
         </label>
         <input
@@ -60,7 +62,7 @@ function SocialField({
         />
       </div>
       <div className="space-y-1.5">
-        <label htmlFor={`${id}-metric`} className={formLabel}>
+        <label htmlFor={`${id}-metric`} className={formLabelStrong}>
           {metricLabel}
         </label>
         <input
@@ -127,7 +129,7 @@ export default function StepPersonalInfluencer({
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor={`${idPrefix}-fullName`} className={formLabel}>
+        <label htmlFor={`${idPrefix}-fullName`} className={formLabelStrong}>
           Full name <span className={formRequiredMark}>*</span>
         </label>
         <input
@@ -143,7 +145,7 @@ export default function StepPersonalInfluencer({
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor={`${idPrefix}-contact`} className={formLabel}>
+        <label htmlFor={`${idPrefix}-contact`} className={formLabelStrong}>
           Contact number <span className={formRequiredMark}>*</span>
         </label>
         <input
@@ -159,7 +161,7 @@ export default function StepPersonalInfluencer({
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor={`${idPrefix}-categories`} className={formLabel}>
+        <label htmlFor={`${idPrefix}-categories`} className={formLabelStrong}>
           {copy.categoriesLabel} <span className={formRequiredMark}>*</span>
         </label>
         <input
@@ -175,7 +177,7 @@ export default function StepPersonalInfluencer({
       </div>
 
       <div className="space-y-3">
-        <p className="font-ui text-[10px] tracking-[0.15em] uppercase text-[#0A0A0A]">
+        <p className="font-ui text-[10px] font-medium tracking-[0.15em] uppercase text-[#0A0A0A]">
           Social media links <span className={formRequiredMark}>*</span>
         </p>
         <p className={formHint}>Add at least one platform. Follower counts are optional.</p>
@@ -228,7 +230,7 @@ export default function StepPersonalInfluencer({
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor={`${idPrefix}-rate`} className={formLabel}>
+        <label htmlFor={`${idPrefix}-rate`} className={formLabelStrong}>
           Rate card
         </label>
         <input
@@ -242,7 +244,7 @@ export default function StepPersonalInfluencer({
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor={`${idPrefix}-brand-work`} className={formLabel}>
+        <label htmlFor={`${idPrefix}-brand-work`} className={formLabelStrong}>
           Past brand work
         </label>
         <textarea
@@ -255,7 +257,7 @@ export default function StepPersonalInfluencer({
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor={`${idPrefix}-bio`} className={formLabel}>
+        <label htmlFor={`${idPrefix}-bio`} className={formLabelStrong}>
           Short bio
         </label>
         <textarea
