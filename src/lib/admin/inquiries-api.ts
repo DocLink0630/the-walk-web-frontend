@@ -34,8 +34,6 @@ export async function fetchAdminInquiries(
   const sp = new URLSearchParams();
   sp.set("page", String(params.page ?? 1));
   sp.set("limit", String(params.limit ?? 20));
-  sp.set("sort", "createdAt");
-  sp.set("order", "desc");
   if (params.search) sp.set("search", params.search);
   if (params.status) sp.set("status", params.status);
 
