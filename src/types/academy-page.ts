@@ -36,6 +36,53 @@ export interface AcademyFeeInstallment {
   amount: string;
 }
 
+export interface AcademyFees {
+  eyebrow: string;
+  heading: string;
+  registration: { label: string; note: string; amount: string };
+  installments: AcademyFeeInstallment[];
+  installmentTotal: string;
+  fullPayment: {
+    badge: string;
+    note: string;
+    regular: string;
+    amount: string;
+    savings: string;
+  };
+  summary: string;
+}
+
+export interface AcademySkillCategory {
+  title: string;
+  items: string[];
+}
+
+export interface AcademyOutcomes {
+  eyebrow: string;
+  heading: string;
+  assessmentIntro: string;
+  assessmentItems: string[];
+  developmentIntro: string;
+  developmentItems: string[];
+}
+
+export type AcademyCourseId = "normal" | "advanced";
+
+export interface AcademyCourseVariant {
+  hero: { description: string };
+  programme: {
+    course: AcademyCourse;
+    classTimes?: {
+      description?: string;
+    };
+  };
+  fees: AcademyFees;
+  cta: { description: string };
+  meta: { title: string; description: string };
+  skills?: AcademySkillCategory[];
+  outcomes?: AcademyOutcomes;
+}
+
 export interface AcademyPageContent {
   hero: {
     eyebrow: string;
@@ -61,21 +108,7 @@ export interface AcademyPageContent {
       slots: { day: string; time: string; label: string }[];
     };
   };
-  fees: {
-    eyebrow: string;
-    heading: string;
-    registration: { label: string; note: string; amount: string };
-    installments: AcademyFeeInstallment[];
-    installmentTotal: string;
-    fullPayment: {
-      badge: string;
-      note: string;
-      regular: string;
-      amount: string;
-      savings: string;
-    };
-    summary: string;
-  };
+  fees: AcademyFees;
   testimonials: {
     eyebrow: string;
     heading: string;
