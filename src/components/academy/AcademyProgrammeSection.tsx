@@ -2,21 +2,42 @@ import Image from "next/image";
 import Link from "next/link";
 import { CTA_PRIMARY_FILLED } from "@/config/cta-styles";
 import { ACADEMY_PAGE_CONTAINER } from "@/data/academy-page";
-import type { AcademyPageContent } from "@/types/academy-page";
+import type {
+  AcademyCourseId,
+  AcademyOutcomes,
+  AcademyPageContent,
+  AcademySkillCategory,
+} from "@/types/academy-page";
+import AcademyCourseToggle from "./AcademyCourseToggle";
 
 interface AcademyProgrammeSectionProps {
   programme: AcademyPageContent["programme"];
+  courseId: AcademyCourseId;
+  onCourseChange: (courseId: AcademyCourseId) => void;
   applyHref?: string;
+  skills?: AcademySkillCategory[];
+  outcomes?: AcademyOutcomes;
 }
 
 export default function AcademyProgrammeSection({
   programme,
+  courseId,
+  onCourseChange,
   applyHref = "/register",
+  skills,
+  outcomes,
 }: AcademyProgrammeSectionProps) {
   const { course } = programme;
+  const isAdvanced = courseId === "advanced";
+  const monthGridClass = isAdvanced
+    ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 md:divide-x divide-[#E5E3E0]"
+    : "grid grid-cols-1 md:grid-cols-3 md:divide-x divide-[#E5E3E0]";
 
   return (
-    <section className="py-16 md:py-24 lg:py-[120px] bg-[#F9F7F4] border-t border-[#E5E3E0]">
+    <section
+      id="academy-programme"
+      className="py-16 md:py-24 lg:py-[120px] bg-[#F9F7F4] border-t border-[#E5E3E0]"
+    >
       <div className={ACADEMY_PAGE_CONTAINER}>
         <div
           data-academy-reveal-group
@@ -29,10 +50,12 @@ export default function AcademyProgrammeSection({
           <h2 className="font-display text-[42px] md:text-[60px] lg:text-[72px] font-light text-[#0A0A0A] leading-[0.95] mb-5 md:mb-6">
             {programme.heading}
           </h2>
-          <div className="w-12 md:w-16 h-px bg-[#C8A97A] mx-auto" />
+          <div className="w-12 md:w-16 h-px bg-[#C8A97A] mx-auto mb-8 md:mb-10" />
+          <AcademyCourseToggle value={courseId} onChange={onCourseChange} />
         </div>
 
         <div
+          key={courseId}
           data-academy-reveal
           data-academy-start="top 85%"
           className="bg-white border border-[#E0E0E0] shadow-[0_4px_24px_rgba(0,0,0,0.05)]"
@@ -72,7 +95,7 @@ export default function AcademyProgrammeSection({
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 md:divide-x divide-[#E5E3E0]">
+          <div className={monthGridClass}>
             {course.months.map((month, index) => (
               <div
                 key={month.number}
@@ -99,10 +122,91 @@ export default function AcademyProgrammeSection({
               </div>
             ))}
           </div>
+
+          {skills && skills.length > 0 && (
+            <div className="border-t border-[#E5E3E0] p-6 md:p-10 lg:p-14 bg-[#FAFAF9]">
+              <div className="text-center max-w-[640px] mx-auto mb-8 md:mb-10">
+                <p className="font-ui text-[9px] tracking-[0.35em] uppercase text-[#C8A97A] mb-3">
+                  CORE SKILLS
+                </p>
+                <h4 className="font-display text-[28px] md:text-[36px] font-light text-[#0A0A0A] leading-[1.05]">
+                  Core Skills Developed
+                </h4>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                {skills.map((category, index) => (
+                  <div
+                    key={category.title}
+                    className={`p-6 md:p-8 border border-[#E0E0E0] ${index % 2 === 0 ? "bg-white" : "bg-[#FAFAF9]"}`}
+                  >
+                    <h5 className="font-ui text-[11px] md:text-[12px] font-semibold tracking-[0.18em] uppercase text-[#0A0A0A] mb-5 md:mb-6">
+                      {category.title}
+                    </h5>
+                    <ul className="space-y-3">
+                      {category.items.map((item) => (
+                        <li key={item} className="flex items-start gap-3">
+                          <span className="w-1 h-1 bg-[#C8A97A] shrink-0 mt-[8px]" />
+                          <span className="font-display text-[15px] md:text-[16px] font-light text-[#4A4A4A] leading-[1.65]">
+                            {item}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {outcomes && (
+            <div className="border-t border-[#E5E3E0] p-6 md:p-10 lg:p-14 bg-white">
+              <div className="text-center max-w-[640px] mx-auto mb-8 md:mb-10">
+                <p className="font-ui text-[9px] tracking-[0.35em] uppercase text-[#C8A97A] mb-3">
+                  {outcomes.eyebrow}
+                </p>
+                <h4 className="font-display text-[28px] md:text-[36px] font-light text-[#0A0A0A] leading-[1.05]">
+                  {outcomes.heading}
+                </h4>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 max-w-[960px] mx-auto">
+                <div className="p-6 md:p-8 border border-[#E0E0E0] bg-[#FAFAF9]">
+                  <p className="font-display text-[17px] md:text-[18px] font-light text-[#0A0A0A] mb-5 md:mb-6">
+                    {outcomes.assessmentIntro}
+                  </p>
+                  <ul className="space-y-3">
+                    {outcomes.assessmentItems.map((item) => (
+                      <li key={item} className="flex items-start gap-3">
+                        <span className="w-1 h-1 bg-[#C8A97A] shrink-0 mt-[8px]" />
+                        <span className="font-display text-[15px] md:text-[16px] font-light text-[#4A4A4A] leading-[1.65]">
+                          {item}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="p-6 md:p-8 border border-[#E0E0E0] bg-white">
+                  <p className="font-display text-[17px] md:text-[18px] font-light text-[#0A0A0A] mb-5 md:mb-6">
+                    {outcomes.developmentIntro}
+                  </p>
+                  <ul className="space-y-3">
+                    {outcomes.developmentItems.map((item) => (
+                      <li key={item} className="flex items-start gap-3">
+                        <span className="w-1 h-1 bg-[#C8A97A] shrink-0 mt-[8px]" />
+                        <span className="font-display text-[15px] md:text-[16px] font-light text-[#4A4A4A] leading-[1.65]">
+                          {item}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {programme.classTimes && (
           <div
+            key={`${courseId}-schedule`}
             data-academy-reveal
             data-academy-start="top 85%"
             className="mt-12 md:mt-16 lg:mt-20"
