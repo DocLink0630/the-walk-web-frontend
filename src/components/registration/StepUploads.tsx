@@ -128,6 +128,7 @@ interface StepUploadsProps {
   copy: RegistrationCopy;
   variant: RegistrationVariant;
   onSubmit?: RegistrationSubmitHandler;
+  onSuccess?: () => void;
 }
 
 export default function StepUploads({
@@ -135,6 +136,7 @@ export default function StepUploads({
   copy,
   variant,
   onSubmit,
+  onSuccess,
 }: StepUploadsProps) {
   const [submitted, setSubmitted] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<{ completed: number; total: number } | null>(null);
@@ -196,6 +198,10 @@ export default function StepUploads({
       });
 
       if (result.ok) {
+        if (onSuccess) {
+          onSuccess();
+          return;
+        }
         store.set({ success: true, isSubmitting: false });
       } else {
         store.set({ error: result.message, isSubmitting: false });
