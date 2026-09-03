@@ -306,7 +306,7 @@ export const ACADEMY_PAGE: AcademyPageContent = {
   },
   programme: {
     eyebrow: "OUR PROGRAMME",
-    heading: "What We Teach",
+    heading: "Choose Your Course",
     course: ACADEMY_COURSES.normal.programme.course,
     classTimes: SHARED_CLASS_TIMES,
   },
