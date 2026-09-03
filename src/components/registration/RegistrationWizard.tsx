@@ -130,6 +130,7 @@ export default function RegistrationWizard({
                 copy={copy}
                 variant={variant}
                 onSubmit={onSubmit}
+                onSuccess={onSuccess}
               />
             )}
           </>
