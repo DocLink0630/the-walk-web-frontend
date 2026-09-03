@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X, UserCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useBooking } from "@/context/BookingContext";
 import logoImage from "@/assets/images/logo.png";
@@ -299,14 +299,20 @@ export default function Navbar() {
                   )}
                 </>
               ) : (
-                <button
-                  type="button"
-                  onClick={() => setShowLogin(true)}
-                  data-cursor="button"
-                  className={desktopLinkClass}
-                >
-                  LOGIN
-                </button>
+                <div className="relative group">
+                  <button
+                    type="button"
+                    onClick={() => setShowLogin(true)}
+                    data-cursor="button"
+                    className="flex items-center justify-center text-[#0A0A0A] hover:text-[#C8A97A] transition-colors duration-300"
+                    aria-label="Login"
+                  >
+                    <UserCircle size={28} strokeWidth={1.5} />
+                  </button>
+                  <span className="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-2 whitespace-nowrap rounded bg-[#0A0A0A] px-2.5 py-1 font-ui text-[9px] tracking-[0.2em] uppercase text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    Login
+                  </span>
+                </div>
               )}
 
               <button
@@ -332,17 +338,23 @@ export default function Navbar() {
                 APPLY
               </button>
               {!isAuthenticated && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    closeMobileMenu();
-                    setShowLogin(true);
-                  }}
-                  data-cursor="button"
-                  className="font-ui text-[10px] font-light tracking-[0.25em] uppercase px-3.5 py-2 border border-[#0A0A0A] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-colors duration-300"
-                >
-                  LOGIN
-                </button>
+                <div className="relative group">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      closeMobileMenu();
+                      setShowLogin(true);
+                    }}
+                    data-cursor="button"
+                    className="flex items-center justify-center text-[#0A0A0A] hover:text-[#C8A97A] transition-colors duration-300 px-1 py-1"
+                    aria-label="Login"
+                  >
+                    <UserCircle size={26} strokeWidth={1.5} />
+                  </button>
+                  <span className="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-2 whitespace-nowrap rounded bg-[#0A0A0A] px-2.5 py-1 font-ui text-[9px] tracking-[0.2em] uppercase text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    Login
+                  </span>
+                </div>
               )}
               {isAuthenticated && hasProfileMenu && profileHref && (
                 <Link
@@ -540,8 +552,9 @@ export default function Navbar() {
                     setShowLogin(true);
                     closeMobileMenu();
                   }}
-                  className="flex min-h-[48px] w-full items-center justify-center border border-[#E0E0E0] bg-white font-ui text-[10px] font-light tracking-[0.25em] uppercase text-[#0A0A0A] hover:border-[#C8A97A] hover:text-[#C8A97A] transition-colors duration-300"
+                  className="flex min-h-[48px] w-full items-center justify-center gap-2 border border-[#E0E0E0] bg-white font-ui text-[10px] font-light tracking-[0.25em] uppercase text-[#0A0A0A] hover:border-[#C8A97A] hover:text-[#C8A97A] transition-colors duration-300"
                 >
+                  <UserCircle size={18} strokeWidth={1.5} />
                   Login
                 </button>
               )}
