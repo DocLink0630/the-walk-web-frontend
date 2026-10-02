@@ -41,9 +41,30 @@ const MODEL_LIST_TABS = [
     status: "PENDING_ADMIN_REVIEW" as UserStatus,
   },
   { id: "current" as const, label: "Current models", status: "ACTIVE" as UserStatus },
+  { id: "rejected" as const, label: "Rejected", status: "REJECTED" as UserStatus },
+  {
+    id: "pendingEmail" as const,
+    label: "Pending email",
+    status: "PENDING_EMAIL_VERIFICATION" as UserStatus,
+  },
+  {
+    id: "pendingPayment" as const,
+    label: "Pending payment",
+    status: "PENDING_PAYMENT" as UserStatus,
+  },
+  { id: "inactive" as const, label: "Inactive", status: "INACTIVE" as UserStatus },
+  { id: "suspended" as const, label: "Suspended", status: "SUSPENDED" as UserStatus },
+  { id: "deleted" as const, label: "Deleted", status: "DELETED" as UserStatus },
 ];
 
 type ModelListTab = (typeof MODEL_LIST_TABS)[number]["id"];
+
+function emptyMessageForTab(tabId: ModelListTab) {
+  if (tabId === "pending") return "No models pending review.";
+  if (tabId === "current") return "No active models found.";
+  const label = MODEL_LIST_TABS.find((tab) => tab.id === tabId)?.label ?? "selected";
+  return `No ${label.toLowerCase()} models found.`;
+}
 
 function formatDate(iso: string) {
   try {
@@ -301,11 +322,7 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
 
       {!loading && users.length === 0 && (
         <div className="md:hidden rounded-xl border border-gray-200 bg-white px-4 py-10 text-center">
-          <p className="text-sm text-gray-500">
-            {activeTab === "current"
-              ? "No active models found."
-              : "No models pending review."}
-          </p>
+          <p className="text-sm text-gray-500">{emptyMessageForTab(activeTab)}</p>
         </div>
       )}
 
@@ -346,9 +363,7 @@ export default function ModelQueueTable({ onUsersChanged }: ModelQueueTableProps
             ) : users.length === 0 ? (
               <tr>
                 <td colSpan={6} className={`${adminTd} text-center text-gray-500`}>
-                  {activeTab === "current"
-                    ? "No active models found."
-                    : "No models pending review."}
+                  {emptyMessageForTab(activeTab)}
                 </td>
               </tr>
             ) : (
