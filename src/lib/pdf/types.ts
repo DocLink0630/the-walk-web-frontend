@@ -45,6 +45,16 @@ export type InquiryTalentPdfData = {
   location?: string | null;
   yearsOfExperience?: number | null;
   equipmentOverview?: string | null;
+  contentCategories?: string[];
+  instagramUrl?: string | null;
+  instagramFollowers?: string | null;
+  tiktokUrl?: string | null;
+  tiktokFollowers?: string | null;
+  youtubeUrl?: string | null;
+  youtubeSubscribers?: string | null;
+  facebookUrl?: string | null;
+  facebookFollowers?: string | null;
+  pastBrandWork?: string | null;
   profileImage?: string | null;
   portfolioImages?: string[];
   /** Mixed image list from older payloads; prefer profileImage + portfolioImages. */

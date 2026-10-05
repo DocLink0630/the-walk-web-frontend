@@ -36,7 +36,17 @@ const talentDropdownLinkClass =
 export default function Navbar() {
   const navRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
-  const { isAuthenticated, logout, user, isModel, isClient, isInfluencer, isPhotographer, isBeautician } = useAuth();
+  const {
+    isAuthenticated,
+    logout,
+    user,
+    isModel,
+    isClient,
+    isInfluencer,
+    isPhotographer,
+    isBeautician,
+    isStudent,
+  } = useAuth();
   const { bookingCart } = useBooking();
   const [showLogin, setShowLogin] = useState(false);
   const [showApplyChoice, setShowApplyChoice] = useState(false);
@@ -49,8 +59,13 @@ export default function Navbar() {
 
   useEffect(() => {
     const openApply = () => setShowApplyChoice(true);
+    const openLogin = () => setShowLogin(true);
     window.addEventListener("walk:open-apply", openApply);
-    return () => window.removeEventListener("walk:open-apply", openApply);
+    window.addEventListener("walk:open-login", openLogin);
+    return () => {
+      window.removeEventListener("walk:open-apply", openApply);
+      window.removeEventListener("walk:open-login", openLogin);
+    };
   }, []);
 
   useEffect(() => {
@@ -69,8 +84,11 @@ export default function Navbar() {
         ? "/photographer/profile"
         : isBeautician
           ? "/beautician/profile"
-          : null;
-  const hasProfileMenu = isModel || isInfluencer || isPhotographer || isBeautician;
+          : isStudent
+            ? "/student/profile"
+            : null;
+  const hasProfileMenu =
+    isModel || isInfluencer || isPhotographer || isBeautician || isStudent;
   const profileInitial = isModel
     ? "M"
     : isInfluencer
@@ -79,7 +97,9 @@ export default function Navbar() {
         ? "P"
         : isBeautician
           ? "B"
-          : "U";
+          : isStudent
+            ? "S"
+            : "U";
 
   useEffect(() => {
     const nav = navRef.current;

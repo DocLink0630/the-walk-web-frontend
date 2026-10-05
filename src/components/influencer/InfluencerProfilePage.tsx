@@ -56,7 +56,9 @@ function DetailRow({ label, value }: { label: string; value?: string | null }) {
           {value}
         </a>
       ) : (
-        <p className="font-ui text-[11px] text-[#0A0A0A]">{value}</p>
+        <p className="font-ui text-[11px] text-[#0A0A0A] whitespace-pre-line break-words">
+          {value}
+        </p>
       )}
     </div>
   );

@@ -67,6 +67,21 @@ type UserExportPayload = {
     yearsOfExperience?: number | null;
     equipmentOverview?: string | null;
   } | null;
+  influencerProfile?: {
+    fullName?: string;
+    shortBio?: string | null;
+    rateCard?: string | null;
+    contentCategories?: string[];
+    instagramUrl?: string | null;
+    instagramFollowers?: string | null;
+    tiktokUrl?: string | null;
+    tiktokFollowers?: string | null;
+    youtubeUrl?: string | null;
+    youtubeSubscribers?: string | null;
+    facebookUrl?: string | null;
+    facebookFollowers?: string | null;
+    pastBrandWork?: string | null;
+  } | null;
   registrationMedia?: AdminModelRegistrationMedia | null;
 };
 
@@ -83,6 +98,7 @@ function mapUserToTalent(
   const model = user.modelProfile;
   const beautician = user.beauticianProfile;
   const photographer = user.photographerProfile;
+  const influencer = user.influencerProfile;
   const media = user.registrationMedia;
   const portfolioImages = uniqueUrls(
     media?.portfolioPhotos?.map((photo) => photo.url) ?? [],
@@ -104,6 +120,7 @@ function mapUserToTalent(
       model?.fullName?.trim() ||
       beautician?.fullName?.trim() ||
       photographer?.fullName?.trim() ||
+      influencer?.fullName?.trim() ||
       item.modelName,
     email: user.email?.trim() || null,
     gender: model?.gender?.trim() || null,
@@ -111,12 +128,14 @@ function mapUserToTalent(
       model?.shortBio?.trim() ||
       beautician?.shortBio?.trim() ||
       photographer?.shortBio?.trim() ||
+      influencer?.shortBio?.trim() ||
       null,
     tier: model?.tier ?? null,
     rate:
       model?.rate?.trim() ||
       beautician?.rateCard?.trim() ||
       photographer?.rateCard?.trim() ||
+      influencer?.rateCard?.trim() ||
       null,
     height: model?.heightEnc?.trim() || null,
     weight: model?.weightEnc?.trim() || null,
@@ -130,6 +149,16 @@ function mapUserToTalent(
     yearsOfExperience:
       beautician?.yearsOfExperience ?? photographer?.yearsOfExperience ?? null,
     equipmentOverview: photographer?.equipmentOverview?.trim() || null,
+    contentCategories: influencer?.contentCategories ?? [],
+    instagramUrl: influencer?.instagramUrl?.trim() || null,
+    instagramFollowers: influencer?.instagramFollowers?.trim() || null,
+    tiktokUrl: influencer?.tiktokUrl?.trim() || null,
+    tiktokFollowers: influencer?.tiktokFollowers?.trim() || null,
+    youtubeUrl: influencer?.youtubeUrl?.trim() || null,
+    youtubeSubscribers: influencer?.youtubeSubscribers?.trim() || null,
+    facebookUrl: influencer?.facebookUrl?.trim() || null,
+    facebookFollowers: influencer?.facebookFollowers?.trim() || null,
+    pastBrandWork: influencer?.pastBrandWork?.trim() || null,
     profileImage,
     portfolioImages,
     images: uniqueUrls([profileImage, ...portfolioImages]),

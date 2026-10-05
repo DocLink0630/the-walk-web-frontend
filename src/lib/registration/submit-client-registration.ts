@@ -29,7 +29,9 @@ export async function submitClientRegistration(
     if (res.status === 409) {
       return {
         ok: false,
-        message: data.message ?? "An account with this email already exists.",
+        message:
+          data.message ??
+          "An account with this email already exists. Try logging in, or use a different email.",
       };
     }
     return {

@@ -15,6 +15,8 @@ interface CroppableImageUploadProps {
   required?: boolean;
   error?: string | null;
   previewAspectRatio?: string;
+  /** When true, save the original file without opening the crop modal. */
+  skipCrop?: boolean;
 }
 
 interface PendingCrop {
@@ -29,6 +31,7 @@ export default function CroppableImageUpload({
   required = false,
   error = null,
   previewAspectRatio = "4 / 3",
+  skipCrop = false,
 }: CroppableImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -50,6 +53,10 @@ export default function CroppableImageUpload({
 
   function handleFileSelect(selected: File | null) {
     if (!selected) return;
+    if (skipCrop) {
+      onFile(selected);
+      return;
+    }
     const src = URL.createObjectURL(selected);
     setPendingCrop({ src, fileName: selected.name });
   }
@@ -85,7 +92,14 @@ export default function CroppableImageUpload({
           {previewUrl ? (
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={previewUrl} alt={label} className="w-full h-full object-cover" />
+              <img
+                src={previewUrl}
+                alt={label}
+                className={[
+                  "w-full h-full",
+                  skipCrop ? "object-contain" : "object-cover",
+                ].join(" ")}
+              />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
                 <span className="opacity-0 group-hover:opacity-100 font-ui text-[9px] tracking-[0.2em] uppercase text-white transition-opacity">
                   Replace

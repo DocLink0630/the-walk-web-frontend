@@ -14,6 +14,7 @@ import {
 import { uploadFloatingImage } from "@/lib/registration/upload-floating-image";
 import type { SiteContentOverrides } from "@/lib/site-content/types";
 import type { AgencyEvent, EventCategory, EventStatus } from "@/types/events-page";
+import AdminImageFilePicker from "./AdminImageFilePicker";
 import {
   adminAlertErr,
   adminAlertOk,
@@ -30,6 +31,10 @@ import {
 
 type ListedEvent = AgencyEvent & { source: "hardcoded" | "admin" };
 
+type GalleryFormItem =
+  | { kind: "existing"; url: string }
+  | { kind: "new"; token: string; preview: string; fileName: string };
+
 const CATEGORIES: EventCategory[] = ["RUNWAY", "ACADEMY EVENT", "EDITORIAL", "GALA"];
 const STATUSES: EventStatus[] = ["UPCOMING", "PAST"];
 
@@ -44,6 +49,12 @@ const EMPTY_FORM = {
   highlight: "",
 };
 
+function galleryTokensFromItems(items: GalleryFormItem[]): string[] {
+  return items
+    .filter((item): item is Extract<GalleryFormItem, { kind: "new" }> => item.kind === "new")
+    .map((item) => item.token);
+}
+
 export default function AdminEventsPanel() {
   const [content, setContent] = useState<SiteContentOverrides | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,9 +64,12 @@ export default function AdminEventsPanel() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [coverToken, setCoverToken] = useState<string | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
-  const [galleryTokens, setGalleryTokens] = useState<string[]>([]);
-  const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+  const [coverFileName, setCoverFileName] = useState<string | null>(null);
+  const [originalCoverUrl, setOriginalCoverUrl] = useState<string | null>(null);
+  const [galleryItems, setGalleryItems] = useState<GalleryFormItem[]>([]);
+  const [galleryLastFileName, setGalleryLastFileName] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -104,13 +118,20 @@ export default function AdminEventsPanel() {
     setMessage({ type: "ok", text: "Visibility updated." });
   }
 
+  function resetImageState() {
+    setCoverToken(null);
+    setCoverPreview(null);
+    setCoverFileName(null);
+    setOriginalCoverUrl(null);
+    setGalleryItems([]);
+    setGalleryLastFileName(null);
+  }
+
   function openCreate() {
     setEditingId(null);
     setForm(EMPTY_FORM);
-    setCoverToken(null);
-    setCoverPreview(null);
-    setGalleryTokens([]);
-    setGalleryPreviews([]);
+    resetImageState();
+    setFormError(null);
     setFormOpen(true);
   }
 
@@ -128,8 +149,11 @@ export default function AdminEventsPanel() {
     });
     setCoverToken(null);
     setCoverPreview(event.image);
-    setGalleryTokens([]);
-    setGalleryPreviews(event.gallery);
+    setCoverFileName(null);
+    setOriginalCoverUrl(event.image);
+    setGalleryItems(event.gallery.map((url) => ({ kind: "existing" as const, url })));
+    setGalleryLastFileName(null);
+    setFormError(null);
     setFormOpen(true);
   }
 
@@ -139,8 +163,21 @@ export default function AdminEventsPanel() {
       setMessage({ type: "err", text: upload.message });
       return;
     }
+    if (coverPreview?.startsWith("blob:")) {
+      URL.revokeObjectURL(coverPreview);
+    }
     setCoverToken(upload.token);
     setCoverPreview(URL.createObjectURL(file));
+    setCoverFileName(file.name);
+  }
+
+  function handleCoverRemove() {
+    if (coverPreview?.startsWith("blob:")) {
+      URL.revokeObjectURL(coverPreview);
+    }
+    setCoverToken(null);
+    setCoverFileName(null);
+    setCoverPreview(originalCoverUrl);
   }
 
   async function handleGalleryUpload(file: File) {
@@ -149,20 +186,50 @@ export default function AdminEventsPanel() {
       setMessage({ type: "err", text: upload.message });
       return;
     }
-    setGalleryTokens((prev) => [...prev, upload.token]);
-    setGalleryPreviews((prev) => [...prev, URL.createObjectURL(file)]);
+    const preview = URL.createObjectURL(file);
+    setGalleryItems((prev) => [
+      ...prev,
+      { kind: "new", token: upload.token, preview, fileName: file.name },
+    ]);
+    setGalleryLastFileName(file.name);
+  }
+
+  function handleGalleryRemove(index: number) {
+    setGalleryItems((prev) => {
+      const item = prev[index];
+      if (!item || item.kind !== "new") return prev;
+      URL.revokeObjectURL(item.preview);
+      const next = prev.filter((_, i) => i !== index);
+      const lastNew = [...next].reverse().find((g) => g.kind === "new");
+      setGalleryLastFileName(lastNew && lastNew.kind === "new" ? lastNew.fileName : null);
+      return next;
+    });
   }
 
   async function handleSave() {
     if (!form.title.trim()) {
-      setMessage({ type: "err", text: "Title is required." });
+      setFormError("Title is required.");
+      return;
+    }
+    if (!form.date.trim()) {
+      setFormError("Date is required.");
+      return;
+    }
+    if (!form.location.trim()) {
+      setFormError("Location is required.");
+      return;
+    }
+    if (!editingId && !coverToken) {
+      setFormError("Cover image is required.");
       return;
     }
 
     setSaving(true);
+    setFormError(null);
     setMessage(null);
 
     const payload: Record<string, unknown> = { ...form };
+    const galleryTokens = galleryTokensFromItems(galleryItems);
 
     if (editingId) {
       if (coverToken) payload.coverImageToken = coverToken;
@@ -170,18 +237,13 @@ export default function AdminEventsPanel() {
       const result = await updateAdminEvent(editingId, payload);
       setSaving(false);
       if (!result.ok) {
-        setMessage({ type: "err", text: result.message });
+        setFormError(result.message);
         return;
       }
       setContent(result.data);
       setFormOpen(false);
+      setFormError(null);
       setMessage({ type: "ok", text: "Event updated." });
-      return;
-    }
-
-    if (!coverToken) {
-      setSaving(false);
-      setMessage({ type: "err", text: "Cover image is required for new events." });
       return;
     }
 
@@ -191,11 +253,12 @@ export default function AdminEventsPanel() {
     const result = await createAdminEvent(payload);
     setSaving(false);
     if (!result.ok) {
-      setMessage({ type: "err", text: result.message });
+      setFormError(result.message);
       return;
     }
     setContent(result.data);
     setFormOpen(false);
+    setFormError(null);
     setMessage({ type: "ok", text: "Event created." });
   }
 
@@ -304,6 +367,8 @@ export default function AdminEventsPanel() {
               {editingId ? "Edit event" : "New event"}
             </h3>
 
+            {formError && <p className={`${adminAlertErr} mb-4`}>{formError}</p>}
+
             <div className="space-y-4">
               <div>
                 <label className={adminLabel}>Title</label>
@@ -390,17 +455,12 @@ export default function AdminEventsPanel() {
                 />
               </div>
               <div>
-                <label className={adminLabel}>
-                  Cover image{editingId ? " (optional on edit)" : ""}
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="text-sm"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) void handleCoverUpload(file);
-                  }}
+                <AdminImageFilePicker
+                  label={`Cover image${editingId ? " (optional on edit)" : ""}`}
+                  fileName={coverFileName}
+                  onPick={(file) => void handleCoverUpload(file)}
+                  onClear={handleCoverRemove}
+                  showClear={Boolean(coverToken)}
                 />
                 {coverPreview && (
                   <div className="relative mt-2 h-32 w-full overflow-hidden rounded-lg bg-gray-100">
@@ -415,32 +475,39 @@ export default function AdminEventsPanel() {
                 )}
               </div>
               <div>
-                <label className={adminLabel}>Gallery images</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="text-sm"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) void handleGalleryUpload(file);
-                    e.target.value = "";
-                  }}
+                <AdminImageFilePicker
+                  label="Gallery images"
+                  fileName={galleryLastFileName}
+                  onPick={(file) => void handleGalleryUpload(file)}
                 />
                 <p className={adminHint}>
                   {editingId
-                    ? "Upload new images to replace the gallery on save."
-                    : "Add one or more gallery images."}
+                    ? "Upload new images to replace the gallery on save. Use × to remove unsaved picks."
+                    : "Add one or more gallery images. Use × to remove unsaved picks."}
                 </p>
-                {galleryPreviews.length > 0 && (
+                {galleryItems.length > 0 && (
                   <div className="mt-2 grid grid-cols-3 gap-2">
-                    {galleryPreviews.map((src, i) => (
-                      <div
-                        key={src}
-                        className="relative aspect-square overflow-hidden rounded-lg bg-gray-100"
-                      >
-                        <Image src={src} alt="" fill className="object-cover" unoptimized />
-                      </div>
-                    ))}
+                    {galleryItems.map((item, i) => {
+                      const src = item.kind === "existing" ? item.url : item.preview;
+                      return (
+                        <div
+                          key={item.kind === "existing" ? item.url : item.token}
+                          className="relative aspect-square overflow-hidden rounded-lg bg-gray-100"
+                        >
+                          <Image src={src} alt="" fill className="object-cover" unoptimized />
+                          {item.kind === "new" && (
+                            <button
+                              type="button"
+                              onClick={() => handleGalleryRemove(i)}
+                              className="absolute top-1 right-1 w-6 h-6 bg-black/60 text-white font-ui text-[10px] flex items-center justify-center hover:bg-red-600"
+                              aria-label={`Remove ${item.fileName}`}
+                            >
+                              ×
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>

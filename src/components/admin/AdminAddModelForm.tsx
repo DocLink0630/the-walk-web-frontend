@@ -12,6 +12,8 @@ import {
   ACCEPTED_IMAGE_LABEL,
   ACCEPTED_IMAGE_MIME,
 } from "@/lib/registration/accepted-image-types";
+import { nicValidationMessage } from "@/lib/validation/nic";
+import { phoneValidationMessage } from "@/lib/validation/phone";
 import { useAdminModelAddStore } from "@/stores/adminModelAddStore";
 import {
   adminHint,
@@ -178,6 +180,13 @@ export default function AdminAddModelForm({ onSuccess }: AdminAddModelFormProps)
   }
 
   const isSaving = phase !== "idle";
+  const nicFieldError = submitted ? nicValidationMessage(store.nic) : null;
+  const contactFieldError = submitted
+    ? phoneValidationMessage(store.contactNumber, "Contact number")
+    : null;
+  const whatsappFieldError = submitted
+    ? phoneValidationMessage(store.whatsappNumber, "WhatsApp number")
+    : null;
 
   const phaseLabel =
     phase === "uploading"
@@ -275,7 +284,7 @@ export default function AdminAddModelForm({ onSuccess }: AdminAddModelFormProps)
           <AdminField label="Age" required hint="Auto-calculated from DOB">
             <input type="text" value={store.age} readOnly className={adminInput + " bg-[#F5F5F5]"} />
           </AdminField>
-          <AdminField label="NIC number" required>
+          <AdminField label="NIC number" required error={nicFieldError}>
             <input
               type="text"
               value={store.nic}
@@ -293,7 +302,7 @@ export default function AdminAddModelForm({ onSuccess }: AdminAddModelFormProps)
           />
         </AdminField>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <AdminField label="Contact number" required>
+          <AdminField label="Contact number" required error={contactFieldError}>
             <input
               type="tel"
               value={store.contactNumber}
@@ -301,7 +310,7 @@ export default function AdminAddModelForm({ onSuccess }: AdminAddModelFormProps)
               className={adminInput}
             />
           </AdminField>
-          <AdminField label="WhatsApp" required>
+          <AdminField label="WhatsApp" required error={whatsappFieldError}>
             <input
               type="tel"
               value={store.whatsappNumber}

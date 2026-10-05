@@ -27,20 +27,33 @@ export interface User {
   type: "client";
 }
 
+interface AuthMeUser {
+  id: string;
+  email: string;
+  roles?: UserRole[];
+  status?: ClientSession["status"];
+  clientProfile?: { fullName?: string };
+  modelProfile?: { fullName?: string };
+  influencerProfile?: { fullName?: string };
+  beauticianProfile?: { fullName?: string };
+  photographerProfile?: { fullName?: string };
+  studentProfile?: { fullName?: string };
+}
+
+interface LoginResult {
+  ok: boolean;
+  message?: string;
+  isModel?: boolean;
+  isClient?: boolean;
+  isInfluencer?: boolean;
+  isPhotographer?: boolean;
+  isBeautician?: boolean;
+  isStudent?: boolean;
+}
+
 interface AuthContextType {
   user: User | null;
-  login: (
-    email: string,
-    password: string,
-  ) => Promise<{
-    ok: boolean;
-    message?: string;
-    isModel?: boolean;
-    isClient?: boolean;
-    isInfluencer?: boolean;
-    isPhotographer?: boolean;
-    isBeautician?: boolean;
-  }>;
+  login: (email: string, password: string) => Promise<LoginResult>;
   logout: () => void;
   isAuthenticated: boolean;
   isClient: boolean;
@@ -48,6 +61,7 @@ interface AuthContextType {
   isInfluencer: boolean;
   isPhotographer: boolean;
   isBeautician: boolean;
+  isStudent: boolean;
   isLoading: boolean;
 }
 
@@ -92,17 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
-          const data = (await res.json()) as {
-            id: string;
-            email: string;
-            roles?: UserRole[];
-            status?: ClientSession["status"];
-            clientProfile?: { fullName?: string };
-            modelProfile?: { fullName?: string };
-            influencerProfile?: { fullName?: string };
-            beauticianProfile?: { fullName?: string };
-            photographerProfile?: { fullName?: string };
-          };
+          const data = (await res.json()) as AuthMeUser;
           applySession(buildClientSession(data));
           setIsLoading(false);
           return;
@@ -120,18 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void restore();
   }, [applySession]);
 
-  const login = async (
-    email: string,
-    password: string,
-  ): Promise<{
-    ok: boolean;
-    message?: string;
-    isModel?: boolean;
-    isClient?: boolean;
-    isInfluencer?: boolean;
-    isPhotographer?: boolean;
-    isBeautician?: boolean;
-  }> => {
+  const login = async (email: string, password: string): Promise<LoginResult> => {
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
@@ -142,17 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = (await res.json()) as {
         access_token?: string | null;
         message?: string;
-        user?: {
-          id: string;
-          email: string;
-          roles?: UserRole[];
-          status?: ClientSession["status"];
-          clientProfile?: { fullName?: string };
-          modelProfile?: { fullName?: string };
-          influencerProfile?: { fullName?: string };
-          beauticianProfile?: { fullName?: string };
-          photographerProfile?: { fullName?: string };
-        };
+        user?: AuthMeUser;
       };
 
       if (!res.ok) {
@@ -176,6 +159,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userIsInfluencer = data.user.roles?.includes("INFLUENCER") ?? false;
       const userIsPhotographer = data.user.roles?.includes("PHOTOGRAPHER") ?? false;
       const userIsBeautician = data.user.roles?.includes("BEAUTICIAN") ?? false;
+      const userIsStudent = data.user.roles?.includes("STUDENT") ?? false;
       return {
         ok: true,
         isModel: userIsModel,
@@ -183,6 +167,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isInfluencer: userIsInfluencer,
         isPhotographer: userIsPhotographer,
         isBeautician: userIsBeautician,
+        isStudent: userIsStudent,
       };
     } catch {
       return { ok: false, message: "Unable to sign in. Please try again." };
@@ -195,13 +180,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
-  const isClient =
-    !!user?.roles?.includes("CORPORATE_CLIENT") || user?.type === "client";
-
+  const isClient = !!user?.roles?.includes("CORPORATE_CLIENT");
   const isModel = !!user?.roles?.includes("MODEL");
   const isInfluencer = !!user?.roles?.includes("INFLUENCER");
   const isPhotographer = !!user?.roles?.includes("PHOTOGRAPHER");
   const isBeautician = !!user?.roles?.includes("BEAUTICIAN");
+  const isStudent = !!user?.roles?.includes("STUDENT");
 
   return (
     <AuthContext.Provider
@@ -215,6 +199,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isInfluencer,
         isPhotographer,
         isBeautician,
+        isStudent,
         isLoading,
       }}
     >

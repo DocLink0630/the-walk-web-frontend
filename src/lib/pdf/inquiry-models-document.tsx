@@ -2,7 +2,9 @@ import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import React from "react";
 
 import {
-  inquiryExtraMeasurements,
+  resolveTalentPdfKind,
+  talentDetailCells,
+  talentDetailsSectionTitle,
   talentSubtitle,
   talentToModelProfilePdfData,
 } from "./normalize-inquiry-talent";
@@ -114,15 +116,26 @@ export function InquiryModelsDocument({
         <PageFooter logoSrc={logoSrc} />
       </Page>
 
-      {talents.flatMap((talent, index) =>
-        renderModelProfilePages({
+      {talents.flatMap((talent, index) => {
+        const kind = resolveTalentPdfKind(talent);
+        const rateExtra =
+          kind === "model" && talent.rate?.trim()
+            ? [{ label: "Rate", value: talent.rate.trim() }]
+            : [];
+
+        return renderModelProfilePages({
           data: talentToModelProfilePdfData(talent),
           logoSrc,
           idPrefix: talent.modelUserId ?? `talent-${index}`,
-          extraMeasurements: inquiryExtraMeasurements(talent),
+          ...(kind === "model"
+            ? { extraMeasurements: rateExtra }
+            : {
+                detailCells: talentDetailCells(talent),
+                detailsSectionTitle: talentDetailsSectionTitle(talent),
+              }),
           subtitle: talentSubtitle(talent),
-        }),
-      )}
+        });
+      })}
     </Document>
   );
 }

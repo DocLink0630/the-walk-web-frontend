@@ -19,13 +19,13 @@ export default function ModelDetailField({
 
   return (
     <div className="border-b border-[#E8E8E8] py-3">
-      <p className="font-ui text-[8px] tracking-[0.25em] uppercase text-[#9A9A9A] mb-1.5">
+      <p className="font-ui text-[10px] tracking-[0.25em] uppercase text-[#9A9A9A] mb-1.5">
         {label}
       </p>
       <div className="relative">
         <p
           className={[
-            "font-ui text-[11px] tracking-[0.05em] text-[#0A0A0A]",
+            "font-ui text-[13px] tracking-[0.05em] text-[#0A0A0A] leading-relaxed whitespace-pre-line break-words",
             locked ? "blur-[4px] select-none" : "",
           ].join(" ")}
         >

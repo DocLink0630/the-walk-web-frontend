@@ -15,6 +15,7 @@ import {
 import { uploadFloatingImage } from "@/lib/registration/upload-floating-image";
 import type { SiteContentOverrides } from "@/lib/site-content/types";
 import type { GalleryAspectRatio, GalleryCategory, GalleryItem } from "@/types/gallery-page";
+import AdminImageFilePicker from "./AdminImageFilePicker";
 import {
   adminAlertErr,
   adminAlertOk,
@@ -48,11 +49,26 @@ const EMPTY_FORM = {
 };
 
 function buildDefaultOrder(content: SiteContentOverrides): string[] {
-  if (content.galleryOrder.length > 0) return content.galleryOrder;
-  return [
+  const knownIds = [
     ...GALLERY_PAGE.items.map((item) => item.id),
     ...content.galleryItems.map((item) => item.id),
   ];
+  const knownSet = new Set(knownIds);
+
+  if (content.galleryOrder.length === 0) return knownIds;
+
+  const ordered: string[] = [];
+  const seen = new Set<string>();
+  for (const id of content.galleryOrder) {
+    if (knownSet.has(id) && !seen.has(id)) {
+      ordered.push(id);
+      seen.add(id);
+    }
+  }
+  for (const id of knownIds) {
+    if (!seen.has(id)) ordered.push(id);
+  }
+  return ordered;
 }
 
 function buildListedItems(content: SiteContentOverrides): ListedItem[] {
@@ -98,7 +114,10 @@ export default function AdminGalleryPanel() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [imageToken, setImageToken] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFileName, setImageFileName] = useState<string | null>(null);
+  const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -118,8 +137,7 @@ export default function AdminGalleryPanel() {
 
   const listedItems = useMemo(() => {
     if (!content) return [];
-    const byId = new Map(buildListedItems(content).map((item) => [item.id, item]));
-    return order.map((id) => byId.get(id)).filter(Boolean) as ListedItem[];
+    return buildListedItems({ ...content, galleryOrder: order });
   }, [content, order]);
 
   const hiddenSet = useMemo(
@@ -166,6 +184,9 @@ export default function AdminGalleryPanel() {
     setForm(EMPTY_FORM);
     setImageToken(null);
     setImagePreview(null);
+    setImageFileName(null);
+    setOriginalImageUrl(null);
+    setFormError(null);
     setFormOpen(true);
   }
 
@@ -178,26 +199,54 @@ export default function AdminGalleryPanel() {
     });
     setImageToken(null);
     setImagePreview(item.url);
+    setImageFileName(null);
+    setOriginalImageUrl(item.url);
+    setFormError(null);
     setFormOpen(true);
   }
 
   async function handleImageUpload(file: File) {
+    setFormError(null);
     const upload = await uploadFloatingImage(file);
     if (!upload.ok) {
-      setMessage({ type: "err", text: upload.message });
+      setFormError(upload.message);
       return;
+    }
+    if (imagePreview?.startsWith("blob:")) {
+      URL.revokeObjectURL(imagePreview);
     }
     setImageToken(upload.token);
     setImagePreview(URL.createObjectURL(file));
+    setImageFileName(file.name);
+  }
+
+  function handleImageRemove() {
+    if (imagePreview?.startsWith("blob:")) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    setImageToken(null);
+    setImageFileName(null);
+    setImagePreview(originalImageUrl);
   }
 
   async function handleSave() {
-    if (!form.title.trim()) {
-      setMessage({ type: "err", text: "Title is required." });
+    const missingTitle = !form.title.trim();
+    const missingImage = !editingId && !imageToken;
+    if (missingTitle && missingImage) {
+      setFormError("Title and image are required.");
+      return;
+    }
+    if (missingTitle) {
+      setFormError("Title is required.");
+      return;
+    }
+    if (missingImage) {
+      setFormError("Image is required.");
       return;
     }
 
     setSaving(true);
+    setFormError(null);
     setMessage(null);
 
     if (editingId) {
@@ -206,7 +255,7 @@ export default function AdminGalleryPanel() {
       const result = await updateAdminGalleryItem(editingId, payload);
       setSaving(false);
       if (!result.ok) {
-        setMessage({ type: "err", text: result.message });
+        setFormError(result.message);
         return;
       }
       setContent(result.data);
@@ -217,14 +266,14 @@ export default function AdminGalleryPanel() {
 
     if (!imageToken) {
       setSaving(false);
-      setMessage({ type: "err", text: "Image is required." });
+      setFormError("Image is required.");
       return;
     }
 
     const result = await createAdminGalleryItem({ ...form, imageToken });
     setSaving(false);
     if (!result.ok) {
-      setMessage({ type: "err", text: result.message });
+      setFormError(result.message);
       return;
     }
     setContent(result.data);
@@ -352,13 +401,18 @@ export default function AdminGalleryPanel() {
               {editingId ? "Edit gallery image" : "New gallery image"}
             </h3>
 
+            {formError && <p className={`${adminAlertErr} mb-4`}>{formError}</p>}
+
             <div className="space-y-4">
               <div>
                 <label className={adminLabel}>Title</label>
                 <input
                   className={adminInput}
                   value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  onChange={(e) => {
+                    setFormError(null);
+                    setForm({ ...form, title: e.target.value });
+                  }}
                 />
               </div>
               <div>
@@ -394,17 +448,12 @@ export default function AdminGalleryPanel() {
                 </select>
               </div>
               <div>
-                <label className={adminLabel}>
-                  Image{editingId ? " (optional on edit)" : ""}
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="text-sm"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) void handleImageUpload(file);
-                  }}
+                <AdminImageFilePicker
+                  label={`Image${editingId ? " (optional on edit)" : ""}`}
+                  fileName={imageFileName}
+                  onPick={(file) => void handleImageUpload(file)}
+                  onClear={handleImageRemove}
+                  showClear={Boolean(imageToken)}
                 />
                 {imagePreview && (
                   <div className="relative mt-2 h-40 w-full overflow-hidden rounded-lg bg-gray-100">
@@ -417,7 +466,9 @@ export default function AdminGalleryPanel() {
                     />
                   </div>
                 )}
-                <p className={adminHint}>Images upload to cloud storage automatically.</p>
+                <p className={adminHint}>
+                  Images upload to cloud storage automatically. Remove undoes an unsaved pick.
+                </p>
               </div>
             </div>
 

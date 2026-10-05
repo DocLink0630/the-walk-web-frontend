@@ -49,20 +49,70 @@ export function normalizeGender(gender?: string | null): NormalizedGender | unde
   return undefined;
 }
 
-export function parseHeightCm(height?: string | null): number | null {
-  if (!height?.trim()) return null;
-  const cmMatch = height.match(/(\d+)\s*cm/i);
-  if (cmMatch) return parseInt(cmMatch[1], 10);
+/** Reasonable adult height bounds used to disambiguate bare numbers. */
+const HEIGHT_INCHES_MIN = 48;
+const HEIGHT_INCHES_MAX = 96;
+const HEIGHT_CM_MIN = 100;
+const HEIGHT_CM_MAX = 250;
 
-  const feetMatch = height.match(/(\d+)'(\d+)"/);
-  if (feetMatch) {
-    const feet = parseInt(feetMatch[1], 10);
-    const inches = parseInt(feetMatch[2], 10);
-    return Math.round((feet * 12 + inches) * 2.54);
+function parseFeetInchesTotal(height: string): number | null {
+  const primeMatch = height.match(/(\d+)\s*['′]\s*(\d+)\s*["″]?/);
+  if (primeMatch) {
+    const feet = parseInt(primeMatch[1], 10);
+    const inches = parseInt(primeMatch[2], 10);
+    if (!Number.isFinite(feet) || !Number.isFinite(inches) || inches >= 12) return null;
+    const total = feet * 12 + inches;
+    return total > 0 ? total : null;
   }
 
-  const numeric = parseInt(height.replace(/\D/g, ""), 10);
-  return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
+  const wordMatch = height.match(
+    /(\d+)\s*(?:ft|feet)\s*(\d+)\s*(?:in|ins|inch|inches)?/i,
+  );
+  if (wordMatch) {
+    const feet = parseInt(wordMatch[1], 10);
+    const inches = parseInt(wordMatch[2], 10);
+    if (!Number.isFinite(feet) || !Number.isFinite(inches) || inches >= 12) return null;
+    const total = feet * 12 + inches;
+    return total > 0 ? total : null;
+  }
+
+  return null;
+}
+
+function parseBareHeightNumber(height: string): { cm: number } | { inches: number } | null {
+  const trimmed = height.trim();
+  if (!/^\d+(\.\d+)?$/.test(trimmed)) return null;
+
+  const numeric = Number(trimmed);
+  if (!Number.isFinite(numeric) || numeric <= 0) return null;
+
+  if (numeric >= HEIGHT_CM_MIN && numeric <= HEIGHT_CM_MAX) {
+    return { cm: Math.round(numeric) };
+  }
+  if (numeric >= HEIGHT_INCHES_MIN && numeric <= HEIGHT_INCHES_MAX) {
+    return { inches: Math.round(numeric) };
+  }
+  return null;
+}
+
+export function parseHeightCm(height?: string | null): number | null {
+  if (!height?.trim()) return null;
+
+  const cmMatch = height.match(/(\d+(?:\.\d+)?)\s*cm/i);
+  if (cmMatch) {
+    const cm = Number(cmMatch[1]);
+    return Number.isFinite(cm) && cm > 0 ? Math.round(cm) : null;
+  }
+
+  const feetInches = parseFeetInchesTotal(height);
+  if (feetInches !== null) {
+    return Math.round(feetInches * 2.54);
+  }
+
+  const bare = parseBareHeightNumber(height);
+  if (!bare) return null;
+  if ("cm" in bare) return bare.cm;
+  return Math.round(bare.inches * 2.54);
 }
 
 /** 5'0" (60") through 6'6" (78") in 1-inch steps */
@@ -86,17 +136,20 @@ export const HEIGHT_FILTER_OPTIONS: { inches: number; label: string }[] = Array.
 export function parseHeightInches(height?: string | null): number | null {
   if (!height?.trim()) return null;
 
-  const feetMatch = height.match(/(\d+)'(\d+)"/);
-  if (feetMatch) {
-    const feet = parseInt(feetMatch[1], 10);
-    const inches = parseInt(feetMatch[2], 10);
-    const total = feet * 12 + inches;
-    return Number.isFinite(total) && total > 0 ? total : null;
+  const feetInches = parseFeetInchesTotal(height);
+  if (feetInches !== null) return feetInches;
+
+  const cmMatch = height.match(/(\d+(?:\.\d+)?)\s*cm/i);
+  if (cmMatch) {
+    const cm = Number(cmMatch[1]);
+    if (!Number.isFinite(cm) || cm <= 0) return null;
+    return Math.round(cm / 2.54);
   }
 
-  const cm = parseHeightCm(height);
-  if (cm === null) return null;
-  return Math.round(cm / 2.54);
+  const bare = parseBareHeightNumber(height);
+  if (!bare) return null;
+  if ("inches" in bare) return bare.inches;
+  return Math.round(bare.cm / 2.54);
 }
 
 function formatMeasurements(profile?: AdminUserDetail["modelProfile"]): string | undefined {
@@ -157,6 +210,7 @@ export function mapPublicApiModelToPublicModel(
     id: item.userId ?? makePublicModelId(item.name, index),
     userId: item.userId ?? null,
     name: item.name,
+    tier: item.tier ?? undefined,
     category: mapTierToCategory(item.tier),
     gender: normalizeGender(item.gender),
     imageUrl: portfolioImages[0] ?? item.imageUrl,
@@ -512,8 +566,12 @@ async function enrichModelsWithProfiles(
   return enrichedCount > 0 ? enriched : models;
 }
 
-function hasProfileFields(model: PublicModel): boolean {
-  return Boolean(model.tier || model.gender || model.height || model.rate);
+/** True when a model has height/gender data that advanced filters can use. */
+function hasAdvancedFilterFields(model: PublicModel): boolean {
+  return (
+    normalizeGender(model.gender) !== undefined ||
+    parseHeightInches(model.height) !== null
+  );
 }
 
 export async function loadModelsPageData(options: {
@@ -544,13 +602,13 @@ export async function loadModelsPageData(options: {
     models = await enrichModelsWithProfiles(models, options.token);
   }
 
-  const hasFullProfiles = models.some(hasProfileFields);
+  const hasAdvancedFilters = models.some(hasAdvancedFilterFields);
 
   return {
     models,
-    restricted: !hasFullProfiles,
+    restricted: !hasAdvancedFilters,
     notice:
-      options.token && !hasFullProfiles
+      options.token && !hasAdvancedFilters
         ? "Sign in with a client account to view full model profiles, measurements, and filters."
         : undefined,
   };

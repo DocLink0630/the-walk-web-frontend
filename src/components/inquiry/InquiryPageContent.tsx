@@ -137,23 +137,24 @@ export default function InquiryPageContent() {
           Sign in as a client to submit an inquiry
         </h1>
         <p className="font-ui text-sm text-[#4A4A4A] leading-relaxed">
-          Create a client account to book models, beauticians, and photographers.
+          Only clients can add talent to an inquiry. Sign in with a client account
+          to book models, beauticians, photographers, and influencers.
           {bookingCart.length > 0 &&
             ` You have ${bookingCart.length} talent${bookingCart.length === 1 ? "" : "s"} in your cart.`}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
           <Link
-            href="/register/client"
+            href="/?login=1"
             data-cursor="button"
             className={CTA_PRIMARY_FILLED + " text-center px-8 py-3"}
           >
-            Register as client
+            Sign in as client
           </Link>
           <Link
-            href="/?login=1"
+            href="/register/client"
             className="font-ui text-[11px] tracking-[0.15em] uppercase border border-[#0A0A0A] px-8 py-3 hover:bg-[#0A0A0A] hover:text-white transition-colors"
           >
-            Sign in
+            Register as client
           </Link>
         </div>
       </div>

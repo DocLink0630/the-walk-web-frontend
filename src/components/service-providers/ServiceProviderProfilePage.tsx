@@ -57,7 +57,9 @@ function DetailRow({
       <p className="font-ui text-[8px] tracking-[0.2em] uppercase text-[#9A9A9A] mb-0.5">
         {label}
       </p>
-      <p className="font-ui text-[11px] text-[#0A0A0A]">{String(value)}</p>
+      <p className="font-ui text-[11px] text-[#0A0A0A] whitespace-pre-line break-words">
+        {String(value)}
+      </p>
     </div>
   );
 }

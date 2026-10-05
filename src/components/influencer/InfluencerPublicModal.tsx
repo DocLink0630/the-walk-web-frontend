@@ -1,8 +1,14 @@
 "use client";
 
-import { X } from "lucide-react";
+import { ShoppingCart, X } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import ReviewsList from "@/components/reviews/ReviewsList";
+import ClientInquiryGateCta from "@/components/inquiry/ClientInquiryGateCta";
+import { useAuth } from "@/context/AuthContext";
+import { useBooking } from "@/context/BookingContext";
+import { mapInfluencerToPublicModel } from "@/lib/public/influencers";
+import { mapToTalentProfile } from "@/lib/public/models";
 import type { PublicInfluencer } from "@/types/public-influencer";
 
 export type { PublicInfluencer };
@@ -94,7 +100,15 @@ function TikTokIcon({ className, size = 14 }: { className?: string; size?: numbe
 }
 
 export default function InfluencerPublicModal({ influencer, onClose }: InfluencerPublicModalProps) {
+  const { isClient, isLoading } = useAuth();
+  const { addToCart, bookingCart, isInCart } = useBooking();
   const coverImage = influencer.imageUrl ?? influencer.portfolioImages[0] ?? null;
+  const inCart = isInCart(influencer.userId);
+
+  function handleAddToCart() {
+    if (!isClient) return;
+    addToCart(mapToTalentProfile(mapInfluencerToPublicModel(influencer)));
+  }
 
   return (
     <div
@@ -144,7 +158,9 @@ export default function InfluencerPublicModal({ influencer, onClose }: Influence
           {influencer.shortBio && (
             <div>
               <p className="font-ui text-[8px] tracking-[0.2em] uppercase text-[#9A9A9A] mb-1">About</p>
-              <p className="font-ui text-[11px] text-[#4A4A4A] leading-relaxed">{influencer.shortBio}</p>
+              <p className="font-ui text-[11px] text-[#4A4A4A] leading-relaxed whitespace-pre-line break-words">
+                {influencer.shortBio}
+              </p>
             </div>
           )}
 
@@ -185,6 +201,40 @@ export default function InfluencerPublicModal({ influencer, onClose }: Influence
             </p>
             <ReviewsList talentUserId={influencer.userId} />
           </div>
+        </div>
+
+        <div className="shrink-0 border-t border-[#E0E0E0] px-5 py-4 space-y-2">
+          {isLoading ? (
+            <div
+              className="h-11 w-full bg-[#F0F0F0] animate-pulse"
+              aria-hidden
+            />
+          ) : isClient ? (
+            <>
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                disabled={inCart}
+                className="block w-full min-w-0 box-border text-center font-ui text-[10px] tracking-[0.18em] uppercase px-4 py-3.5 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] transition-colors disabled:opacity-60 disabled:cursor-default"
+              >
+                {inCart ? "Added to inquiry" : "Add to inquiry"}
+              </button>
+              <Link
+                href="/inquiry"
+                className="flex w-full min-w-0 items-center justify-center gap-2 font-ui text-[10px] font-bold tracking-[0.18em] uppercase px-4 py-3 bg-[#C8A97A]/20 text-[#9A7329] border border-[#C8A97A] hover:bg-[#C8A97A] hover:text-white transition-colors"
+              >
+                <ShoppingCart size={14} strokeWidth={2.25} />
+                View inquiry cart
+                {bookingCart.length > 0 && (
+                  <span className="flex h-4 min-w-4 items-center justify-center bg-[#9A7329] px-1 font-ui text-[8px] tracking-normal text-white">
+                    {bookingCart.length}
+                  </span>
+                )}
+              </Link>
+            </>
+          ) : (
+            <ClientInquiryGateCta />
+          )}
         </div>
       </div>
     </div>

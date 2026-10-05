@@ -16,6 +16,7 @@ import {
   resolveModelProfileForModal,
 } from "@/lib/public/models";
 import type { PublicModel } from "@/types/public-model";
+import ClientInquiryGateCta from "@/components/inquiry/ClientInquiryGateCta";
 import ReviewsList from "@/components/reviews/ReviewsList";
 import ModelAddReviewModal from "./ModelAddReviewModal";
 import ModelDetailField from "./ModelDetailField";
@@ -26,7 +27,7 @@ interface ModelDetailModalProps {
 }
 
 export default function ModelDetailModal({ model, onClose }: ModelDetailModalProps) {
-  const { isAuthenticated, isClient, user } = useAuth();
+  const { isAuthenticated, isClient, isLoading, user } = useAuth();
   const { addToCart, bookingCart, isInCart } = useBooking();
   const [slideIndex, setSlideIndex] = useState(0);
   const [resolvedModel, setResolvedModel] = useState(model);
@@ -202,6 +203,7 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
   }
 
   function handleAddToCart() {
+    if (!isClient) return;
     addToCart(mapToTalentProfile(resolvedModel));
   }
 
@@ -221,7 +223,7 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
       />
 
       <div
-        className="relative w-full max-w-6xl max-h-[100dvh] md:max-h-[92dvh] bg-white border border-[#E0E0E0] shadow-[0_24px_80px_rgba(0,0,0,0.25)] overflow-y-auto flex flex-col"
+        className="relative w-full max-w-6xl max-h-[100dvh] md:max-h-[92dvh] bg-white border border-[#E0E0E0] shadow-[0_24px_80px_rgba(0,0,0,0.25)] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         <header className="shrink-0 flex items-start justify-between gap-4 border-b border-[#E0E0E0] px-5 py-5 md:px-8 md:py-6">
@@ -271,9 +273,9 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
         )}
 
         <div className="flex-1 flex flex-col lg:flex-row min-h-0">
-          <div className="relative lg:w-[55%] bg-[#0A0A0A] min-h-[320px] lg:min-h-0 flex items-center justify-center">
+          <div className="relative lg:w-[55%] bg-[#0A0A0A] h-56 max-h-[40vh] shrink-0 lg:h-auto lg:max-h-none lg:min-h-0 flex items-center justify-center">
             {hasImage || currentSlide?.locked ? (
-              <div className="relative w-full h-full min-h-[320px] lg:min-h-[480px]">
+              <div className="relative w-full h-full lg:min-h-[480px]">
                 {hasImage && !currentSlide?.locked && (
                   <Image
                     src={currentSlide!.image!}
@@ -320,7 +322,7 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
                 )}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-20 text-white/40">
+              <div className="flex h-full w-full flex-col items-center justify-center text-white/40">
                 <span className="font-ui text-[10px] tracking-[0.2em] uppercase">
                   Imagery coming soon
                 </span>
@@ -363,9 +365,9 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
             )}
           </div>
 
-          <div className="lg:w-[45%] lg:min-w-[280px] flex flex-col min-h-0 min-w-0 border-t lg:border-t-0 lg:border-l border-[#E0E0E0]">
-            <div className="flex-1 overflow-y-auto px-5 py-6 md:px-6 md:pr-8">
-              <p className="font-ui text-[8px] tracking-[0.3em] uppercase text-[#9A9A9A] mb-4">
+          <div className="flex-1 lg:w-[45%] lg:min-w-[280px] flex flex-col min-h-0 min-w-0 border-t lg:border-t-0 lg:border-l border-[#E0E0E0]">
+            <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-6 md:px-6 md:pr-8">
+              <p className="font-ui text-[10px] tracking-[0.3em] uppercase text-[#9A9A9A] mb-4">
                 Profile
               </p>
 
@@ -424,8 +426,8 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
                 placeholder="Members only"
               />
 
-              <div className="mt-6 pt-5 border-t border-[#E8E8E8]">
-                <p className="font-ui text-[8px] tracking-[0.2em] uppercase text-[#9A9A9A] mb-3">
+              <div className="mt-6 pt-5 border-t border-[#E8E8E8] pb-2">
+                <p className="font-ui text-[10px] tracking-[0.2em] uppercase text-[#9A9A9A] mb-3">
                   Client reviews
                 </p>
                 <ReviewsList talentUserId={modelUserId} />
@@ -433,7 +435,12 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
             </div>
 
             <div className="shrink-0 border-t border-[#E0E0E0] px-5 py-4 md:px-6 md:pr-8 space-y-2">
-              {isClient ? (
+              {isLoading ? (
+                <div
+                  className="h-11 w-full bg-[#F0F0F0] animate-pulse"
+                  aria-hidden
+                />
+              ) : isClient ? (
                 <>
                   <button
                     type="button"
@@ -464,12 +471,7 @@ export default function ModelDetailModal({ model, onClose }: ModelDetailModalPro
                   </button>
                 </>
               ) : (
-                <Link
-                  href="/register/client"
-                  className="block w-full text-center font-ui text-[10px] tracking-[0.2em] uppercase px-6 py-3 border border-[#0A0A0A] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-colors"
-                >
-                  Sign in to inquiry
-                </Link>
+                <ClientInquiryGateCta />
               )}
             </div>
           </div>

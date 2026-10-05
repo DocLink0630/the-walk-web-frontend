@@ -2,10 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
-import { X, ShoppingBag, Check } from "lucide-react";
+import Link from "next/link";
+import { X, ShoppingBag, Check, ShoppingCart } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 import { useBooking } from "@/context/BookingContext";
 import type { PublicServiceProvider, ServiceProviderType } from "@/types/public-service-provider";
 import type { TalentProfile } from "@/types/talents";
+import ClientInquiryGateCta from "@/components/inquiry/ClientInquiryGateCta";
 import ReviewsList from "@/components/reviews/ReviewsList";
 
 interface ServiceProvidersPageContentProps {
@@ -67,7 +70,8 @@ interface DetailModalProps {
 }
 
 function ServiceProviderDetailModal({ provider, type, onClose }: DetailModalProps) {
-  const { addToCart, removeFromCart, isInCart } = useBooking();
+  const { isClient, isLoading } = useAuth();
+  const { addToCart, removeFromCart, isInCart, bookingCart } = useBooking();
   const talent = mapToTalentProfile(provider, type);
   const inCart = isInCart(talent.id);
 
@@ -155,7 +159,9 @@ function ServiceProviderDetailModal({ provider, type, onClose }: DetailModalProp
             {provider.shortBio && (
               <div>
                 <p className="font-ui text-[8px] tracking-[0.2em] uppercase text-[#9A9A9A] mb-1">About</p>
-                <p className="font-ui text-[11px] text-[#4A4A4A] leading-relaxed break-words">{provider.shortBio}</p>
+                <p className="font-ui text-[11px] text-[#4A4A4A] leading-relaxed whitespace-pre-line break-words">
+                  {provider.shortBio}
+                </p>
               </div>
             )}
 
@@ -172,25 +178,49 @@ function ServiceProviderDetailModal({ provider, type, onClose }: DetailModalProp
               </div>
             )}
 
-            <button
-              type="button"
-              disabled={!inCart && !talent.id}
-              onClick={() => {
-                if (inCart) {
-                  removeFromCart(talent.id);
-                  return;
-                }
-                if (!talent.id) return;
-                addToCart(talent);
-              }}
-              className={`w-full font-ui text-[10px] tracking-[0.2em] uppercase px-6 py-3 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-                inCart
-                  ? "bg-[#C8A97A] text-white hover:bg-[#b8985e]"
-                  : "bg-[#0A0A0A] text-white hover:bg-[#C8A97A]"
-              }`}
-            >
-              {inCart ? <><Check className="w-3.5 h-3.5" /> Added to inquiry</> : <><ShoppingBag className="w-3.5 h-3.5" /> Add to inquiry</>}
-            </button>
+            {isLoading ? (
+              <div
+                className="h-11 w-full bg-[#F0F0F0] animate-pulse"
+                aria-hidden
+              />
+            ) : isClient ? (
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  disabled={!inCart && !talent.id}
+                  onClick={() => {
+                    if (!isClient) return;
+                    if (inCart) {
+                      removeFromCart(talent.id);
+                      return;
+                    }
+                    if (!talent.id) return;
+                    addToCart(talent);
+                  }}
+                  className={`w-full font-ui text-[10px] tracking-[0.2em] uppercase px-6 py-3 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                    inCart
+                      ? "bg-[#C8A97A] text-white hover:bg-[#b8985e]"
+                      : "bg-[#0A0A0A] text-white hover:bg-[#C8A97A]"
+                  }`}
+                >
+                  {inCart ? <><Check className="w-3.5 h-3.5" /> Added to inquiry</> : <><ShoppingBag className="w-3.5 h-3.5" /> Add to inquiry</>}
+                </button>
+                <Link
+                  href="/inquiry"
+                  className="flex w-full min-w-0 items-center justify-center gap-2 font-ui text-[10px] font-bold tracking-[0.18em] uppercase px-4 py-3 bg-[#C8A97A]/20 text-[#9A7329] border border-[#C8A97A] hover:bg-[#C8A97A] hover:text-white transition-colors"
+                >
+                  <ShoppingCart size={14} strokeWidth={2.25} />
+                  View inquiry cart
+                  {bookingCart.length > 0 && (
+                    <span className="flex h-4 min-w-4 items-center justify-center bg-[#9A7329] px-1 font-ui text-[8px] tracking-normal text-white">
+                      {bookingCart.length}
+                    </span>
+                  )}
+                </Link>
+              </div>
+            ) : (
+              <ClientInquiryGateCta />
+            )}
 
             <div>
               <p className="font-ui text-[8px] tracking-[0.2em] uppercase text-[#9A9A9A] mb-3">

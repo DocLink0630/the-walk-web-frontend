@@ -202,27 +202,13 @@ export default function ClientProfilePage() {
         </div>
 
         <section className="mt-8 bg-white border border-[#E0E0E0] p-6 space-y-5">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#0A0A0A]">
-                My inquiries
-              </h2>
-              <p className="font-ui text-[10px] text-[#6B6B6B] mt-1">
-                One PDF per inquiry — every model included.
-              </p>
-            </div>
-            {inquiries.length > 0 && (
-              <button
-                type="button"
-                onClick={() => void handleExportInquiryPdf(inquiries[0].id)}
-                disabled={exportingInquiryId !== null}
-                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 font-ui text-[10px] tracking-[0.2em] uppercase bg-[#0A0A0A] text-white border-2 border-[#C8A97A] hover:bg-[#C8A97A] hover:text-[#0A0A0A] disabled:opacity-50 transition-colors"
-              >
-                {exportingInquiryId === inquiries[0].id
-                  ? "Preparing PDF…"
-                  : `Download all ${inquiries[0].items.length} model${inquiries[0].items.length === 1 ? "" : "s"} (one PDF)`}
-              </button>
-            )}
+          <div>
+            <h2 className="font-ui text-[9px] tracking-[0.25em] uppercase text-[#0A0A0A]">
+              My inquiries
+            </h2>
+            <p className="font-ui text-[10px] text-[#6B6B6B] mt-1">
+              One PDF per inquiry — every talent included.
+            </p>
           </div>
 
           {inquiries.length === 0 ? (
@@ -256,7 +242,7 @@ export default function ClientProfilePage() {
                         >
                           {exportingInquiryId === inquiry.id
                             ? "Preparing PDF…"
-                            : `All ${inquiry.items.length} model${inquiry.items.length === 1 ? "" : "s"} (one PDF)`}
+                            : `Download PDF (${inquiry.items.length} talent${inquiry.items.length === 1 ? "" : "s"})`}
                         </button>
                       </div>
 

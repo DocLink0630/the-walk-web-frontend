@@ -247,11 +247,13 @@ export default function StepUploads({
               label="NIC — Front (optional)"
               file={store.nicFront}
               onFile={(f) => store.set({ nicFront: f })}
+              skipCrop
             />
             <CroppableImageUpload
               label="NIC — Back (optional)"
               file={store.nicBack}
               onFile={(f) => store.set({ nicBack: f })}
+              skipCrop
             />
           </div>
 

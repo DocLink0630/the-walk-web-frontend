@@ -8,6 +8,13 @@ export const STUDENT_QUEUE_STATUSES: UserStatus[] = [
   "DELETED",
 ];
 
+/** Forward pipeline only (excludes DELETED, which is always allowed as a side exit). */
+const STUDENT_STATUS_PIPELINE: UserStatus[] = [
+  "PENDING_ADMIN_REVIEW",
+  "PENDING_PAYMENT",
+  "ACTIVE",
+];
+
 export const STUDENT_STATUS_LABELS: Record<UserStatus, string> = {
   ...MODEL_STATUS_LABELS,
   PENDING_ADMIN_REVIEW: "Pending review",
@@ -15,8 +22,21 @@ export const STUDENT_STATUS_LABELS: Record<UserStatus, string> = {
 };
 
 export function studentStatusOptions(current: UserStatus): UserStatus[] {
-  if (STUDENT_QUEUE_STATUSES.includes(current)) {
-    return STUDENT_QUEUE_STATUSES;
+  const idx = STUDENT_STATUS_PIPELINE.indexOf(current);
+  if (idx === -1) {
+    return current === "DELETED" ? ["DELETED"] : [current, "DELETED"];
   }
-  return [current, ...STUDENT_QUEUE_STATUSES];
+
+  const options: UserStatus[] = [
+    ...STUDENT_STATUS_PIPELINE.slice(idx),
+    "DELETED",
+  ];
+  return options;
+}
+
+export function canTransitionStudentStatus(
+  from: UserStatus,
+  to: UserStatus,
+): boolean {
+  return studentStatusOptions(from).includes(to);
 }

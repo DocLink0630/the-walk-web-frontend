@@ -371,47 +371,92 @@ function MeasurementRow({
 
 export type ExtraMeasurement = { label: string; value?: string | null };
 
+function renderDetailRows(
+  idPrefix: string,
+  cells: ExtraMeasurement[],
+) {
+  const rows: ExtraMeasurement[][] = [];
+  for (let i = 0; i < cells.length; i += 3) {
+    rows.push(cells.slice(i, i + 3));
+  }
+
+  return rows.map((row, index) =>
+    row.length < 3 ? (
+      <MeasurementRow
+        key={`${idPrefix}-detail-${index}`}
+        items={row}
+        centered
+      />
+    ) : (
+      <View
+        key={`${idPrefix}-detail-${index}`}
+        style={[
+          portfolioStyles.statGrid,
+          index > 0 ? { marginTop: 10 } : {},
+        ]}
+      >
+        <MeasurementRow items={row} />
+      </View>
+    ),
+  );
+}
+
 export function renderModelProfilePages({
   data,
   logoSrc,
   idPrefix = "model",
   extraMeasurements = [],
+  detailCells,
+  detailsSectionTitle = "Measurements & Details",
   subtitle,
 }: {
   data: ModelProfilePdfData;
   logoSrc?: string | null;
   idPrefix?: string;
+  /** Appended after the default model measurement grid when detailCells is omitted. */
   extraMeasurements?: ExtraMeasurement[];
+  /** When provided, replaces the default model measurement grid entirely. */
+  detailCells?: ExtraMeasurement[];
+  detailsSectionTitle?: string;
   subtitle?: string;
 }): React.ReactElement[] {
   const displayName = data.fullName?.trim() || "Model";
   const email = data.email?.trim() || "";
-
-  const measurementsRow1 = [
-    { label: "Gender", value: data.gender },
-    { label: "Height", value: data.height },
-    { label: "Weight", value: data.weight },
-  ];
-  const measurementsRow2 = [
-    { label: "Chest", value: data.chest },
-    { label: "Shoulder", value: data.shoulder },
-    { label: "Waist", value: data.waist },
-  ];
-  const measurementsRow3 = [
-    { label: "Eyes", value: data.eyeColor },
-    { label: "Hair", value: data.hairColor },
-  ];
-
-  const extraRows: ExtraMeasurement[][] = [];
-  for (let i = 0; i < extraMeasurements.length; i += 3) {
-    extraRows.push(extraMeasurements.slice(i, i + 3));
-  }
 
   const portfolioChunks = chunkImages(data.portfolioImages.filter(Boolean));
   const workImages = data.workExperience.flatMap((entry) =>
     entry.images.filter(Boolean),
   );
   const workChunks = chunkImages(workImages);
+
+  const defaultMeasurements = (
+    <>
+      <View style={portfolioStyles.statGrid}>
+        <MeasurementRow
+          items={[
+            { label: "Gender", value: data.gender },
+            { label: "Height", value: data.height },
+            { label: "Weight", value: data.weight },
+          ]}
+        />
+        <MeasurementRow
+          items={[
+            { label: "Chest", value: data.chest },
+            { label: "Shoulder", value: data.shoulder },
+            { label: "Waist", value: data.waist },
+          ]}
+        />
+      </View>
+      <MeasurementRow
+        items={[
+          { label: "Eyes", value: data.eyeColor },
+          { label: "Hair", value: data.hairColor },
+        ]}
+        centered
+      />
+      {renderDetailRows(idPrefix, extraMeasurements)}
+    </>
+  );
 
   const cover = (
     <Page key={`${idPrefix}-cover`} size="A4" style={portfolioStyles.page}>
@@ -439,28 +484,10 @@ export function renderModelProfilePages({
         </View>
       </View>
 
-      <Text style={portfolioStyles.sectionTitle}>Measurements & Details</Text>
-      <View style={portfolioStyles.statGrid}>
-        <MeasurementRow items={measurementsRow1} />
-        <MeasurementRow items={measurementsRow2} />
-      </View>
-      <MeasurementRow items={measurementsRow3} centered />
-      {extraRows.map((row, index) =>
-        row.length < 3 ? (
-          <MeasurementRow
-            key={`${idPrefix}-extra-${index}`}
-            items={row}
-            centered
-          />
-        ) : (
-          <View
-            key={`${idPrefix}-extra-${index}`}
-            style={[portfolioStyles.statGrid, { marginTop: 10 }]}
-          >
-            <MeasurementRow items={row} />
-          </View>
-        ),
-      )}
+      <Text style={portfolioStyles.sectionTitle}>{detailsSectionTitle}</Text>
+      {detailCells !== undefined
+        ? renderDetailRows(idPrefix, detailCells)
+        : defaultMeasurements}
     </Page>
   );
 

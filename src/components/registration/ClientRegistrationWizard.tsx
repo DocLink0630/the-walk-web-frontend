@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { checkEmailAvailable } from "@/lib/registration/check-email-available";
 import { CLIENT_REGISTRATION_COPY } from "@/lib/registration/client-copy";
 import type { ClientRegistrationStore } from "@/types/client-registration";
 import RegistrationProgress, { CLIENT_STEPS } from "./RegistrationProgress";
@@ -13,6 +14,12 @@ import {
   formEyebrow,
   formPanel,
 } from "./form-styles";
+
+async function ensureClientEmailAvailable(email: string): Promise<string | null> {
+  const result = await checkEmailAvailable(email, "CORPORATE_CLIENT");
+  if (result.available) return null;
+  return result.message ?? "Email already registered";
+}
 
 interface ClientRegistrationWizardProps {
   store: ClientRegistrationStore;
@@ -101,6 +108,7 @@ export default function ClientRegistrationWizard({
                 store={store}
                 copy={accountCopy}
                 idPrefix={idPrefix}
+                beforeNext={ensureClientEmailAvailable}
               />
             )}
             {store.step === 2 && (
