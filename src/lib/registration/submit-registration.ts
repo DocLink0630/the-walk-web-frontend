@@ -52,7 +52,10 @@ export async function submitRegistration(
   const formData = new FormData();
   formData.append("email", state.email);
   formData.append("password", state.password);
-  appendRegistrationImageTokens(formData, imageTokensResult.tokens);
+  appendRegistrationImageTokens(formData, {
+    ...imageTokensResult.tokens,
+    portfolioVideoToken: state.portfolioVideoToken ?? undefined,
+  });
   formData.append("role", "MODEL");
   formData.append(
     "modelProfile",

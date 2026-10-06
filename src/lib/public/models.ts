@@ -166,7 +166,7 @@ function makePublicModelId(name: string, index: number): string {
 /** Loads profile + portfolio gallery for guests (no auth). */
 export async function fetchPublicModelGallery(
   name: string,
-): Promise<Pick<PublicModel, "portfolioImages" | "portfolioCount" | "imageUrl" | "height"> | null> {
+): Promise<Pick<PublicModel, "portfolioImages" | "portfolioCount" | "imageUrl" | "height" | "videoUrl"> | null> {
   try {
     const params = new URLSearchParams({ name });
     const res = await fetch(`/api/public/models/gallery?${params.toString()}`);
@@ -177,6 +177,7 @@ export async function fetchPublicModelGallery(
       portfolioCount?: number;
       imageUrl?: string | null;
       height?: string | null;
+      videoUrl?: string | null;
     };
 
     const portfolioImages = Array.isArray(data.portfolioImages)
@@ -190,6 +191,7 @@ export async function fetchPublicModelGallery(
       portfolioCount: data.portfolioCount ?? portfolioImages.length,
       imageUrl: portfolioImages[0] ?? data.imageUrl ?? null,
       height: data.height?.trim() || undefined,
+      videoUrl: data.videoUrl ?? null,
     };
   } catch {
     return null;
@@ -217,6 +219,7 @@ export function mapPublicApiModelToPublicModel(
     height: item.height?.trim() || undefined,
     portfolioImages,
     portfolioCount: item.portfolioCount ?? portfolioImages.length,
+    videoUrl: item.videoUrl ?? null,
   };
 }
 
@@ -266,6 +269,7 @@ export function featuredModelToPublicModel(
     height: model.height?.trim() || undefined,
     portfolioImages,
     portfolioCount: model.portfolioCount ?? portfolioImages.length,
+    videoUrl: model.videoUrl ?? null,
     isFeaturedOnly: true,
   };
 }
@@ -309,6 +313,7 @@ function mapDetailToPublicModel(detail: AdminUserDetail): PublicModel {
     hairColor: profile?.hairColorEnc ?? undefined,
     bio: profile?.shortBio ?? profile?.talentsEnc ?? undefined,
     portfolioImages,
+    videoUrl: detail.registrationMedia?.portfolioVideo?.url ?? null,
     workExperienceImages,
   };
 }
@@ -329,6 +334,7 @@ function mergePublicWithDetail(
       detail.portfolioImages.length > 0
         ? detail.portfolioImages
         : publicModel.portfolioImages,
+    videoUrl: detail.videoUrl ?? publicModel.videoUrl ?? null,
     workExperienceImages:
       detail.workExperienceImages && detail.workExperienceImages.length > 0
         ? detail.workExperienceImages

@@ -12,6 +12,7 @@ function authHeaders(extra?: Record<string, string>): Record<string, string> {
 
 export type AttachMediaType =
   | "PORTFOLIO"
+  | "PORTFOLIO_VIDEO"
   | "WORK_EXPERIENCE"
   | "PROFILE"
   | "NIC_FRONT"

@@ -246,6 +246,7 @@ export default function TalentSection({
                       image={model.imageUrl}
                       offset={offset}
                       interactive
+                      hasVideo={Boolean(model.videoUrl)}
                       onClick={() =>
                         setSelectedModel(featuredModelToPublicModel(model, item.index))
                       }

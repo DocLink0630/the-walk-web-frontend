@@ -12,6 +12,7 @@ import {
   ACCEPTED_IMAGE_LABEL,
   ACCEPTED_IMAGE_MIME,
 } from "@/lib/registration/accepted-image-types";
+import PortfolioVideoUpload from "@/components/shared/PortfolioVideoUpload";
 import { nicValidationMessage } from "@/lib/validation/nic";
 import { phoneValidationMessage } from "@/lib/validation/phone";
 import { useAdminModelAddStore } from "@/stores/adminModelAddStore";
@@ -118,6 +119,7 @@ export default function AdminAddModelForm({ onSuccess }: AdminAddModelFormProps)
   const [phase, setPhase] = useState<"idle" | AdminModelSubmitPhase | "done">("idle");
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [uploadProgress, setUploadProgress] = useState<{ completed: number; total: number } | null>(null);
+  const [videoUploading, setVideoUploading] = useState(false);
 
   function handleDobChange(value: string) {
     const age = ageFromDateOfBirth(value);
@@ -471,15 +473,38 @@ export default function AdminAddModelForm({ onSuccess }: AdminAddModelFormProps)
             <p className={adminHint + " text-red-600"}>At least one portfolio photo is required.</p>
           )}
         </div>
+        <PortfolioVideoUpload
+          variant="admin"
+          token={store.portfolioVideoToken}
+          meta={store.portfolioVideoMeta}
+          disabled={isSaving}
+          onUploadingChange={setVideoUploading}
+          onUploaded={({ token, fileName, size }) =>
+            store.set({
+              portfolioVideoToken: token,
+              portfolioVideoMeta: { fileName, size },
+            })
+          }
+          onCleared={() =>
+            store.set({
+              portfolioVideoToken: null,
+              portfolioVideoMeta: null,
+            })
+          }
+        />
       </section>
 
       <div className="sticky bottom-0 -mx-4 md:-mx-6 px-4 md:px-6 py-4 bg-white border-t border-[#E0E0E0]">
         <button
           type="submit"
-          disabled={isSaving}
+          disabled={isSaving || videoUploading}
           className="w-full font-ui text-[10px] tracking-[0.2em] uppercase px-6 py-3.5 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isSaving ? "Working…" : "Save & activate model"}
+          {isSaving
+            ? "Working…"
+            : videoUploading
+              ? "Uploading video…"
+              : "Save & activate model"}
         </button>
         {isSaving && phaseLabel && (
           <p className={adminHint + " text-center mt-2"}>{phaseLabel}</p>

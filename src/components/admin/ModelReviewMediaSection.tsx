@@ -13,6 +13,7 @@ import {
   type AdminAttachMediaType,
 } from "@/lib/admin/users-api";
 import { uploadFloatingImage } from "@/lib/registration/upload-floating-image";
+import PortfolioVideoUpload from "@/components/shared/PortfolioVideoUpload";
 import {
   adminAlertErr,
   adminAlertOk,
@@ -238,6 +239,7 @@ export default function ModelReviewMediaSection({
   const [pendingReplaceType, setPendingReplaceType] = useState<AdminAttachMediaType | null>(
     null,
   );
+  const [videoUploading, setVideoUploading] = useState(false);
 
   const portfolioInputRef = useRef<HTMLInputElement>(null);
   const workInputRef = useRef<HTMLInputElement>(null);
@@ -315,6 +317,40 @@ export default function ModelReviewMediaSection({
       type,
       workExperienceId,
     });
+    setBusy(false);
+    if (!result.ok) {
+      reportError(result.message);
+      return;
+    }
+    applyMediaUpdate(result.registrationMedia);
+  }
+
+  async function handlePortfolioVideoUploaded(payload: {
+    token: string;
+    fileName: string;
+    size: number;
+  }) {
+    setBusy(true);
+    setError(null);
+    const result = await attachAdminModelMedia(userId, {
+      token: payload.token,
+      type: "PORTFOLIO_VIDEO",
+    });
+    setBusy(false);
+    if (!result.ok) {
+      reportError(result.message);
+      return;
+    }
+    applyMediaUpdate(result.registrationMedia);
+  }
+
+  async function handleDeleteVideo() {
+    const video = media?.portfolioVideo;
+    if (!video?.storageFileId) return;
+    if (!window.confirm("Remove this video?")) return;
+    setBusy(true);
+    setError(null);
+    const result = await deleteModelMedia(userId, video.storageFileId);
     setBusy(false);
     if (!result.ok) {
       reportError(result.message);
@@ -405,6 +441,7 @@ export default function ModelReviewMediaSection({
       draft.nicFront ||
       draft.nicBack ||
       draft.portfolioPhotos.length > 0 ||
+      media?.portfolioVideo ||
       draft.workExperience.some((entry) => entry.images.length > 0));
 
   return (
@@ -414,7 +451,7 @@ export default function ModelReviewMediaSection({
         {isDirty && (
           <button
             type="button"
-            disabled={saving || busy}
+            disabled={saving || busy || videoUploading}
             onClick={() => void handleSaveOrder()}
             className={adminBtnPrimary + " !py-2 text-xs"}
           >
@@ -591,6 +628,25 @@ export default function ModelReviewMediaSection({
             </p>
           )
         )}
+      </div>
+
+      <div className="space-y-2">
+        <PortfolioVideoUpload
+          variant="admin"
+          token={null}
+          meta={
+            media?.portfolioVideo
+              ? { fileName: "Portfolio video", size: 0 }
+              : null
+          }
+          existingUrl={media?.portfolioVideo?.url ?? null}
+          disabled={busy}
+          onUploadingChange={setVideoUploading}
+          onUploaded={(payload) => void handlePortfolioVideoUploaded(payload)}
+          onCleared={() => {
+            if (media?.portfolioVideo) void handleDeleteVideo();
+          }}
+        />
       </div>
 
       {showWorkExperience && (

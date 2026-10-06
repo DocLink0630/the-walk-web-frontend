@@ -5,6 +5,7 @@ import { CTA_PRIMARY_FILLED } from "@/config/cta-styles";
 import CroppableImageUpload, {
   useCropImagePicker,
 } from "@/components/shared/CroppableImageUpload";
+import PortfolioVideoUpload from "@/components/shared/PortfolioVideoUpload";
 import type { RegistrationCopy } from "@/lib/registration/copy";
 import { validateWorkExperienceDrafts } from "@/lib/registration/build-work-experience-payload";
 import { submitRegistration } from "@/lib/registration/submit-registration";
@@ -140,6 +141,7 @@ export default function StepUploads({
 }: StepUploadsProps) {
   const [submitted, setSubmitted] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<{ completed: number; total: number } | null>(null);
+  const [videoUploading, setVideoUploading] = useState(false);
 
   const workExperienceError =
     submitted && variant === "model"
@@ -271,6 +273,27 @@ export default function StepUploads({
                 : undefined
             }
           />
+
+          {variant === "model" && (
+            <PortfolioVideoUpload
+              token={store.portfolioVideoToken}
+              meta={store.portfolioVideoMeta}
+              disabled={store.isSubmitting}
+              onUploadingChange={setVideoUploading}
+              onUploaded={({ token, fileName, size }) =>
+                store.set({
+                  portfolioVideoToken: token,
+                  portfolioVideoMeta: { fileName, size },
+                })
+              }
+              onCleared={() =>
+                store.set({
+                  portfolioVideoToken: null,
+                  portfolioVideoMeta: null,
+                })
+              }
+            />
+          )}
         </>
       )}
       {photoError && <p className={formHint + " text-red-600"}>{photoError}</p>}
@@ -300,14 +323,14 @@ export default function StepUploads({
         <button
           type="button"
           onClick={store.prevStep}
-          disabled={store.isSubmitting}
+          disabled={store.isSubmitting || videoUploading}
           className={formBackBtn + " disabled:opacity-40"}
         >
           Back
         </button>
         <button
           type="submit"
-          disabled={store.isSubmitting}
+          disabled={store.isSubmitting || videoUploading}
           data-cursor="button"
           className={CTA_PRIMARY_FILLED + " flex-1 text-center block disabled:opacity-60"}
         >
@@ -315,7 +338,9 @@ export default function StepUploads({
             ? uploadProgress
               ? `Uploading image ${uploadProgress.completed} of ${uploadProgress.total}…`
               : "Submitting…"
-            : copy.submitLabel}
+            : videoUploading
+              ? "Uploading video…"
+              : copy.submitLabel}
         </button>
       </div>
     </form>

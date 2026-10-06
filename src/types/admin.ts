@@ -100,6 +100,7 @@ export interface AdminModelRegistrationMedia {
   nicFront?: AdminModelMediaItem | null;
   nicBack?: AdminModelMediaItem | null;
   portfolioPhotos: AdminModelMediaItem[];
+  portfolioVideo?: AdminModelMediaItem | null;
   workExperience: AdminModelWorkExperienceMedia[];
 }
 

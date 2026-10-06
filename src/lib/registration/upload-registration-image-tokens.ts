@@ -6,6 +6,7 @@ export interface RegistrationImageTokens {
   nicFrontToken?: string;
   nicBackToken?: string;
   portfolioPhotoTokens: string[];
+  portfolioVideoToken?: string;
 }
 
 type ImageUploadState = Pick<
@@ -79,5 +80,8 @@ export function appendRegistrationImageTokens(
   }
   if (tokens.portfolioPhotoTokens.length > 0) {
     formData.append("portfolio_photos_tokens", JSON.stringify(tokens.portfolioPhotoTokens));
+  }
+  if (tokens.portfolioVideoToken) {
+    formData.append("portfolio_video_token", tokens.portfolioVideoToken);
   }
 }

@@ -10,6 +10,8 @@ export interface PortraitCardProps {
   className?: string;
   onClick?: () => void;
   interactive?: boolean;
+  /** Shows a small play badge when the model has a portfolio video */
+  hasVideo?: boolean;
 }
 
 const PortraitCard = forwardRef<HTMLDivElement, PortraitCardProps>(
@@ -23,6 +25,7 @@ const PortraitCard = forwardRef<HTMLDivElement, PortraitCardProps>(
       className = "",
       onClick,
       interactive = false,
+      hasVideo = false,
     },
     ref,
   ) => {
@@ -52,6 +55,14 @@ const PortraitCard = forwardRef<HTMLDivElement, PortraitCardProps>(
                 Coming soon
               </span>
             </div>
+          )}
+          {hasVideo && (
+            <span
+              className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center bg-black/65 border border-white/40"
+              aria-label="Has video"
+            >
+              <span className="ml-0.5 border-y-[5px] border-y-transparent border-l-[8px] border-l-white" />
+            </span>
           )}
           <div
             className={`absolute inset-x-0 bottom-0 px-4 pb-4 pt-16 ${
