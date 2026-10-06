@@ -59,31 +59,58 @@ interface StepAccountProps {
   store: AccountStepStore;
   copy: StepAccountCopy;
   idPrefix?: string;
+  /** Return an error message to block Continue, or null to proceed. */
+  beforeNext?: (email: string) => Promise<string | null>;
 }
 
 export default function StepAccount({
   store,
   copy,
   idPrefix = "reg",
+  beforeNext,
 }: StepAccountProps) {
   const [touched, setTouched] = useState({ email: false, password: false });
   const [showPassword, setShowPassword] = useState(false);
+  const [emailAvailabilityError, setEmailAvailabilityError] = useState<
+    string | null
+  >(null);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
-  const emailError =
+  const formatEmailError =
     touched.email && !store.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
       ? "Enter a valid email address"
       : null;
+
+  const emailError = formatEmailError ?? emailAvailabilityError;
 
   const passwordError =
     touched.password && !PASSWORD_REGEX.test(store.password)
       ? "Password must be 8+ characters with uppercase, lowercase, number, and special character"
       : null;
 
-  function handleNext(e: React.FormEvent) {
+  async function handleNext(e: React.FormEvent) {
     e.preventDefault();
     setTouched({ email: true, password: true });
-    if (emailError || passwordError) return;
+    setEmailAvailabilityError(null);
+
+    const emailInvalid = !store.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+    const passwordInvalid = !PASSWORD_REGEX.test(store.password);
+    if (emailInvalid || passwordInvalid) return;
     if (!store.email || !store.password) return;
+
+    if (beforeNext) {
+      setIsCheckingEmail(true);
+      try {
+        const availabilityError = await beforeNext(store.email);
+        if (availabilityError) {
+          setEmailAvailabilityError(availabilityError);
+          return;
+        }
+      } finally {
+        setIsCheckingEmail(false);
+      }
+    }
+
     store.nextStep();
   }
 
@@ -102,10 +129,14 @@ export default function StepAccount({
           id={`${idPrefix}-email`}
           type="email"
           value={store.email}
-          onChange={(e) => store.set({ email: e.target.value })}
+          onChange={(e) => {
+            setEmailAvailabilityError(null);
+            store.set({ email: e.target.value });
+          }}
           onBlur={() => setTouched((t) => ({ ...t, email: true }))}
           placeholder="you@example.com"
           autoComplete="email"
+          disabled={isCheckingEmail}
           className={emailError ? formInputError : formInput}
         />
         {emailError && <p className={formHint + " text-red-600"}>{emailError}</p>}
@@ -124,6 +155,7 @@ export default function StepAccount({
             onBlur={() => setTouched((t) => ({ ...t, password: true }))}
             placeholder="Min. 8 characters"
             autoComplete="new-password"
+            disabled={isCheckingEmail}
             className={(passwordError ? formInputError : formInput) + " pr-20"}
           />
           <button
@@ -142,10 +174,11 @@ export default function StepAccount({
 
       <button
         type="submit"
+        disabled={isCheckingEmail}
         data-cursor="button"
-        className={CTA_PRIMARY_FILLED + " w-full text-center block"}
+        className={CTA_PRIMARY_FILLED + " w-full text-center block disabled:opacity-60"}
       >
-        Continue
+        {isCheckingEmail ? "Checking…" : "Continue"}
       </button>
     </form>
   );

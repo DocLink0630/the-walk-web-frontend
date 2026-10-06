@@ -52,7 +52,11 @@ export default function StepPersonalClient({
         router.push("/models");
         return;
       }
-      store.set({ success: true, isSubmitting: false });
+      store.set({
+        error:
+          "Email already registered. Please log in with your existing password, or use a different email.",
+        isSubmitting: false,
+      });
     } else {
       store.set({ error: result.message, isSubmitting: false });
     }

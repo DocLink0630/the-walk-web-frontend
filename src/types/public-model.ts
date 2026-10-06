@@ -7,6 +7,7 @@ export interface PublicFeaturedModel {
   imageUrl: string | null;
   portfolioImages?: string[];
   portfolioCount?: number;
+  videoUrl?: string | null;
 }
 
 /** GET /v1/public/models — no auth required */
@@ -20,6 +21,7 @@ export interface PublicApiModel {
   imageUrl: string | null;
   portfolioImages?: string[];
   portfolioCount?: number;
+  videoUrl?: string | null;
 }
 
 export interface PublicModelsPageResponse {
@@ -51,8 +53,10 @@ export interface PublicModel {
   hairColor?: string;
   bio?: string;
   portfolioImages: string[];
-  /** Total number of portfolio images — used to render locked placeholder slots for guests */
+  /** Total number of portfolio images from the public gallery API */
   portfolioCount?: number;
+  /** Optional intro / portfolio video URL */
+  videoUrl?: string | null;
   workExperienceImages?: string[];
   /** True when sourced from featured-only fallback (guest or permission denied) */
   isFeaturedOnly?: boolean;

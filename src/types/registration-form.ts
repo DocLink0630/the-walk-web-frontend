@@ -51,6 +51,9 @@ export interface RegistrationFormState {
   nicFront: File | null;
   nicBack: File | null;
   portfolioPhotos: File[];
+  /** Optional portfolio video — uploaded via multipart before submit */
+  portfolioVideoToken: string | null;
+  portfolioVideoMeta: { fileName: string; size: number } | null;
   /** Model registration — sent as work_experience with uploaded image tokens */
   workExperiences: WorkExperienceDraft[];
   step: 1 | 2 | 3;

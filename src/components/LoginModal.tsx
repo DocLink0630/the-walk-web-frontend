@@ -35,6 +35,8 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         router.push("/photographer/profile");
       } else if (result.isBeautician) {
         router.push("/beautician/profile");
+      } else if (result.isStudent) {
+        router.push("/student/profile");
       } else {
         router.push("/models");
       }

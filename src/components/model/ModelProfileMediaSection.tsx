@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import { Trash2, Upload } from "lucide-react";
 import type { AdminModelRegistrationMedia } from "@/types/admin";
+import PortfolioVideoUpload from "@/components/shared/PortfolioVideoUpload";
 import { uploadFloatingImage } from "@/lib/registration/upload-floating-image";
 import {
   attachModelMedia,
@@ -32,12 +33,15 @@ export default function ModelProfileMediaSection({
   const profileInputRef = useRef<HTMLInputElement>(null);
   const workInputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const [videoUploading, setVideoUploading] = useState(false);
   const [newWorkTitle, setNewWorkTitle] = useState("");
   const [uploadTargetWorkId, setUploadTargetWorkId] = useState<string | null>(null);
 
   const portfolio = media?.portfolioPhotos ?? [];
   const workExperience = media?.workExperience ?? [];
   const profilePhoto = media?.profilePhoto ?? null;
+  const portfolioVideo = media?.portfolioVideo ?? null;
+  const mediaBusy = busy || videoUploading;
 
   async function handleProfilePhotoUpload(file: File) {
     setBusy(true);
@@ -65,6 +69,37 @@ export default function ModelProfileMediaSection({
       return;
     }
     const result = await attachModelMedia({ token: upload.token, type: "PORTFOLIO" });
+    setBusy(false);
+    if (!result.ok) {
+      onError(result.message);
+      return;
+    }
+    onMediaChange(result.registrationMedia);
+  }
+
+  async function handlePortfolioVideoUploaded(payload: {
+    token: string;
+    fileName: string;
+    size: number;
+  }) {
+    setBusy(true);
+    const result = await attachModelMedia({
+      token: payload.token,
+      type: "PORTFOLIO_VIDEO",
+    });
+    setBusy(false);
+    if (!result.ok) {
+      onError(result.message);
+      return;
+    }
+    onMediaChange(result.registrationMedia);
+  }
+
+  async function handleDeleteVideo() {
+    if (!portfolioVideo?.storageFileId) return;
+    if (!window.confirm("Remove this video?")) return;
+    setBusy(true);
+    const result = await deleteModelMedia(portfolioVideo.storageFileId);
     setBusy(false);
     if (!result.ok) {
       onError(result.message);
@@ -191,7 +226,7 @@ export default function ModelProfileMediaSection({
             />
             <button
               type="button"
-              disabled={busy}
+              disabled={mediaBusy}
               onClick={() => profileInputRef.current?.click()}
               className="inline-flex items-center gap-1 font-ui text-[8px] tracking-[0.15em] uppercase border border-[#C8A97A] px-4 py-2 hover:bg-[#FFFBF5] disabled:opacity-50"
             >
@@ -222,7 +257,7 @@ export default function ModelProfileMediaSection({
               />
               <button
                 type="button"
-                disabled={busy}
+                disabled={mediaBusy}
                 onClick={() => portfolioInputRef.current?.click()}
                 className="inline-flex items-center gap-1 font-ui text-[8px] tracking-[0.15em] uppercase border border-[#E0E0E0] px-3 py-1.5 hover:border-[#C8A97A] disabled:opacity-50"
               >
@@ -244,7 +279,7 @@ export default function ModelProfileMediaSection({
               )}
               <button
                 type="button"
-                disabled={busy || (!allowEmptyPortfolio && portfolio.length <= 1)}
+                disabled={mediaBusy || (!allowEmptyPortfolio && portfolio.length <= 1)}
                 onClick={() => void handleDeletePhoto(item.storageFileId)}
                 className="absolute top-1 right-1 p-1 bg-black/60 text-white hover:bg-red-600 disabled:opacity-40"
                 aria-label="Delete photo"
@@ -254,6 +289,25 @@ export default function ModelProfileMediaSection({
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="bg-white border border-[#E0E0E0] p-6 space-y-4">
+        <PortfolioVideoUpload
+          variant="profile"
+          token={null}
+          meta={
+            portfolioVideo
+              ? { fileName: "Portfolio video", size: 0 }
+              : null
+          }
+          existingUrl={portfolioVideo?.url ?? null}
+          disabled={busy}
+          onUploadingChange={setVideoUploading}
+          onUploaded={(payload) => void handlePortfolioVideoUploaded(payload)}
+          onCleared={() => {
+            if (portfolioVideo) void handleDeleteVideo();
+          }}
+        />
       </section>
 
       {showWorkExperience && (
@@ -273,7 +327,7 @@ export default function ModelProfileMediaSection({
               />
               <button
                 type="button"
-                disabled={busy}
+                disabled={mediaBusy}
                 onClick={() => void handleDeleteWorkEntry(entry.id)}
                 className="p-1.5 border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50"
                 aria-label="Delete entry"
@@ -288,7 +342,7 @@ export default function ModelProfileMediaSection({
                   <Image src={item.url} alt={entry.title} fill className="object-cover" unoptimized />
                   <button
                     type="button"
-                    disabled={busy || entry.images.length <= 1}
+                    disabled={mediaBusy || entry.images.length <= 1}
                     onClick={() => void handleDeletePhoto(item.storageFileId)}
                     className="absolute top-1 right-1 p-1 bg-black/60 text-white hover:bg-red-600 disabled:opacity-40"
                     aria-label="Delete photo"
@@ -302,7 +356,7 @@ export default function ModelProfileMediaSection({
             {entry.images.length < 5 && (
               <button
                 type="button"
-                disabled={busy}
+                disabled={mediaBusy}
                 onClick={() => {
                   setUploadTargetWorkId(entry.id);
                   workInputRef.current?.click();
@@ -345,7 +399,7 @@ export default function ModelProfileMediaSection({
           <input
             type="file"
             accept="image/*"
-            disabled={busy}
+            disabled={mediaBusy}
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) void handleCreateWorkExperience(file);

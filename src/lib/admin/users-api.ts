@@ -264,7 +264,10 @@ export async function saveAdminModel(
   formData.append("password", state.password);
   formData.append("role", "MODEL");
   formData.append("modelProfile", profileJson);
-  appendRegistrationImageTokens(formData, imageTokensResult.tokens);
+  appendRegistrationImageTokens(formData, {
+    ...imageTokensResult.tokens,
+    portfolioVideoToken: state.portfolioVideoToken ?? undefined,
+  });
 
   if (workResult.payload.length > 0) {
     formData.append("work_experience", JSON.stringify(workResult.payload));
@@ -422,6 +425,7 @@ export function formatBulkDeleteResult(result: {
 
 export type AdminAttachMediaType =
   | "PORTFOLIO"
+  | "PORTFOLIO_VIDEO"
   | "WORK_EXPERIENCE"
   | "PROFILE"
   | "NIC_FRONT"

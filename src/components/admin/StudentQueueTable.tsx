@@ -12,6 +12,7 @@ import {
 import {
   STUDENT_QUEUE_STATUSES,
   STUDENT_STATUS_LABELS,
+  canTransitionStudentStatus,
   studentStatusOptions,
 } from "@/lib/admin/student-user-status";
 import type { AdminUser, UserStatus } from "@/types/admin";
@@ -203,6 +204,15 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
   async function handleUpdate(user: AdminUser) {
     const next = pendingStatus[user.id];
     if (!next || next === user.status) return;
+
+    if (!canTransitionStudentStatus(user.status, next)) {
+      setBanner({
+        type: "err",
+        text: "Cannot move a student back to an earlier status.",
+      });
+      setPendingStatus((prev) => ({ ...prev, [user.id]: user.status }));
+      return;
+    }
 
     setUpdatingId(user.id);
     setBanner(null);
@@ -401,6 +411,7 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
           users={users}
           statusLabels={STUDENT_STATUS_LABELS}
           allStatuses={STUDENT_QUEUE_STATUSES}
+          getStatusOptions={studentStatusOptions}
           pendingStatus={pendingStatus}
           updatingId={updatingId}
           onStatusChange={(userId, status) =>

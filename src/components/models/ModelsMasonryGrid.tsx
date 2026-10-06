@@ -75,6 +75,14 @@ export default function ModelsMasonryGrid({
                     </span>
                   </div>
                 )}
+                {model.videoUrl && (
+                  <span
+                    className="absolute top-3 left-3 flex h-7 w-7 items-center justify-center bg-black/65 border border-white/40"
+                    aria-label="Has video"
+                  >
+                    <span className="ml-0.5 border-y-[5px] border-y-transparent border-l-[8px] border-l-white" />
+                  </span>
+                )}
                 {isInCart(model.id) && (
                   <div className="absolute top-3 right-3 w-7 h-7 bg-[#C8A97A] border border-white flex items-center justify-center">
                     <span className="font-ui text-[9px] text-white">✓</span>

@@ -91,7 +91,7 @@ export default function StudentReviewPanel({
   async function handleApprove() {
     setApproving(true);
     setBanner(null);
-    const result = await updateUserStatus(user.id, "ACTIVE");
+    const result = await updateUserStatus(user.id, "PENDING_PAYMENT");
     setApproving(false);
 
     if (!result.ok) {
@@ -99,7 +99,7 @@ export default function StudentReviewPanel({
       return;
     }
 
-    setBanner({ type: "ok", text: "Student application approved." });
+    setBanner({ type: "ok", text: "Student approved. Pending payment." });
     onUpdated();
   }
 

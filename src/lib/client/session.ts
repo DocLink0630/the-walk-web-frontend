@@ -39,6 +39,7 @@ export function buildClientSession(user: {
   influencerProfile?: { fullName?: string };
   beauticianProfile?: { fullName?: string };
   photographerProfile?: { fullName?: string };
+  studentProfile?: { fullName?: string };
 }): ClientSession {
   const name =
     user.clientProfile?.fullName ??
@@ -46,12 +47,14 @@ export function buildClientSession(user: {
     user.influencerProfile?.fullName ??
     user.beauticianProfile?.fullName ??
     user.photographerProfile?.fullName ??
+    user.studentProfile?.fullName ??
     user.email.split("@")[0];
 
   return {
     id: user.id,
     email: user.email,
     name,
+    // Legacy fallback only when roles are absent from the auth payload
     roles: user.roles ?? ["CORPORATE_CLIENT"],
     status: user.status ?? "ACTIVE",
   };

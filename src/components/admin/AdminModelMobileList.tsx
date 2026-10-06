@@ -14,6 +14,8 @@ interface AdminModelMobileListProps {
   users: AdminUser[];
   statusLabels: Record<UserStatus, string>;
   allStatuses: UserStatus[];
+  /** When set, overrides allStatuses for per-user option lists (e.g. forward-only). */
+  getStatusOptions?: (current: UserStatus) => UserStatus[];
   pendingStatus: Record<string, UserStatus>;
   updatingId: string | null;
   onStatusChange: (userId: string, status: UserStatus) => void;
@@ -34,6 +36,7 @@ export default function AdminModelMobileList({
   users,
   statusLabels,
   allStatuses,
+  getStatusOptions,
   pendingStatus,
   updatingId,
   onStatusChange,
@@ -106,9 +109,11 @@ export default function AdminModelMobileList({
                   onChange={(e) => onStatusChange(user.id, e.target.value as UserStatus)}
                   className={adminInput}
                 >
-                  {(allStatuses.includes(user.status)
-                    ? allStatuses
-                    : [user.status, ...allStatuses]
+                  {(getStatusOptions
+                    ? getStatusOptions(user.status)
+                    : allStatuses.includes(user.status)
+                      ? allStatuses
+                      : [user.status, ...allStatuses]
                   ).map((s) => (
                     <option key={s} value={s}>
                       {statusLabels[s]}

@@ -6,7 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { CONTACT_DETAILS } from "@/data/contact";
 import type { ContactDetail } from "@/types/contact";
 import ContactDetailItem from "@/components/ui/ContactDetailsItem";
-import MagneticButton from "@/components/ui/MagneticButton";
+import MagneticLink from "@/components/ui/MagneticLink";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,8 +16,8 @@ export interface ContactSectionProps {
   heading?: string;
   description?: string;
   buttonLabel?: string;
+  inquiryHref?: string;
   details?: ContactDetail[];
-  onInquiry?: () => void;
 }
 
 export default function ContactSection({
@@ -26,8 +26,8 @@ export default function ContactSection({
   heading = "LET'S TALK",
   description = "Book models. Apply as talent. Partner with us.",
   buttonLabel = "MAKE INQUIRY",
+  inquiryHref = "/inquiry",
   details = CONTACT_DETAILS,
-  onInquiry,
 }: ContactSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const introRef = useRef<HTMLDivElement>(null);
@@ -93,12 +93,12 @@ export default function ContactSection({
               {description}
             </p>
 
-            <MagneticButton
-              onClick={onInquiry}
+            <MagneticLink
+              href={inquiryHref}
               className="mt-8 md:mt-10 lg:mt-12 font-ui text-[12px] md:text-[13px] font-medium tracking-[0.18em] uppercase px-8 md:px-10 lg:px-12 py-4 md:py-4.5 lg:py-5 bg-[#0A0A0A] text-white hover:bg-[#C8A97A] transition-colors duration-300 w-full sm:w-auto text-center"
             >
               {buttonLabel}
-            </MagneticButton>
+            </MagneticLink>
           </div>
 
           <div className="lg:col-span-5 space-y-6 md:space-y-8">

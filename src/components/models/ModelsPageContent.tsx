@@ -7,18 +7,12 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { getClientToken } from "@/lib/client/token";
 import {
-  fetchPublicInfluencerRoster,
-  mapInfluencerToPublicModel,
-} from "@/lib/public/influencers";
-import {
   DEFAULT_MODEL_FILTERS,
   filterModels,
   loadModelsPageData,
   type ModelFilters,
 } from "@/lib/public/models";
-import type { PublicInfluencer } from "@/types/public-influencer";
 import type { PublicModel } from "@/types/public-model";
-import InfluencerPublicModal from "@/components/influencer/InfluencerPublicModal";
 import ModelDetailModal from "./ModelDetailModal";
 import ModelsFilterBar from "./ModelsFilterBar";
 import ModelsHeroSection from "./ModelsHeroSection";
@@ -52,19 +46,9 @@ export default function ModelsPageContent() {
   const [error, setError] = useState<string | undefined>();
   const [restricted, setRestricted] = useState(true);
 
-  const [influencers, setInfluencers] = useState<PublicInfluencer[]>([]);
-  const [influencersLoaded, setInfluencersLoaded] = useState(false);
-  const [influencersLoading, setInfluencersLoading] = useState(false);
-  const [influencersError, setInfluencersError] = useState<string | undefined>();
-
   const [filters, setFilters] = useState<ModelFilters>(DEFAULT_MODEL_FILTERS);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [selectedModel, setSelectedModel] = useState<PublicModel | null>(null);
-  const [selectedInfluencer, setSelectedInfluencer] = useState<PublicInfluencer | null>(
-    null,
-  );
-
-  const isInfluencerFilter = filters.category === "Influencer";
 
   const loadModels = useCallback(async () => {
     setLoading(true);
@@ -81,20 +65,6 @@ export default function ModelsPageContent() {
     setLoading(false);
   }, [isAuthenticated]);
 
-  const loadInfluencers = useCallback(async () => {
-    setInfluencersLoading(true);
-    setInfluencersError(undefined);
-
-    const result = await fetchPublicInfluencerRoster();
-    if (result.ok) {
-      setInfluencers(result.data);
-    } else {
-      setInfluencersError(result.message);
-    }
-    setInfluencersLoaded(true);
-    setInfluencersLoading(false);
-  }, []);
-
   useEffect(() => {
     document.body.style.overflow = "auto";
     window.scrollTo(0, 0);
@@ -104,35 +74,12 @@ export default function ModelsPageContent() {
     loadModels();
   }, [loadModels]);
 
-  useEffect(() => {
-    if (!isInfluencerFilter || influencersLoaded) return;
-    void loadInfluencers();
-  }, [isInfluencerFilter, influencersLoaded, loadInfluencers]);
-
-  useEffect(() => {
-    if (!isInfluencerFilter) setSelectedInfluencer(null);
-  }, [isInfluencerFilter]);
-
-  const displayedModels = useMemo(() => {
-    if (isInfluencerFilter) {
-      return influencers.map(mapInfluencerToPublicModel);
-    }
-    return filterModels(models, filters);
-  }, [isInfluencerFilter, influencers, models, filters]);
-
-  const gridLoading = isInfluencerFilter
-    ? !influencersLoaded || influencersLoading
-    : loading;
-  const gridError = isInfluencerFilter ? influencersError : error;
+  const displayedModels = useMemo(
+    () => filterModels(models, filters),
+    [models, filters],
+  );
 
   function handleSelect(model: PublicModel) {
-    if (model.isInfluencer) {
-      const influencer = influencers.find(
-        (item) => item.userId === model.userId || item.userId === model.id,
-      );
-      if (influencer) setSelectedInfluencer(influencer);
-      return;
-    }
     setSelectedModel(model);
   }
 
@@ -246,7 +193,7 @@ export default function ModelsPageContent() {
 
       <section className="py-6 md:py-20 bg-white overflow-hidden">
         <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-[80px]">
-          {notice && !isInfluencerFilter && (
+          {notice && (
             <div className="mb-6 border border-[#C8A97A]/30 bg-[#C8A97A]/10 px-4 py-3">
               <p className="font-ui text-[10px] text-[#4A4A4A] leading-relaxed">
                 {notice}
@@ -267,33 +214,29 @@ export default function ModelsPageContent() {
             </div>
           )}
 
-          {gridError && displayedModels.length === 0 ? (
+          {error && displayedModels.length === 0 ? (
             <div className="text-center py-16 space-y-4">
-              <p className="font-ui text-sm text-[#4A4A4A]">{gridError}</p>
+              <p className="font-ui text-sm text-[#4A4A4A]">{error}</p>
               <button
                 type="button"
-                onClick={isInfluencerFilter ? loadInfluencers : loadModels}
+                onClick={loadModels}
                 className="font-ui text-[9px] tracking-[0.2em] uppercase px-6 py-3 border border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-colors"
               >
                 Retry
               </button>
             </div>
-          ) : gridLoading ? (
+          ) : loading ? (
             <GridSkeleton />
           ) : (
             <ModelsMasonryGrid
               models={displayedModels}
               cardRefs={cardRefs}
               onSelect={handleSelect}
-              emptyMessage={
-                isInfluencerFilter
-                  ? "No influencers found."
-                  : "No models match these filters."
-              }
+              emptyMessage="No models match these filters."
             />
           )}
 
-          {!loading && !isInfluencerFilter && models.length === 0 && !error && (
+          {!loading && models.length === 0 && !error && (
             <div className="text-center py-16 space-y-4">
               <p className="font-display text-[20px] font-light text-[#9A9A9A] italic">
                 New models will appear here once approved.
@@ -315,13 +258,6 @@ export default function ModelsPageContent() {
         <ModelDetailModal
           model={selectedModel}
           onClose={() => setSelectedModel(null)}
-        />
-      )}
-
-      {selectedInfluencer && (
-        <InfluencerPublicModal
-          influencer={selectedInfluencer}
-          onClose={() => setSelectedInfluencer(null)}
         />
       )}
     </div>
