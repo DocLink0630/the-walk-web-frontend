@@ -1,6 +1,6 @@
 export function isValidPhone(phone: string): boolean {
-  const digits = phone.replace(/\D/g, "");
-  return digits.length >= 7 && digits.length <= 15;
+  const cleaned = phone.replace(/[\s-]/g, "");
+  return /^(?:0|\+?94)[0-9]{9}$/.test(cleaned);
 }
 
 export function phoneValidationMessage(

@@ -1,13 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { getClientToken } from "@/lib/client/token";
 import { PASSWORD_HINT, validatePassword } from "@/lib/auth/password";
 
 export default function ChangePasswordSection() {
   const [currentPassword, setCurrentPassword] = useState("");
+  const [showCurrent, setShowCurrent] = useState(false);
   const [newPassword, setNewPassword] = useState("");
+  const [showNew, setShowNew] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showConfirm, setShowConfirm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
@@ -80,41 +84,68 @@ export default function ChangePasswordSection() {
           <label className="block font-ui text-[9px] tracking-[0.12em] uppercase text-[#0A0A0A] mb-1">
             Current password
           </label>
-          <input
-            type="password"
-            required
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            autoComplete="current-password"
-            className={inputCls}
-          />
+          <div className="relative">
+            <input
+              type={showCurrent ? "text" : "password"}
+              required
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              autoComplete="current-password"
+              className={inputCls}
+            />
+            <button
+              type="button"
+              onClick={() => setShowCurrent(!showCurrent)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B6B6B] hover:text-[#0A0A0A] transition-colors"
+            >
+              {showCurrent ? <EyeOff size={14} /> : <Eye size={14} />}
+            </button>
+          </div>
         </div>
         <div>
           <label className="block font-ui text-[9px] tracking-[0.12em] uppercase text-[#0A0A0A] mb-1">
             New password
           </label>
-          <input
-            type="password"
-            required
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            autoComplete="new-password"
-            className={inputCls}
-          />
+          <div className="relative">
+            <input
+              type={showNew ? "text" : "password"}
+              required
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              autoComplete="new-password"
+              className={inputCls}
+            />
+            <button
+              type="button"
+              onClick={() => setShowNew(!showNew)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B6B6B] hover:text-[#0A0A0A] transition-colors"
+            >
+              {showNew ? <EyeOff size={14} /> : <Eye size={14} />}
+            </button>
+          </div>
           <p className="font-ui text-[9px] text-[#9A9A9A] mt-1">{PASSWORD_HINT}</p>
         </div>
         <div>
           <label className="block font-ui text-[9px] tracking-[0.12em] uppercase text-[#0A0A0A] mb-1">
             Confirm new password
           </label>
-          <input
-            type="password"
-            required
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            autoComplete="new-password"
-            className={inputCls}
-          />
+          <div className="relative">
+            <input
+              type={showConfirm ? "text" : "password"}
+              required
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              autoComplete="new-password"
+              className={inputCls}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirm(!showConfirm)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B6B6B] hover:text-[#0A0A0A] transition-colors"
+            >
+              {showConfirm ? <EyeOff size={14} /> : <Eye size={14} />}
+            </button>
+          </div>
         </div>
 
         {message && (

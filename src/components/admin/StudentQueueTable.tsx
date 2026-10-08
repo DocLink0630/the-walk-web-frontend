@@ -54,6 +54,16 @@ const STUDENT_LIST_TABS = [
     label: "Approved",
     status: "ACTIVE" as UserStatus,
   },
+  {
+    id: "pendingEmail" as const,
+    label: "Pending Email",
+    status: "PENDING_EMAIL_VERIFICATION" as UserStatus,
+  },
+  {
+    id: "deleted" as const,
+    label: "Deleted",
+    status: "DELETED" as UserStatus,
+  },
 ];
 
 type StudentListTab = (typeof STUDENT_LIST_TABS)[number]["id"];
@@ -365,7 +375,13 @@ export default function StudentQueueTable({ onUsersChanged }: StudentQueueTableP
             <input
               type="search"
               value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              onChange={(e) => {
+                setSearchInput(e.target.value);
+                if (e.target.value === "") {
+                  setSearch("");
+                  setPage(1);
+                }
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") applySearch();
               }}

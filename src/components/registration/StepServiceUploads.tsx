@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { CTA_PRIMARY_FILLED } from "@/config/cta-styles";
 import CroppableImageUpload, {
   useCropImagePicker,
@@ -119,6 +121,8 @@ export default function StepServiceUploads({
   copy,
   variant,
 }: StepServiceUploadsProps) {
+  const router = useRouter();
+  const { login } = useAuth();
   const [uploadProgress, setUploadProgress] = useState<{
     completed: number;
     total: number;
@@ -135,6 +139,20 @@ export default function StepServiceUploads({
       });
 
       if (result.ok) {
+        try {
+          const loginRes = await login(store.email, store.password);
+          if (loginRes.ok) {
+            if (loginRes.isModel) router.push("/model/profile");
+            else if (loginRes.isStudent) router.push("/student/profile");
+            else if (loginRes.isInfluencer) router.push("/influencer/profile");
+            else if (loginRes.isPhotographer) router.push("/photographer/profile");
+            else if (loginRes.isBeautician) router.push("/beautician/profile");
+            else router.push("/models");
+            return;
+          }
+        } catch (e) {
+          console.error(e);
+        }
         store.set({ success: true, isSubmitting: false });
       } else {
         store.set({ error: result.message, isSubmitting: false });

@@ -34,14 +34,18 @@ export default function StepPersonalClient({
   const copy = CLIENT_REGISTRATION_COPY;
 
   const fullNameError =
-    submitted && !store.fullName.trim() ? "Name or company name is required" : null;
+    submitted && !store.fullName.trim() 
+      ? "Name or company name is required" 
+      : submitted && store.fullName.trim() && /^\d+$/.test(store.fullName.trim())
+        ? "Name cannot be purely numeric"
+        : null;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitted(true);
     store.set({ error: null });
 
-    if (!store.fullName.trim()) return;
+    if (fullNameError) return;
 
     store.set({ isSubmitting: true });
     const result = await submitClientRegistration(store);
