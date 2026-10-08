@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CTA_PRIMARY_FILLED } from "@/config/cta-styles";
+import { isValidPhone } from "@/lib/validation/phone";
 import type { ServiceRegistrationCopy } from "@/lib/registration/service-copy";
 import type {
   ServiceRegistrationStore,
@@ -35,9 +36,17 @@ export default function StepPersonalService({
 }: StepPersonalServiceProps) {
   const [submitted, setSubmitted] = useState(false);
 
-  const fullNameError = submitted && !store.fullName.trim() ? "Full name is required" : null;
+  const fullNameError = submitted && !store.fullName.trim() 
+    ? "Full name is required" 
+    : submitted && store.fullName.trim() && !/^[a-zA-Z\s'-]+$/.test(store.fullName)
+      ? "Only letters, spaces, hyphens, and apostrophes are allowed"
+      : null;
   const contactError =
-    submitted && !store.contactNumber.trim() ? "Contact number is required" : null;
+    submitted && !store.contactNumber.trim() 
+      ? "Contact number is required"
+      : submitted && store.contactNumber.trim() && !isValidPhone(store.contactNumber)
+        ? "Enter a valid Sri Lankan mobile number"
+        : null;
   const specialtiesError =
     submitted && store.specialties.split(",").every((s) => !s.trim())
       ? "Enter at least one specialty"
@@ -53,8 +62,8 @@ export default function StepPersonalService({
     store.set({ error: null });
 
     if (
-      !store.fullName.trim() ||
-      !store.contactNumber.trim() ||
+      fullNameError ||
+      contactError ||
       store.specialties.split(",").every((s) => !s.trim()) ||
       yearsError
     ) {

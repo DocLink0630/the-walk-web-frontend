@@ -135,6 +135,18 @@ export default function AdminGalleryPanel() {
     load();
   }, [load]);
 
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setFormOpen(false);
+      }
+    }
+    if (formOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [formOpen]);
+
   const listedItems = useMemo(() => {
     if (!content) return [];
     return buildListedItems({ ...content, galleryOrder: order });
@@ -395,7 +407,14 @@ export default function AdminGalleryPanel() {
       )}
 
       {formOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-4">
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-4"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) {
+              setFormOpen(false);
+            }
+          }}
+        >
           <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl bg-white p-5 sm:p-6 shadow-xl">
             <h3 className={`${adminSectionTitle} mb-4`}>
               {editingId ? "Edit gallery image" : "New gallery image"}

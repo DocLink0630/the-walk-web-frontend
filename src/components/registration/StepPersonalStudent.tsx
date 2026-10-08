@@ -36,7 +36,7 @@ export default function StepPersonalStudent({
 
       <IdentitySection {...sectionProps} />
       <ContactSection {...sectionProps} />
-      <MeasurementsSection store={store} idPrefix={idPrefix} fields="student" />
+      <MeasurementsSection store={store} idPrefix={idPrefix} err={err} fields="student" />
       <StudentAcademySection store={store} idPrefix={idPrefix} />
 
       <PersonalStepActions onBack={store.prevStep} />

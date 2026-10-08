@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CTA_PRIMARY_FILLED } from "@/config/cta-styles";
+import { isValidPhone } from "@/lib/validation/phone";
 import { INFLUENCER_REGISTRATION_COPY } from "@/lib/registration/influencer-copy";
 import type { InfluencerRegistrationStore } from "@/types/influencer-registration";
 import {
@@ -85,9 +86,17 @@ export default function StepPersonalInfluencer({
   const copy = INFLUENCER_REGISTRATION_COPY;
   const [submitted, setSubmitted] = useState(false);
 
-  const fullNameError = submitted && !store.fullName.trim() ? "Full name is required" : null;
+  const fullNameError = submitted && !store.fullName.trim() 
+    ? "Full name is required" 
+    : submitted && store.fullName.trim() && !/^[a-zA-Z\s'-]+$/.test(store.fullName)
+      ? "Only letters, spaces, hyphens, and apostrophes are allowed"
+      : null;
   const contactError =
-    submitted && !store.contactNumber.trim() ? "Contact number is required" : null;
+    submitted && !store.contactNumber.trim() 
+      ? "Contact number is required"
+      : submitted && store.contactNumber.trim() && !isValidPhone(store.contactNumber)
+        ? "Enter a valid Sri Lankan mobile number"
+        : null;
   const categoriesError =
     submitted && store.contentCategories.split(",").every((s) => !s.trim())
       ? "Enter at least one content category"
@@ -110,8 +119,8 @@ export default function StepPersonalInfluencer({
     store.set({ error: null });
 
     if (
-      !store.fullName.trim() ||
-      !store.contactNumber.trim() ||
+      fullNameError ||
+      contactError ||
       store.contentCategories.split(",").every((s) => !s.trim()) ||
       !hasSocialLink
     ) {

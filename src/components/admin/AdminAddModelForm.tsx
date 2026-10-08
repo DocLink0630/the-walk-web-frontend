@@ -391,7 +391,8 @@ export default function AdminAddModelForm({ onSuccess }: AdminAddModelFormProps)
           ).map(([key, label]) => (
             <AdminField key={key} label={label}>
               <input
-                type="text"
+                type="number"
+                step="any"
                 value={store[key]}
                 onChange={(e) => store.set({ [key]: e.target.value })}
                 className={adminInput}

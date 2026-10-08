@@ -199,7 +199,8 @@ export function MeasurementsSection({
   store,
   idPrefix,
   fields = "full",
-}: Pick<SectionProps, "store" | "idPrefix"> & {
+  err,
+}: Pick<SectionProps, "store" | "idPrefix" | "err"> & {
   fields?: "full" | "student";
 }) {
   const allFields = [
@@ -227,14 +228,15 @@ export function MeasurementsSection({
         }
       >
         {measurementFields.map(({ key, label, placeholder }) => (
-          <Field key={key} label={label} htmlFor={`${idPrefix}-${key}`}>
+          <Field key={key} label={label} error={err?.(key)} htmlFor={`${idPrefix}-${key}`}>
             <input
               id={`${idPrefix}-${key}`}
               type="number"
               value={store[key]}
               onChange={(e) => store.set({ [key]: e.target.value })}
+              onWheel={(e) => e.currentTarget.blur()}
               placeholder={placeholder}
-              className={formInput}
+              className={err?.(key) ? formInputError : formInput}
             />
           </Field>
         ))}

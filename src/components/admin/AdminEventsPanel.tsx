@@ -86,6 +86,18 @@ export default function AdminEventsPanel() {
     load();
   }, [load]);
 
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setFormOpen(false);
+      }
+    }
+    if (formOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [formOpen]);
+
   const listedEvents = useMemo((): ListedEvent[] => {
     if (!content) return [];
     const hardcoded = EVENTS_PAGE.events.map((event) => ({
@@ -191,7 +203,7 @@ export default function AdminEventsPanel() {
       ...prev,
       { kind: "new", token: upload.token, preview, fileName: file.name },
     ]);
-    setGalleryLastFileName(file.name);
+    setGalleryLastFileName((prev) => prev?.includes("files selected") ? prev : file.name);
   }
 
   function handleGalleryRemove(index: number) {
@@ -361,7 +373,14 @@ export default function AdminEventsPanel() {
       )}
 
       {formOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-4">
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-4"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) {
+              setFormOpen(false);
+            }
+          }}
+        >
           <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-5 sm:p-6 shadow-xl">
             <h3 className={`${adminSectionTitle} mb-4`}>
               {editingId ? "Edit event" : "New event"}
@@ -382,6 +401,7 @@ export default function AdminEventsPanel() {
                 <div>
                   <label className={adminLabel}>Date</label>
                   <input
+                    type="date"
                     className={adminInput}
                     value={form.date}
                     onChange={(e) => setForm({ ...form, date: e.target.value })}
@@ -436,6 +456,7 @@ export default function AdminEventsPanel() {
                   className={adminTextarea}
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  maxLength={150}
                 />
               </div>
               <div>
@@ -478,6 +499,15 @@ export default function AdminEventsPanel() {
                 <AdminImageFilePicker
                   label="Gallery images"
                   fileName={galleryLastFileName}
+                  multiple
+                  onPickMultiple={(files) => {
+                    if (files.length > 1) {
+                      setGalleryLastFileName(`${files.length} files selected`);
+                    }
+                    for (const file of files) {
+                      void handleGalleryUpload(file);
+                    }
+                  }}
                   onPick={(file) => void handleGalleryUpload(file)}
                 />
                 <p className={adminHint}>

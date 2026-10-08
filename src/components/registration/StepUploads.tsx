@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { CTA_PRIMARY_FILLED } from "@/config/cta-styles";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import CroppableImageUpload, {
   useCropImagePicker,
 } from "@/components/shared/CroppableImageUpload";
@@ -139,6 +141,8 @@ export default function StepUploads({
   onSubmit,
   onSuccess,
 }: StepUploadsProps) {
+  const router = useRouter();
+  const { login } = useAuth();
   const [submitted, setSubmitted] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<{ completed: number; total: number } | null>(null);
   const [videoUploading, setVideoUploading] = useState(false);
@@ -203,6 +207,20 @@ export default function StepUploads({
         if (onSuccess) {
           onSuccess();
           return;
+        }
+        try {
+          const loginRes = await login(store.email, store.password);
+          if (loginRes.ok) {
+            if (loginRes.isModel) router.push("/model/profile");
+            else if (loginRes.isStudent) router.push("/student/profile");
+            else if (loginRes.isInfluencer) router.push("/influencer/profile");
+            else if (loginRes.isPhotographer) router.push("/photographer/profile");
+            else if (loginRes.isBeautician) router.push("/beautician/profile");
+            else router.push("/models");
+            return;
+          }
+        } catch (e) {
+          console.error(e);
         }
         store.set({ success: true, isSubmitting: false });
       } else {

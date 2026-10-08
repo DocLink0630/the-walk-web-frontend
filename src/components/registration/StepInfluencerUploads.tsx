@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { CTA_PRIMARY_FILLED } from "@/config/cta-styles";
 import CroppableImageUpload from "@/components/shared/CroppableImageUpload";
 import { INFLUENCER_REGISTRATION_COPY } from "@/lib/registration/influencer-copy";
@@ -19,6 +21,8 @@ interface StepInfluencerUploadsProps {
 }
 
 export default function StepInfluencerUploads({ store }: StepInfluencerUploadsProps) {
+  const router = useRouter();
+  const { login } = useAuth();
   const copy = INFLUENCER_REGISTRATION_COPY;
   const [uploadProgress, setUploadProgress] = useState<{
     completed: number;
@@ -36,6 +40,20 @@ export default function StepInfluencerUploads({ store }: StepInfluencerUploadsPr
       });
 
       if (result.ok) {
+        try {
+          const loginRes = await login(store.email, store.password);
+          if (loginRes.ok) {
+            if (loginRes.isModel) router.push("/model/profile");
+            else if (loginRes.isStudent) router.push("/student/profile");
+            else if (loginRes.isInfluencer) router.push("/influencer/profile");
+            else if (loginRes.isPhotographer) router.push("/photographer/profile");
+            else if (loginRes.isBeautician) router.push("/beautician/profile");
+            else router.push("/models");
+            return;
+          }
+        } catch (e) {
+          console.error(e);
+        }
         store.set({ success: true, isSubmitting: false });
       } else {
         store.set({ error: result.message, isSubmitting: false });

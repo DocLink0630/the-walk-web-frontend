@@ -11,14 +11,18 @@ export default function AdminImageFilePicker({
   label,
   fileName,
   onPick,
+  onPickMultiple,
   onClear,
   showClear,
+  multiple,
 }: {
   label: string;
   fileName: string | null;
-  onPick: (file: File) => void;
+  onPick?: (file: File) => void;
+  onPickMultiple?: (files: File[]) => void;
   onClear?: () => void;
   showClear?: boolean;
+  multiple?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -52,9 +56,16 @@ export default function AdminImageFilePicker({
         type="file"
         accept={ACCEPTED_IMAGE_MIME}
         className="hidden"
+        multiple={multiple}
         onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) onPick(file);
+          const files = e.target.files;
+          if (files && files.length > 0) {
+            if (onPickMultiple) {
+              onPickMultiple(Array.from(files));
+            } else if (onPick) {
+              onPick(files[0]);
+            }
+          }
           e.target.value = "";
         }}
       />

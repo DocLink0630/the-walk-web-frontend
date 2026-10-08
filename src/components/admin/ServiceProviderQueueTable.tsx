@@ -166,7 +166,13 @@ export default function ServiceProviderQueueTable({ providerType }: Props) {
         <input
           type="search"
           value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
+          onChange={(e) => {
+            setSearchInput(e.target.value);
+            if (e.target.value === "") {
+              setSearch("");
+              setPage(1);
+            }
+          }}
           placeholder={`Search ${typeLabel.toLowerCase()}s…`}
           className={adminInput + " flex-1"}
         />

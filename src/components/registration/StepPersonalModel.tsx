@@ -37,7 +37,7 @@ export default function StepPersonalModel({
 
       <IdentitySection {...sectionProps} />
       <ContactSection {...sectionProps} />
-      <MeasurementsSection store={store} idPrefix={idPrefix} />
+      <MeasurementsSection store={store} idPrefix={idPrefix} err={err} />
       <AppearanceSection store={store} idPrefix={idPrefix} />
       <ModelReferralSection store={store} idPrefix={idPrefix} />
 
